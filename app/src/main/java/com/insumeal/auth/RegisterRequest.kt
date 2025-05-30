@@ -6,8 +6,8 @@ data class RegisterRequest(
     @SerializedName("name")
     val name: String,
 
-    @SerializedName("lastname")
-    val lastname: String,
+    @SerializedName("lastName")
+    val lastName: String,
 
     @SerializedName("email")
     val email: String,
@@ -16,11 +16,11 @@ data class RegisterRequest(
     val password: String,
 
     @SerializedName("ratio")
-    val ratio: String,
+    val ratio: Double,
 
-    @SerializedName("senitivity")
-    val sensitivity: String,
+    @SerializedName("sensitivity")
+    val sensitivity: Double,
 
     @SerializedName("glycemiaTarget")
-    val glycemiaTarget: String,
+    val glycemiaTarget: Int,
 )

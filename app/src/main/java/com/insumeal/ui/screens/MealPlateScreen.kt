@@ -1,4 +1,4 @@
 package com.insumeal.ui.screens
 
-class MealPlateScreen {
+class `MealPlateScreen` {
 }
