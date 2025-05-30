@@ -3,6 +3,7 @@ package com.insumeal.ui.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -97,7 +98,10 @@ fun HomeScreen(navController: NavController, context: Context) {
                     onClick = {
                         scope.launch { drawerState.close() }
                         tokenManager.clearToken()
-                        // El LaunchedEffect se encargará de navegar a login
+                        navController.navigate("login") {
+                            popUpTo("home") { inclusive = true }
+                            launchSingleTop = true
+                        }
                     },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
@@ -107,59 +111,81 @@ fun HomeScreen(navController: NavController, context: Context) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Insumeal") },
+                    title = {}, // Sin texto al lado del menú
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch {
                                 if (drawerState.isClosed) drawerState.open() else drawerState.close()
                             }
                         }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Abrir menú")
+                            Icon(
+                                Icons.Filled.Menu,
+                                contentDescription = "Abrir menú",
+                                tint = MaterialTheme.colorScheme.primary // Color primario
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        containerColor = MaterialTheme.colorScheme.background,
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }
-        ) { innerPadding -> // Este es el padding que Scaffold provee para el contenido
-            Column(
+        ) { innerPadding ->
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding) // Aplicar el padding de Scaffold
-                    .padding(16.dp), // Tu padding adicional
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp) // Espacio entre botones
+                    .padding(innerPadding)
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.TopCenter
             ) {
-                Text(
-                    "Bienvenido a Insumeal",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "InsuMeal",
+                        style = MaterialTheme.typography.displayMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        "Bienvenido al home",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        shape = MaterialTheme.shapes.large
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                        ) {
+                            ButtonWithIcon(
+                                text = "Analizar Plato de Comida",
+                                icon = Icons.Filled.PhotoCamera,
+                                onClick = { navController.navigate("uploadPhoto") }
+                            )
+                            ButtonWithIcon(
+                                text = "Ver Historial",
+                                icon = Icons.Filled.History,
+                                onClick = { navController.navigate("foodHistory") }
+                            )
 
-                ButtonWithIcon(
-                    text = "Subir foto de Comida",
-                    icon = Icons.Filled.PhotoCamera,
-                    onClick = { navController.navigate("upload") }
-                )
-
-                ButtonWithIcon(
-                    text = "Ver Historial",
-                    icon = Icons.Filled.History,
-                    onClick = {
-                        val selectedRestrictions = setOf("sin gluten", "sin lactosa") // Mantener tu lógica
-                        val restrictionsParam = selectedRestrictions.joinToString(",")
-                        navController.navigate("history/$restrictionsParam")
+                        }
                     }
-                )
-
-                ButtonWithIcon(
-                    text = "Configurar Restricciones",
-                    icon = Icons.Filled.Settings,
-                    onClick = { navController.navigate("restricciones") }
-                )
+                }
             }
         }
     }
@@ -188,3 +214,4 @@ fun ButtonWithIcon(
         Text(text)
     }
 }
+

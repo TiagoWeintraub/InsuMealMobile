@@ -50,6 +50,16 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             HomeScreen(navController = navController, context = applicationContext)
                         }
+
+                        composable("uploadPhoto") {
+                            UploadPhotoScreen(navController)
+                        }
+                        composable("mealPlate") {
+                            MealPlateScreen()
+                        }
+                        composable("foodHistory") {
+                            FoodHistoryScreen()
+                        }
                     }
                 }
             }

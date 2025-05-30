@@ -1,12 +1,16 @@
-
 package com.insumeal.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.insumeal.api.RegisterService
 import com.insumeal.api.RetrofitClient
@@ -20,6 +24,9 @@ import kotlinx.coroutines.withContext
 fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var ratio by remember { mutableStateOf(15.0) }
@@ -32,10 +39,18 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Registro", style = MaterialTheme.typography.headlineMedium)
+//        Spacer(modifier = Modifier.height(32.dp))
+        // Logo de texto InsuMeal
+//        Text(
+//            text = "InsuMeal",
+//            style = MaterialTheme.typography.displayMedium,
+//            color = MaterialTheme.colorScheme.primary,
+//            modifier = Modifier.padding(bottom = 16.dp)
+//        )
+        Text("Registro", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
@@ -63,7 +78,36 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
             value = password,
             onValueChange = { password = it },
             label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            singleLine = true,
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, contentDescription = description)
+                }
+            }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirmar contraseña") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            singleLine = true,
+            trailingIcon = {
+                val image = if (confirmPasswordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+                val description = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    Icon(imageVector = image, contentDescription = description)
+                }
+            }
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -99,6 +143,10 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
         Button(
             onClick = {
                 errorMessage = null
+                if (password != confirmPassword) {
+                    errorMessage = "Las contraseñas no coinciden."
+                    return@Button
+                }
                 isLoading = true
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
@@ -168,3 +216,4 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
         }
     }
 }
+
