@@ -60,6 +60,10 @@ class MainActivity : ComponentActivity() {
                         composable("foodHistory") {
                             FoodHistoryScreen()
                         }
+                        composable("profile/{userId}") { backStackEntry ->
+                            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
+                            ProfileScreen(userId = userId, navController = navController)
+                        }
                     }
                 }
             }

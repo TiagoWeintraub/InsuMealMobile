@@ -20,10 +20,13 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = Celeste,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
+    secondary = Verde40,
+    tertiary = Verde80,
+    primaryContainer = GrisClaro, // Cambiado de VerdeContainer a GrisClaro
+    secondaryContainer = GrisClaro, // Cambiado a GrisClaro
+    tertiaryContainer = GrisClaro, // Cambiado a GrisClaro
+    surface = GrisClaro, // Cambiado de FondoBlanco a GrisClaro para tarjetas
     background = FondoBlanco,
-    surface = FondoBlanco,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
@@ -42,4 +45,3 @@ fun InsuMealTheme(
         content = content
     )
 }
-

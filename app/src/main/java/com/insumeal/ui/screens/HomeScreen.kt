@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Settings
@@ -15,10 +18,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.insumeal.utils.TokenManager
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.insumeal.ui.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.launch // Para controlar el drawer
 
 // Data class para los ítems del Navigation Drawer
@@ -34,6 +43,8 @@ data class DrawerItem(
 fun HomeScreen(navController: NavController, context: Context) {
     val tokenManager = remember { TokenManager(context) } // Usar remember para TokenManager
     val token = tokenManager.getToken()
+    val userProfileViewModel: UserProfileViewModel = viewModel()
+    val userProfile by userProfileViewModel.userProfile.collectAsState()
 
     // Para controlar el estado del Navigation Drawer (abierto/cerrado)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -55,6 +66,17 @@ fun HomeScreen(navController: NavController, context: Context) {
             CircularProgressIndicator() // O un Composable vacío
         }
         return // Salir temprano si no hay token
+    }
+
+    // Si el perfil es nulo, intentamos cargarlo
+    LaunchedEffect(Unit) {
+        if (userProfile == null) {
+            val savedUserId = tokenManager.getUserId()
+            if (savedUserId != null) {
+                val authHeader = "Bearer $token"
+                userProfileViewModel.loadUserProfile(authHeader, savedUserId)
+            }
+        }
     }
 
     // Lista de ítems para el Navigation Drawer
@@ -82,8 +104,17 @@ fun HomeScreen(navController: NavController, context: Context) {
                         selected = false, // Puedes manejar la selección si es necesario
                         onClick = {
                             scope.launch { drawerState.close() }
-                            navController.navigate(item.route) {
-                                launchSingleTop = true // Evita múltiples instancias de la misma pantalla
+                            if (item.route == "profile") {
+                                val userId = tokenManager.getUserId()
+                                if (userId != null) {
+                                    navController.navigate("profile/$userId") {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            } else {
+                                navController.navigate(item.route) {
+                                    launchSingleTop = true
+                                }
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -121,7 +152,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             Icon(
                                 Icons.Filled.Menu,
                                 contentDescription = "Abrir menú",
-                                tint = MaterialTheme.colorScheme.primary // Color primario
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
@@ -143,48 +174,83 @@ fun HomeScreen(navController: NavController, context: Context) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 40.dp),
+                        .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "InsuMeal",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        "Bienvenido al home",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-                    Card(
+                    // Header con gradiente
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                        shape = MaterialTheme.shapes.large
+                            .padding(vertical = 16.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            )
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            ButtonWithIcon(
-                                text = "Analizar Plato de Comida",
-                                icon = Icons.Filled.PhotoCamera,
-                                onClick = { navController.navigate("uploadPhoto") }
+                            Text(
+                                text = "InsuMeal",
+                                style = MaterialTheme.typography.displayMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
-                            ButtonWithIcon(
-                                text = "Ver Historial",
-                                icon = Icons.Filled.History,
-                                onClick = { navController.navigate("foodHistory") }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = if (userProfile != null) "Bienvenido ${userProfile!!.username}" else "Bienvenido",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
-
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Sección de funcionalidades
+                    Text(
+                        text = "¿Qué quieres hacer hoy?",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(bottom = 16.dp, start = 8.dp)
+                    )
+
+                    // Tarjetas de opciones
+                    HomeOptionCard(
+                        title = "Analizar Plato de Comida",
+                        description = "Fotografía y analiza los nutrientes de tu comida",
+                        icon = Icons.Filled.PhotoCamera,
+                        onClick = { navController.navigate("uploadPhoto") }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    HomeOptionCard(
+                        title = "Ver Historial",
+                        description = "Consulta tus registros alimenticios anteriores",
+                        icon = Icons.Filled.History,
+                        onClick = { navController.navigate("foodHistory") }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    HomeOptionCard(
+                        title = "Información Clínica",
+                        description = "Consulta tus datos médicos y de salud",
+                        icon = Icons.Filled.Info,
+                        onClick = { /* Navegación a pantalla de información clínica */ },
+                        showArrow = false
+                    )
                 }
             }
         }
@@ -215,3 +281,77 @@ fun ButtonWithIcon(
     }
 }
 
+// Componente para las tarjetas de opciones en el Home
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeOptionCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    showArrow: Boolean = true // Parámetro para mostrar/ocultar la flecha
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Círculo para el icono
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Texto de la tarjeta
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Flecha de navegación (opcional)
+            if (showArrow) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
