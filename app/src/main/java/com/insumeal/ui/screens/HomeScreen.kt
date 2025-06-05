@@ -242,13 +242,16 @@ fun HomeScreen(navController: NavController, context: Context) {
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
-
                     HomeOptionCard(
                         title = "Información Clínica",
                         description = "Consulta tus datos médicos y de salud",
                         icon = Icons.Filled.Info,
-                        onClick = { /* Navegación a pantalla de información clínica */ },
-                        showArrow = false
+                        onClick = {
+                            val userId = tokenManager.getUserId()
+                            if (userId != null) {
+                                navController.navigate("clinicalData/$userId")
+                            }
+                        }
                     )
                 }
             }

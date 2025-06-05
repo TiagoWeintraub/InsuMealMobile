@@ -1,20 +1,18 @@
 package com.insumeal.ui.screens
 
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.insumeal.ui.viewmodel.UserProfileViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Bloodtype
+import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material.icons.filled.Scale
+import androidx.compose.material.icons.filled.TrackChanges // Importar el icono correcto
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,34 +21,37 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.insumeal.ui.viewmodel.ClinicalDataViewModel
 import com.insumeal.utils.TokenManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(userId: Int = 1, navController: NavController) {
+fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
     val context = LocalContext.current
-    val userProfileViewModel: UserProfileViewModel = viewModel()
-    val userProfile by userProfileViewModel.userProfile.collectAsState()
+    val clinicalDataViewModel: ClinicalDataViewModel = viewModel()
+    val clinicalData by clinicalDataViewModel.clinicalData.collectAsState()
 
-    // Si el perfil es nulo, intentamos cargarlo
+    // Si los datos clínicos son nulos, intentamos cargarlos
     LaunchedEffect(Unit) {
-        if (userProfile == null) {
+        if (clinicalData == null) {
             val tokenManager = TokenManager(context)
             val token = tokenManager.getToken()
             val savedUserId = tokenManager.getUserId() ?: userId.toString()
 
             if (token != null) {
                 val authHeader = "Bearer $token"
-                userProfileViewModel.loadUserProfile(authHeader, savedUserId)
+                clinicalDataViewModel.loadClinicalData(authHeader, savedUserId)
             }
         }
     }
 
-    // UI para mostrar los datos de perfil
-    Scaffold(        topBar = {
+    // UI para mostrar los datos clínicos
+    Scaffold(
+        topBar = {
             TopAppBar(
-                title = { Text("Perfil de Usuario") },
+                title = { Text("Datos Clínicos") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -74,7 +75,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.TopCenter
         ) {
-            if (userProfile != null) {
+            if (clinicalData != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -82,35 +83,36 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    ProfileCard(
-                        title = "Nombre",
-                        value = userProfile!!.username,
-                        icon = Icons.Default.Person
+                    ClinicalDataCard(
+                        title = "Sensibilidad a la Insulina",
+                        value = "${clinicalData!!.sensitivity} mg/dl por unidad",
+                        icon = Icons.Default.MonitorHeart
                     )
 
-                    ProfileCard(
-                        title = "Apellido",
-                        value = userProfile!!.lastName,
-                        icon = Icons.Default.Person
+                    ClinicalDataCard(
+                        title = "Ratio Insulina/Carbohidratos",
+                        value = "1:${clinicalData!!.ratio} unidades",
+                        icon = Icons.Default.Scale
                     )
 
-                    ProfileCard(
-                        title = "Email",
-                        value = userProfile!!.email,
-                        icon = Icons.Default.Email
+                    ClinicalDataCard(
+                        title = "Objetivo de Glucemia",
+                        value = "${clinicalData!!.glycemiaTarget} mg/dl",
+                        icon = Icons.Filled.TrackChanges // Usar el icono correcto
                     )
 
-                    ProfileCard(
+                    ClinicalDataCard(
                         title = "ID de Usuario",
-                        value = userProfile!!.id.toString(),
-                        icon = Icons.Default.Badge
+                        value = clinicalData!!.userId.toString(),
+                        icon = Icons.Default.Bloodtype
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             } else {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -120,7 +122,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Cargando perfil...",
+                        text = "Cargando datos clínicos...",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -130,7 +132,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
 }
 
 @Composable
-fun ProfileCard(
+fun ClinicalDataCard(
     title: String,
     value: String,
     icon: ImageVector
