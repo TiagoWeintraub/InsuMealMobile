@@ -182,12 +182,11 @@ fun HomeScreen(navController: NavController, context: Context) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 16.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
+                            .clip(RoundedCornerShape(16.dp))                            .background(
                                 brush = Brush.verticalGradient(
                                     colors = listOf(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        MaterialTheme.colorScheme.primary
+                                        MaterialTheme.colorScheme.primary,  // Celeste
+                                        MaterialTheme.colorScheme.secondary // Verde
                                     )
                                 )
                             )
@@ -308,11 +307,10 @@ fun HomeOptionCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Círculo para el icono
-            Box(
-                modifier = Modifier
+            Box(                modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(percent = 50))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

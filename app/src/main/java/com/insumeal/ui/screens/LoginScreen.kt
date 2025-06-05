@@ -67,12 +67,11 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 40.dp, bottom = 32.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
+                    .clip(RoundedCornerShape(16.dp))                    .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primaryContainer
+                                MaterialTheme.colorScheme.primary,  // Celeste
+                                MaterialTheme.colorScheme.secondary // Verde
                             )
                         )
                     )
@@ -104,7 +103,10 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface  // Usar GrisClaro para el fondo
+                )
             ) {
                 Column(
                     modifier = Modifier
@@ -244,8 +246,7 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(
+                        enabled = !isLoading,                        colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )

@@ -62,12 +62,11 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp, bottom = 24.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
+                    .clip(RoundedCornerShape(16.dp))                    .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                MaterialTheme.colorScheme.primary
+                                MaterialTheme.colorScheme.primary,  // Celeste
+                                MaterialTheme.colorScheme.secondary // Verde
                             )
                         )
                     )
@@ -99,7 +98,10 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface  // Usar GrisClaro para el fondo
+                )
             ) {
                 Column(
                     modifier = Modifier

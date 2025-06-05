@@ -48,8 +48,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
     }
 
     // UI para mostrar los datos de perfil
-    Scaffold(
-        topBar = {
+    Scaffold(        topBar = {
             TopAppBar(
                 title = { Text("Perfil de Usuario") },
                 navigationIcon = {
@@ -121,15 +120,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                        Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
-                        Text("Volver al Inicio")
-                    }
+                    )
                 }
             } else {
                 Column(
