@@ -240,7 +240,6 @@ fun HomeScreen(navController: NavController, context: Context) {
                         icon = Icons.Filled.History,
                         onClick = { navController.navigate("foodHistory") }
                     )
-
                     Spacer(modifier = Modifier.height(12.dp))
                     HomeOptionCard(
                         title = "Información Clínica",
@@ -251,7 +250,8 @@ fun HomeScreen(navController: NavController, context: Context) {
                             if (userId != null) {
                                 navController.navigate("clinicalData/$userId")
                             }
-                        }
+                        },
+                        showArrow = false
                     )
                 }
             }
