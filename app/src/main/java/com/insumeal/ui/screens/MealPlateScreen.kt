@@ -343,21 +343,35 @@ fun IngredientEditableCard(
                     ),
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                
-                Row(
+                  Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = editGrams,
-                        onValueChange = onGramsChange,
-                        label = { Text("Gramos") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        enabled = !isUpdating
-                    )
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = editGrams,
+                            onValueChange = onGramsChange,
+                            label = { Text("Gramos") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            enabled = !isUpdating
+                        )
+                        
+                        // Mostrar carbohidratos calculados en tiempo real
+                        val previewCarbs = editGrams.toDoubleOrNull()?.let { grams ->
+                            (grams / 100.0) * ingredient.carbsPerHundredGrams
+                        } ?: ingredient.carbs
+                        
+                        Text(
+                            text = "≈ ${String.format("%.1f", previewCarbs)} Carbs",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
+                    }
                     
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -410,18 +424,28 @@ fun IngredientEditableCard(
                     ),
                     modifier = Modifier.weight(1f)
                 )
-                
-                Row(
+                  Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "${String.format("%.0f", ingredient.grams)} Gramos",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = "${String.format("%.0f", ingredient.grams)} Gramos",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${String.format("%.1f", ingredient.carbs)} Carbs",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                     
                     Icon(
                         imageVector = Icons.Default.Edit,
