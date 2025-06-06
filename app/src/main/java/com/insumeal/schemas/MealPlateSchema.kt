@@ -7,12 +7,12 @@ import com.insumeal.models.MealPlate
 // Este schema representa la estructura de la respuesta del endpoint /gemini/analyze-image
 data class MealPlateSchema(
     @SerializedName("meal_plate_id") val id: Int,
-    @SerializedName("meal_plate_name") val name: String,
-    @SerializedName("date") val date: String,
+    @SerializedName("meal_plate_name") val name: String?,
+    @SerializedName("date") val date: String?,
     @SerializedName("totalCarbs") val totalCarbs: Double,
     @SerializedName("dosis") val dosis: Double,
     @SerializedName("glycemia") val glycemia: Double,
-    @SerializedName("ingredients") val ingredients: List<IngredientSchema> = emptyList()
+    @SerializedName("ingredients") val ingredients: List<IngredientSchema>? = null
 )
 
 data class IngredientSchema(
@@ -28,7 +28,11 @@ fun MealPlateSchema.toModel(): MealPlate {
     try {
         android.util.Log.d("MealPlateSchema", "Convirtiendo MealPlateSchema a MealPlate: id=${this.id}, name=${this.name}")
         
-        val ingredientModels = this.ingredients.mapIndexed { index, ingredientSchema ->
+        // Manejar ingredientes nulos con una lista vacía por defecto
+        val ingredientsList = this.ingredients ?: emptyList()
+        android.util.Log.d("MealPlateSchema", "Procesando ${ingredientsList.size} ingredientes")
+        
+        val ingredientModels = ingredientsList.mapIndexed { index, ingredientSchema ->
             try {
                 val ingredient = ingredientSchema.toModel()
                 android.util.Log.d("MealPlateSchema", "Ingrediente $index convertido: ${ingredient.name}")
@@ -41,8 +45,8 @@ fun MealPlateSchema.toModel(): MealPlate {
         
         val mealPlate = MealPlate(
             id = this.id,
-            name = this.name,
-            date = this.date,
+            name = this.name ?: "Plato sin nombre", // Valor por defecto si name es null
+            date = this.date ?: "", // Valor por defecto si date es null
             totalCarbs = this.totalCarbs,
             dosis = this.dosis,
             glycemia = this.glycemia,

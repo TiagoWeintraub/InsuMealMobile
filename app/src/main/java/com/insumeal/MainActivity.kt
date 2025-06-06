@@ -80,9 +80,13 @@ fun MealPlateScreensContainer(navController: NavHostController) {
         composable("uploadPhoto") {
             UploadPhotoScreen(navController = navController, mealPlateViewModel = mealPlateViewModel)
         }
-
+        
         composable("mealPlate") {
             MealPlateScreen(navController, mealPlateViewModel)
+        }
+
+        composable("dosis") {
+            DosisScreen(navController, mealPlateViewModel)
         }
 
         composable("foodHistory") {

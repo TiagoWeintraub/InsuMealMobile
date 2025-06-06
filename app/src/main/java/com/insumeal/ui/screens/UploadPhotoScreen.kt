@@ -116,7 +116,8 @@ fun UploadPhotoScreen(
             onDismissRequest = { mealPlateViewModel.clearError() },            title = { Text("Error") },
             text = { Text(errorMessage!!) },
             confirmButton = {
-                TextButton(                    onClick = { 
+                TextButton(
+                    onClick = {
                         // Necesitamos agregar un método clearError al ViewModel
                         mealPlateViewModel.clearError()
                         // Si es un error de autenticación, redirigir a login

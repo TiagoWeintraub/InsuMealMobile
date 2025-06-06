@@ -101,12 +101,6 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                         icon = Icons.Filled.TrackChanges // Usar el icono correcto
                     )
 
-                    ClinicalDataCard(
-                        title = "ID de Usuario",
-                        value = clinicalData!!.userId.toString(),
-                        icon = Icons.Default.Bloodtype
-                    )
-
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             } else {

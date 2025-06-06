@@ -2,10 +2,12 @@ package com.insumeal.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -17,7 +19,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -31,11 +35,19 @@ fun MealPlateScreen(
     navController: NavController,
     mealPlateViewModel: MealPlateViewModel
 ) {
+    val context = LocalContext.current
+    
     // Usar collectAsState para observar los StateFlow del ViewModel
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val isLoading by mealPlateViewModel.isLoading.collectAsState()
     val errorMessage by mealPlateViewModel.errorMessage.collectAsState()
     val hasAttemptedLoad by mealPlateViewModel.hasAttemptedLoad.collectAsState()
+    
+    // Estados para la edición de ingredientes
+    var editingIngredientId by remember { mutableStateOf<Int?>(null) }
+    var editGrams by remember { mutableStateOf("") }
+    var isUpdating by remember { mutableStateOf(false) }
+    var updateError by remember { mutableStateOf<String?>(null) }
     
     // Efecto para sincronizar los estados y hacer logs
     LaunchedEffect(mealPlate) {
@@ -188,126 +200,237 @@ fun MealPlateScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
-                
-                // Lista de ingredientes simplificada
+                  // Lista de ingredientes con capacidad de edición
                 items(mealPlate!!.ingredients) { ingredient ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = ingredient.name,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                modifier = Modifier.weight(1f)
-                            )
-                            
-                            Text(
-                                text = "${String.format("%.0f", ingredient.grams)}g",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
-                
-                // Información nutricional resumida
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Información nutricional:",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                InfoItem(
-                                    icon = Icons.Default.Restaurant,
-                                    label = "Carbohidratos",
-                                    value = "${String.format("%.1f", mealPlate!!.totalCarbs)} g"
-                                )
+                    IngredientEditableCard(
+                        ingredient = ingredient,
+                        mealPlateId = mealPlate!!.id,
+                        isEditing = editingIngredientId == ingredient.id,
+                        editGrams = editGrams,
+                        isUpdating = isUpdating,
+                        onEditStart = { 
+                            editingIngredientId = ingredient.id
+                            editGrams = ingredient.grams.toInt().toString()
+                        },
+                        onEditCancel = { 
+                            editingIngredientId = null
+                            editGrams = ""
+                            updateError = null
+                        },
+                        onGramsChange = { editGrams = it },
+                        onEditConfirm = {
+                            val newGrams = editGrams.toDoubleOrNull()
+                            if (newGrams != null && newGrams > 0) {
+                                isUpdating = true
+                                updateError = null
                                 
-                                InfoItem(
-                                    icon = Icons.Default.Favorite,
-                                    label = "Dosis",
-                                    value = "${String.format("%.1f", mealPlate!!.dosis)} U"
+                                mealPlateViewModel.updateIngredientGrams(
+                                    context = context,
+                                    mealPlateId = mealPlate!!.id,
+                                    ingredientId = ingredient.id,
+                                    newGrams = newGrams,
+                                    onSuccess = {
+                                        isUpdating = false
+                                        editingIngredientId = null
+                                        editGrams = ""
+                                    },
+                                    onError = { error ->
+                                        isUpdating = false
+                                        updateError = error
+                                    }
                                 )
-                                
-                                InfoItem(
-                                    icon = Icons.Default.Timeline,
-                                    label = "Glucemia",
-                                    value = "${String.format("%.0f", mealPlate!!.glycemia)} mg/dl"
-                                )
+                            } else {
+                                updateError = "Por favor, ingresa un valor válido mayor a 0"
                             }
                         }
+                    )
+                }
+                  // Botón para calcular dosis
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Button(
+                        onClick = { 
+                            navController.navigate("dosis")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 6.dp,
+                            pressedElevation = 8.dp
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
+                        Text(
+                            text = "Calcular Dosis",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color.White
+                        )
                     }
                 }
                 
                 // Espacio al final
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
+                }            }
+        }
+    }
+    
+    // Diálogo de error para actualizaciones
+    if (updateError != null) {
+        AlertDialog(
+            onDismissRequest = { updateError = null },
+            title = { Text("Error al actualizar") },
+            text = { Text(updateError!!) },
+            confirmButton = {
+                TextButton(onClick = { updateError = null }) {
+                    Text("Aceptar")
                 }
             }
-        }
+        )
     }
 }
 
 @Composable
-fun InfoItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+fun IngredientEditableCard(
+    ingredient: Ingredient,
+    mealPlateId: Int,
+    isEditing: Boolean,
+    editGrams: String,
+    isUpdating: Boolean,
+    onEditStart: () -> Unit,
+    onEditCancel: () -> Unit,
+    onGramsChange: (String) -> Unit,
+    onEditConfirm: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isEditing) 4.dp else 2.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isEditing) 
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            else 
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        )
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(4.dp))
-        
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold
-            )
-        )
+        if (isEditing) {
+            // Modo edición
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = ingredient.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = editGrams,
+                        onValueChange = onGramsChange,
+                        label = { Text("Gramos") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isUpdating
+                    )
+                    
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        IconButton(
+                            onClick = onEditCancel,
+                            enabled = !isUpdating
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cancelar",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        
+                        IconButton(
+                            onClick = onEditConfirm,
+                            enabled = !isUpdating && editGrams.isNotBlank()
+                        ) {
+                            if (isUpdating) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Confirmar",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Modo visualización
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEditStart() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = ingredient.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "${String.format("%.0f", ingredient.grams)} Gramos",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
     }
 }

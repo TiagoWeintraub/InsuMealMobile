@@ -53,11 +53,11 @@ class MealPlateApiClient {
                     try {
                         // Convertir el schema a modelo
                         val mealPlateSchema = response.body()!!
-                        Log.d("MealPlateApiClient", "Schema recibido: ${mealPlateSchema.name}, ${mealPlateSchema.ingredients.size} ingredientes")
+                        Log.d("MealPlateApiClient", "Schema recibido: ${mealPlateSchema.name}, ${mealPlateSchema.ingredients?.size} ingredientes")
                         
                         // Mostrar detalles para debug
                         Log.d("MealPlateApiClient", "Schema detallado: id=${mealPlateSchema.id}, carbs=${mealPlateSchema.totalCarbs}, dosis=${mealPlateSchema.dosis}")
-                        mealPlateSchema.ingredients.forEachIndexed { index, ingredient ->
+                        mealPlateSchema.ingredients?.forEachIndexed { index, ingredient ->
                             Log.d("MealPlateApiClient", "Ingrediente $index: ${ingredient.name}, ${ingredient.grams}g, ${ingredient.carbs}g carbs")
                         }
                         
@@ -117,6 +117,64 @@ class MealPlateApiClient {
             // Registrar el error para depuración
             Log.e("MealPlateApiClient", "Error al preparar la imagen", e)
             throw e
+        }
+    }    suspend fun updateIngredientGrams(
+        context: Context,
+        currentMealPlate: MealPlate,
+        ingredientId: Int,
+        grams: Double
+    ): Result<MealPlate> = withContext(Dispatchers.IO) {
+        try {
+            Log.d("MealPlateApiClient", "Actualizando ingrediente: mealPlateId=${currentMealPlate.id}, ingredientId=$ingredientId, grams=$grams")
+            
+            val mealPlateService = getMealPlateService(context)
+            val updateGramsRequest = UpdateGramsRequest(grams)
+            
+            val response = mealPlateService.updateIngredientGrams(currentMealPlate.id, ingredientId, updateGramsRequest)
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful) {
+                // En lugar de confiar en la respuesta del backend, actualizar localmente
+                Log.d("MealPlateApiClient", "Ingrediente actualizado exitosamente en el servidor")
+                
+                // Buscar el ingrediente y actualizarlo
+                val updatedIngredients = currentMealPlate.ingredients.map { ingredient ->
+                    if (ingredient.id == ingredientId) {
+                        // Calcular los nuevos carbohidratos basados en los gramos actualizados
+                        val newCarbs = (grams / 100.0) * ingredient.carbsPerHundredGrams
+                        ingredient.copy(grams = grams, carbs = newCarbs)
+                    } else {
+                        ingredient
+                    }
+                }
+                
+                // Recalcular los carbohidratos totales
+                val newTotalCarbs = updatedIngredients.sumOf { it.carbs }
+                
+                val updatedMealPlate = currentMealPlate.copy(
+                    ingredients = updatedIngredients,
+                    totalCarbs = newTotalCarbs
+                )
+                
+                Log.d("MealPlateApiClient", "MealPlate actualizado localmente: totalCarbs=$newTotalCarbs")
+                return@withContext Result.success(updatedMealPlate)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error en la actualización: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "Ingrediente o plato no encontrado"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al actualizar: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al actualizar ingrediente", e)
+            return@withContext Result.failure(e)
         }
     }
 }
