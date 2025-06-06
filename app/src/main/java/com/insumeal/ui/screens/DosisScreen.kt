@@ -7,6 +7,8 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,7 +32,7 @@ import com.insumeal.ui.viewmodel.MealPlateViewModel
 import com.insumeal.utils.TokenManager
 
 @Composable
-fun createAuthenticatedImageRequest(context: Context, imageUrl: String, fallbackUrl: String): ImageRequest {
+fun createAuthenticatedImageRequest(context: Context, imageUrl: String): ImageRequest {
     val tokenManager = TokenManager(context)
     val token = tokenManager.getToken()
     
@@ -40,11 +42,8 @@ fun createAuthenticatedImageRequest(context: Context, imageUrl: String, fallback
             if (token != null) {
                 addHeader("Authorization", "Bearer $token")
             }
-        }.error(
-            ImageRequest.Builder(context)
-                .data(fallbackUrl)
-                .build()
-        ).build()
+        }
+        .build()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,12 +75,14 @@ fun DosisScreen(
                     navigationIconContentColor = Color.White
                 )
             )
-        }
-    ) { paddingValues ->        Column(
+        }    ) { paddingValues ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -109,16 +110,17 @@ fun DosisScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
+                    shape = RoundedCornerShape(16.dp)                ) {
                     val imageRequest = createAuthenticatedImageRequest(
                         context = context,
-                        imageUrl = "http://10.0.0.170:8000/meal_plate/image/${mealPlate!!.id}",
-                        fallbackUrl = "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=${mealPlate!!.name}"
+                        imageUrl = "http://10.0.0.170:8000/meal_plate/image/${mealPlate!!.id}"
                     )
                     
                     Image(
-                        painter = rememberAsyncImagePainter(imageRequest),
+                        painter = rememberAsyncImagePainter(
+                            model = imageRequest,
+                            error = rememberAsyncImagePainter("https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=${mealPlate!!.name}")
+                        ),
                         contentDescription = "Imagen de ${mealPlate!!.name}",
                         modifier = Modifier
                             .fillMaxSize()
@@ -355,14 +357,12 @@ fun DosisScreen(
                                     visible = isDosisExpanded,
                                     enter = expandVertically(),
                                     exit = shrinkVertically()
-                                ) {
-                                    Column(
+                                ) {                                    Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 20.dp),
-                                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        Card(
+                                            .padding(top = 24.dp),
+                                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                                    ) {Card(
                                             modifier = Modifier.fillMaxWidth(),
                                             colors = CardDefaults.cardColors(
                                                 containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
@@ -371,8 +371,8 @@ fun DosisScreen(
                                             shape = RoundedCornerShape(12.dp)
                                         ) {
                                             Column(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                                modifier = Modifier.padding(20.dp),
+                                                verticalArrangement = Arrangement.spacedBy(20.dp)
                                             ) {
                                                 Text(
                                                     text = "💊 Desglose del cálculo:",
@@ -381,15 +381,15 @@ fun DosisScreen(
                                                     ),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
-                                                
-                                                // Insulina para corrección
+                                                  // Insulina para corrección
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     horizontalArrangement = Arrangement.SpaceBetween
                                                 ) {
                                                     Row(
-                                                        verticalAlignment = Alignment.CenterVertically
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.weight(1f)
                                                     ) {
                                                         Icon(
                                                             imageVector = Icons.Default.Healing,
@@ -400,7 +400,8 @@ fun DosisScreen(
                                                         Spacer(modifier = Modifier.width(12.dp))
                                                         Text(
                                                             text = "Insulina para corrección",
-                                                            style = MaterialTheme.typography.bodyMedium
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            maxLines = 2
                                                         )
                                                     }
                                                     Text(
@@ -416,15 +417,15 @@ fun DosisScreen(
                                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                                     thickness = 1.dp
                                                 )
-                                                
-                                                // Insulina para carbohidratos
+                                                  // Insulina para carbohidratos
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     horizontalArrangement = Arrangement.SpaceBetween
                                                 ) {
                                                     Row(
-                                                        verticalAlignment = Alignment.CenterVertically
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.weight(1f)
                                                     ) {
                                                         Icon(
                                                             imageVector = Icons.Default.LocalDining,
@@ -435,7 +436,8 @@ fun DosisScreen(
                                                         Spacer(modifier = Modifier.width(12.dp))
                                                         Text(
                                                             text = "Insulina para carbohidratos",
-                                                            style = MaterialTheme.typography.bodyMedium
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            maxLines = 2
                                                         )
                                                     }
                                                     Text(
@@ -605,12 +607,12 @@ fun DosisScreen(
                                     color = Color.White
                                 )
                             }
-                        }
-                    }
+                        }                    }
                 }
             }
             
-            Spacer(modifier = Modifier.weight(1f))
+            // Espaciado adicional al final para asegurar que el botón sea visible
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
