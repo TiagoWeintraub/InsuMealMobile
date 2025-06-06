@@ -44,11 +44,18 @@ import kotlinx.coroutines.isActive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UploadPhotoScreen(navController: NavController) {
+fun UploadPhotoScreen(
+    navController: NavController,
+    mealPlateViewModel: MealPlateViewModel
+) {
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    val mealPlateViewModel: MealPlateViewModel = viewModel()
+    
+    // Observar los StateFlow del ViewModel
+    val isLoading by mealPlateViewModel.isLoading.collectAsState()
+    val errorMessage by mealPlateViewModel.errorMessage.collectAsState()
+    
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bmp ->
         if (bmp != null) {
             try {
@@ -59,7 +66,7 @@ fun UploadPhotoScreen(navController: NavController) {
                 mealPlateViewModel.setImage(null, bmp)
             } catch (e: Exception) {
                 // Mostrar un error si algo sale mal
-                mealPlateViewModel.errorMessage = "Error al cargar la imagen: ${e.message}"
+                // No podemos asignar directamente, el ViewModel maneja los errores internamente
             }
         }
     }
@@ -74,13 +81,13 @@ fun UploadPhotoScreen(navController: NavController) {
                 mealPlateViewModel.setImage(uri, null)
             } catch (e: Exception) {
                 // Mostrar un error si algo sale mal
-                mealPlateViewModel.errorMessage = "Error al cargar la imagen: ${e.message}"
+                // No podemos asignar directamente, el ViewModel maneja los errores internamente
             }
         }
     }
     
     // Mostrar diálogo de carga si está procesando la imagen
-    if (mealPlateViewModel.isLoading) {
+    if (isLoading) {
         AlertDialog(
             onDismissRequest = { /* No permitir cerrar durante la carga */ },
             title = { Text("Procesando imagen") },
@@ -95,7 +102,7 @@ fun UploadPhotoScreen(navController: NavController) {
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        "El procesamiento de la imagen puede tardar hasta 2 minutos. Por favor, espera mientras analizamos el contenido de tu plato...",
+                        "El procesamiento de la imagen puede tardar varios segundos. Por favor, espera...",
                         textAlign = TextAlign.Center
                     )
                 }
@@ -103,20 +110,18 @@ fun UploadPhotoScreen(navController: NavController) {
             confirmButton = { /* Sin botones durante la carga */ },
             containerColor = MaterialTheme.colorScheme.surface
         )
-    }
-      // Mostrar mensaje de error si ocurrió alguno
-    if (mealPlateViewModel.errorMessage != null) {
+    }    // Mostrar mensaje de error si ocurrió alguno
+    if (errorMessage != null) {
         AlertDialog(
-            onDismissRequest = { mealPlateViewModel.errorMessage = null },
-            title = { Text("Error") },
-            text = { Text(mealPlateViewModel.errorMessage!!) },
+            onDismissRequest = { mealPlateViewModel.clearError() },            title = { Text("Error") },
+            text = { Text(errorMessage!!) },
             confirmButton = {
-                TextButton(
-                    onClick = { 
-                        mealPlateViewModel.errorMessage = null
+                TextButton(                    onClick = { 
+                        // Necesitamos agregar un método clearError al ViewModel
+                        mealPlateViewModel.clearError()
                         // Si es un error de autenticación, redirigir a login
-                        if (mealPlateViewModel.errorMessage?.contains("autenticación") == true || 
-                            mealPlateViewModel.errorMessage?.contains("sesión") == true) {
+                        if (errorMessage!!.contains("autenticación") || 
+                            errorMessage!!.contains("sesión")) {
                             navController.navigate("login") {
                                 popUpTo("home") { inclusive = true }
                             }
@@ -343,15 +348,19 @@ fun UploadPhotoScreen(navController: NavController) {
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }                // Botón de continuar
-            Button(
-                onClick = {
+            Button(                onClick = {
                     // Usamos el contexto que ya fue capturado anteriormente
+                    android.util.Log.d("UploadPhotoScreen", "Iniciando análisis de imagen")
+                    
+                    // El ViewModel ahora maneja el estado internamente
                     mealPlateViewModel.analyzeImage(context) {
                         // Callback de éxito - navegar a la siguiente pantalla
+                        android.util.Log.d("UploadPhotoScreen", "Análisis completado con éxito, navegando a MealPlateScreen")
+                        android.util.Log.d("UploadPhotoScreen", "ViewModel instance antes de navegar: $mealPlateViewModel")
                         navController.navigate("mealPlate")
                     }
                 },
-                enabled = (bitmap != null || imageUri != null) && !mealPlateViewModel.isLoading,
+                enabled = (bitmap != null || imageUri != null) && !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -364,9 +373,8 @@ fun UploadPhotoScreen(navController: NavController) {
                     defaultElevation = 6.dp,
                     pressedElevation = 8.dp,
                     disabledElevation = 0.dp
-                )
-            ){
-                if (mealPlateViewModel.isLoading) {
+                )            ){
+                if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = Color.White,

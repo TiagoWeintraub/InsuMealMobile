@@ -40,17 +40,35 @@ class MealPlateApiClient {
                 // Preparar la parte de la imagen
                 val imagePart = prepareImagePart(context, imageUri, bitmap)
                 Log.d("MealPlateApiClient", "Imagen preparada correctamente, enviando al servidor...")
-                
-                // Llamar al servicio con el contexto para asegurar que tenga el token
+                  // Llamar al servicio con el contexto para asegurar que tenga el token
                 val mealPlateService = getMealPlateService(context)
                 val response = mealPlateService.analyzeImage(imagePart)
                 Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
                 
+                // Registrar más detalles de la respuesta
+                Log.d("MealPlateApiClient", "Cabeceras de respuesta: ${response.headers()}")
+                Log.d("MealPlateApiClient", "Mensaje de respuesta: ${response.message()}")
+                
                 if (response.isSuccessful && response.body() != null) {
-                    // Convertir el schema a modelo
-                    val mealPlateSchema = response.body()!!
-                    Log.d("MealPlateApiClient", "Schema recibido: ${mealPlateSchema.name}, ${mealPlateSchema.ingredients.size} ingredientes")
-                    Result.success(mealPlateSchema.toModel())
+                    try {
+                        // Convertir el schema a modelo
+                        val mealPlateSchema = response.body()!!
+                        Log.d("MealPlateApiClient", "Schema recibido: ${mealPlateSchema.name}, ${mealPlateSchema.ingredients.size} ingredientes")
+                        
+                        // Mostrar detalles para debug
+                        Log.d("MealPlateApiClient", "Schema detallado: id=${mealPlateSchema.id}, carbs=${mealPlateSchema.totalCarbs}, dosis=${mealPlateSchema.dosis}")
+                        mealPlateSchema.ingredients.forEachIndexed { index, ingredient ->
+                            Log.d("MealPlateApiClient", "Ingrediente $index: ${ingredient.name}, ${ingredient.grams}g, ${ingredient.carbs}g carbs")
+                        }
+                        
+                        // Convertir a modelo y devolver éxito
+                        val mealPlateModel = mealPlateSchema.toModel()
+                        Log.d("MealPlateApiClient", "Modelo creado exitosamente: ${mealPlateModel.name}, id=${mealPlateModel.id}")
+                        return@withContext Result.success(mealPlateModel)
+                    } catch (e: Exception) {
+                        Log.e("MealPlateApiClient", "Error al convertir la respuesta a modelo", e)
+                        return@withContext Result.failure(Exception("Error al procesar la respuesta del servidor: ${e.message}"))
+                    }
                 } else {
                     // Log más detallado para el error
                     val errorBody = response.errorBody()?.string()

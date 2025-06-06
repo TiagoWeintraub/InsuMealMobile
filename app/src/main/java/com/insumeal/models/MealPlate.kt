@@ -9,4 +9,8 @@ data class MealPlate(
     val dosis: Double,
     val glycemia: Double,
     val ingredients: List<Ingredient> = emptyList()
-)
+) {
+    override fun toString(): String {
+        return "MealPlate(id=$id, name='$name', totalCarbs=$totalCarbs, dosis=$dosis, ingredients=${ingredients.size})"
+    }
+}

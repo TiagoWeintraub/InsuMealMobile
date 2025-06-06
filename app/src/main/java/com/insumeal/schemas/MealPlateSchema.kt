@@ -25,24 +25,55 @@ data class IngredientSchema(
 
 // Función de extensión para convertir el schema a modelo
 fun MealPlateSchema.toModel(): MealPlate {
-    return MealPlate(
-        id = this.id,
-        name = this.name,
-        date = this.date,
-        totalCarbs = this.totalCarbs,
-        dosis = this.dosis,
-        glycemia = this.glycemia,
-        ingredients = this.ingredients.map { it.toModel() }
-    )
+    try {
+        android.util.Log.d("MealPlateSchema", "Convirtiendo MealPlateSchema a MealPlate: id=${this.id}, name=${this.name}")
+        
+        val ingredientModels = this.ingredients.mapIndexed { index, ingredientSchema ->
+            try {
+                val ingredient = ingredientSchema.toModel()
+                android.util.Log.d("MealPlateSchema", "Ingrediente $index convertido: ${ingredient.name}")
+                ingredient
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateSchema", "Error convirtiendo ingrediente $index: ${e.message}", e)
+                throw e
+            }
+        }
+        
+        val mealPlate = MealPlate(
+            id = this.id,
+            name = this.name,
+            date = this.date,
+            totalCarbs = this.totalCarbs,
+            dosis = this.dosis,
+            glycemia = this.glycemia,
+            ingredients = ingredientModels
+        )
+        
+        android.util.Log.d("MealPlateSchema", "MealPlate creado con éxito: ${mealPlate.name}, con ${mealPlate.ingredients.size} ingredientes")
+        return mealPlate
+    } catch (e: Exception) {
+        android.util.Log.e("MealPlateSchema", "Error al convertir MealPlateSchema a MealPlate: ${e.message}", e)
+        throw e
+    }
 }
 
 // Función de extensión para convertir el schema de ingrediente a modelo
 fun IngredientSchema.toModel(): Ingredient {
-    return Ingredient(
-        id = this.id,
-        name = this.name,
-        carbsPerHundredGrams = this.carbsPerHundredGrams,
-        grams = this.grams,
-        carbs = this.carbs
-    )
+    try {
+        android.util.Log.d("IngredientSchema", "Convirtiendo IngredientSchema a Ingredient: id=${this.id}, name=${this.name}")
+        
+        val ingredient = Ingredient(
+            id = this.id,
+            name = this.name,
+            carbsPerHundredGrams = this.carbsPerHundredGrams,
+            grams = this.grams,
+            carbs = this.carbs
+        )
+        
+        android.util.Log.d("IngredientSchema", "Ingrediente creado con éxito: ${ingredient.name}")
+        return ingredient
+    } catch (e: Exception) {
+        android.util.Log.e("IngredientSchema", "Error al convertir IngredientSchema a Ingredient: ${e.message}", e)
+        throw e
+    }
 }
