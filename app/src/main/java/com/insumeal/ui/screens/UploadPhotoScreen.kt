@@ -45,22 +45,89 @@ import kotlinx.coroutines.isActive
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UploadPhotoScreen(navController: NavController) {
-    // Eliminamos la variable 'context' que no se usa
+    val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     val mealPlateViewModel: MealPlateViewModel = viewModel()
-
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bmp ->
         if (bmp != null) {
-            bitmap = bmp
-            imageUri = null
+            try {
+                // Guardamos el bitmap y limpiamos la URI para evitar conflictos
+                bitmap = bmp
+                imageUri = null
+                // También establecemos la imagen en el ViewModel directamente
+                mealPlateViewModel.setImage(null, bmp)
+            } catch (e: Exception) {
+                // Mostrar un error si algo sale mal
+                mealPlateViewModel.errorMessage = "Error al cargar la imagen: ${e.message}"
+            }
         }
     }
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
-            imageUri = uri
-            bitmap = null
+            // Asegurarnos de que la URI sea persistente para que no desaparezca después
+            try {
+                // Guardamos la URI y limpiamos el bitmap para evitar conflictos
+                imageUri = uri
+                bitmap = null
+                // También podemos establecer la imagen en el ViewModel directamente
+                mealPlateViewModel.setImage(uri, null)
+            } catch (e: Exception) {
+                // Mostrar un error si algo sale mal
+                mealPlateViewModel.errorMessage = "Error al cargar la imagen: ${e.message}"
+            }
         }
+    }
+    
+    // Mostrar diálogo de carga si está procesando la imagen
+    if (mealPlateViewModel.isLoading) {
+        AlertDialog(
+            onDismissRequest = { /* No permitir cerrar durante la carga */ },
+            title = { Text("Procesando imagen") },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        "El procesamiento de la imagen puede tardar hasta 2 minutos. Por favor, espera mientras analizamos el contenido de tu plato...",
+                        textAlign = TextAlign.Center
+                    )
+                }
+            },
+            confirmButton = { /* Sin botones durante la carga */ },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    }
+      // Mostrar mensaje de error si ocurrió alguno
+    if (mealPlateViewModel.errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { mealPlateViewModel.errorMessage = null },
+            title = { Text("Error") },
+            text = { Text(mealPlateViewModel.errorMessage!!) },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        mealPlateViewModel.errorMessage = null
+                        // Si es un error de autenticación, redirigir a login
+                        if (mealPlateViewModel.errorMessage?.contains("autenticación") == true || 
+                            mealPlateViewModel.errorMessage?.contains("sesión") == true) {
+                            navController.navigate("login") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     }
     Scaffold(
             topBar = {
@@ -275,19 +342,19 @@ fun UploadPhotoScreen(navController: NavController) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-            }
-              
-            // Botón de continuar
+            }                // Botón de continuar
             Button(
                 onClick = {
-                    mealPlateViewModel.setImage(imageUri, bitmap)
-                    navController.navigate("mealPlate")
+                    // Usamos el contexto que ya fue capturado anteriormente
+                    mealPlateViewModel.analyzeImage(context) {
+                        // Callback de éxito - navegar a la siguiente pantalla
+                        navController.navigate("mealPlate")
+                    }
                 },
-                enabled = (bitmap != null || imageUri != null),
+                enabled = (bitmap != null || imageUri != null) && !mealPlateViewModel.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
-                    // .padding(bottom = 24.dp), // Padding handled by parent Column's bottom padding
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -298,13 +365,28 @@ fun UploadPhotoScreen(navController: NavController) {
                     pressedElevation = 8.dp,
                     disabledElevation = 0.dp
                 )
-            ) {
-                Text(
-                    "Continuar",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
+            ){
+                if (mealPlateViewModel.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
                     )
-                )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Procesando...",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                } else {
+                    Text(
+                        "Continuar",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
             }
         }
         } // END OF: Bottom Content Column
