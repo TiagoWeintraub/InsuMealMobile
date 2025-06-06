@@ -5,7 +5,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import com.insumeal.models.MealPlate
+import com.insumeal.models.DosisCalculation
 import com.insumeal.schemas.toModel
+import com.insumeal.schemas.DosisCalculationSchema
 import com.insumeal.utils.AuthCheckUtil
 import com.insumeal.utils.ImageUtils
 import com.insumeal.utils.TokenManager
@@ -171,9 +173,47 @@ class MealPlateApiClient {
                 }
                 
                 return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al actualizar ingrediente", e)
+            return@withContext Result.failure(e)
+        }
+    }
+      suspend fun calculateDosis(
+        context: Context,
+        mealPlateId: Int,
+        glycemia: Double
+    ): Result<DosisCalculation> = withContext(Dispatchers.IO) {
+        try {
+            Log.d("MealPlateApiClient", "Calculando dosis para mealPlateId=$mealPlateId con glycemia=$glycemia")
+            
+            val mealPlateService = getMealPlateService(context)
+            val calculateDosisRequest = CalculateDosisRequest(glycemia)
+            val response = mealPlateService.calculateDosis(mealPlateId, calculateDosisRequest)
+            
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful && response.body() != null) {
+                val dosisSchema = response.body()!!
+                Log.d("MealPlateApiClient", "Cálculo de dosis exitoso")
+                
+                val dosisCalculation = dosisSchema.toModel()
+                return@withContext Result.success(dosisCalculation)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error en el cálculo: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "Plato no encontrado"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al calcular la dosis: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
             }
         } catch (e: Exception) {
-            Log.e("MealPlateApiClient", "Error inesperado al actualizar ingrediente", e)
+            Log.e("MealPlateApiClient", "Error inesperado al calcular dosis", e)
             return@withContext Result.failure(e)
         }
     }

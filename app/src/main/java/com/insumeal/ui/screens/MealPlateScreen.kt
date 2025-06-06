@@ -42,12 +42,16 @@ fun MealPlateScreen(
     val isLoading by mealPlateViewModel.isLoading.collectAsState()
     val errorMessage by mealPlateViewModel.errorMessage.collectAsState()
     val hasAttemptedLoad by mealPlateViewModel.hasAttemptedLoad.collectAsState()
-    
-    // Estados para la edición de ingredientes
+      // Estados para la edición de ingredientes
     var editingIngredientId by remember { mutableStateOf<Int?>(null) }
     var editGrams by remember { mutableStateOf("") }
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
+    
+    // Estados para el cálculo de dosis
+    var glycemiaInput by remember { mutableStateOf("") }
+    var isCalculatingDosis by remember { mutableStateOf(false) }
+    var dosisCalculationError by remember { mutableStateOf<String?>(null) }
     
     // Efecto para sincronizar los estados y hacer logs
     LaunchedEffect(mealPlate) {
@@ -244,42 +248,138 @@ fun MealPlateScreen(
                             }
                         }
                     )
-                }
-                  // Botón para calcular dosis
+                }                  // Campo para ingresar glucemia y botón para calcular dosis
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    Button(
-                        onClick = { 
-                            navController.navigate("dosis")
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 6.dp,
-                            pressedElevation = 8.dp
+                    // Tarjeta para el cálculo de dosis
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Calculate,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.width(8.dp))
-                        
-                        Text(
-                            text = "Calcular Dosis",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color.White
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "Cálculo de Dosis",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            
+                            Text(
+                                text = "Ingresa tu nivel actual de glucemia para calcular la dosis de insulina recomendada:",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                            
+                            // Campo de entrada para glucemia
+                            OutlinedTextField(
+                                value = glycemiaInput,
+                                onValueChange = { glycemiaInput = it },
+                                label = { Text("Glucemia actual (mg/dL)") },
+                                placeholder = { Text("Ej: 150") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                singleLine = true,
+                                enabled = !isCalculatingDosis,
+                                modifier = Modifier.fillMaxWidth(),
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Bloodtype,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            )
+                            
+                            // Mostrar error si lo hay
+                            if (dosisCalculationError != null) {
+                                Text(
+                                    text = dosisCalculationError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 16.dp)
+                                )
+                            }
+                            
+                            // Botón para calcular dosis
+                            Button(
+                                onClick = { 
+                                    val glycemiaValue = glycemiaInput.toDoubleOrNull()
+                                    if (glycemiaValue != null && glycemiaValue > 0) {
+                                        isCalculatingDosis = true
+                                        dosisCalculationError = null
+                                        
+                                        mealPlateViewModel.calculateDosis(
+                                            context = context,
+                                            mealPlateId = mealPlate!!.id,
+                                            glycemia = glycemiaValue,
+                                            onSuccess = {
+                                                isCalculatingDosis = false
+                                                navController.navigate("dosis")
+                                            },
+                                            onError = { error ->
+                                                isCalculatingDosis = false
+                                                dosisCalculationError = error
+                                            }
+                                        )
+                                    } else {
+                                        dosisCalculationError = "Por favor, ingresa un valor válido de glucemia mayor a 0"
+                                    }
+                                },
+                                enabled = glycemiaInput.isNotBlank() && !isCalculatingDosis,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                ),
+                                elevation = ButtonDefaults.buttonElevation(
+                                    defaultElevation = 6.dp,
+                                    pressedElevation = 8.dp
+                                )
+                            ) {
+                                if (isCalculatingDosis) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Calculando...",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = Color.White
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Calculate,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    
+                                    Text(
+                                        text = "Calcular Dosis",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
                 

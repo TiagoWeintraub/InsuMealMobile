@@ -22,8 +22,9 @@ fun DosisScreen(
     navController: NavController,
     mealPlateViewModel: MealPlateViewModel
 ) {
-    // Observar el StateFlow del ViewModel
+    // Observar los StateFlow del ViewModel
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
+    val dosisCalculation by mealPlateViewModel.dosisCalculation.collectAsState()
     
     Scaffold(
         topBar = {
@@ -78,9 +79,8 @@ fun DosisScreen(
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
-                    
-                    Text(
-                        text = "Información Nutricional",
+                      Text(
+                        text = "Resultado del Cálculo",
                         style = MaterialTheme.typography.headlineSmall.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -97,9 +97,8 @@ fun DosisScreen(
                     }
                 }
             }
-            
-            // Información nutricional detallada
-            if (mealPlate != null) {
+              // Información nutricional detallada
+            if (mealPlate != null && dosisCalculation != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -113,33 +112,53 @@ fun DosisScreen(
                             .padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Carbohidratos
+                        // Glucemia actual
+                        InfoRowItem(
+                            icon = Icons.Default.Bloodtype,
+                            label = "Glucemia actual",
+                            value = "${String.format("%.0f", dosisCalculation!!.glycemia)} mg/dL",
+                            iconColor = MaterialTheme.colorScheme.tertiary
+                        )
+                        
+                        Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        
+                        // Carbohidratos totales
                         InfoRowItem(
                             icon = Icons.Default.Restaurant,
                             label = "Carbohidratos totales",
-                            value = "${String.format("%.1f", mealPlate!!.totalCarbs)} g",
+                            value = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
                             iconColor = MaterialTheme.colorScheme.secondary
                         )
                         
                         Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                         
-                        // Dosis
+                        // Insulina para corrección
                         InfoRowItem(
-                            icon = Icons.Default.Medication,
-                            label = "Dosis recomendada",
-                            value = "${String.format("%.1f", mealPlate!!.dosis)} U",
-                            iconColor = MaterialTheme.colorScheme.primary,
-                            isHighlighted = true
+                            icon = Icons.Default.Healing,
+                            label = "Insulina para corrección",
+                            value = "${String.format("%.1f", dosisCalculation!!.correctionInsulin)} U",
+                            iconColor = MaterialTheme.colorScheme.error
                         )
                         
                         Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                         
-                        // Glucemia
+                        // Insulina para carbohidratos
                         InfoRowItem(
-                            icon = Icons.Default.Timeline,
-                            label = "Impacto en glucemia",
-                            value = "${String.format("%.0f", mealPlate!!.glycemia)} mg/dl",
-                            iconColor = MaterialTheme.colorScheme.tertiary
+                            icon = Icons.Default.LocalDining,
+                            label = "Insulina para carbohidratos",
+                            value = "${String.format("%.1f", dosisCalculation!!.carbInsulin)} U",
+                            iconColor = MaterialTheme.colorScheme.secondary
+                        )
+                        
+                        Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        
+                        // Dosis total recomendada (destacada)
+                        InfoRowItem(
+                            icon = Icons.Default.Medication,
+                            label = "DOSIS TOTAL RECOMENDADA",
+                            value = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
+                            iconColor = MaterialTheme.colorScheme.primary,
+                            isHighlighted = true
                         )
                     }
                 }
@@ -174,8 +193,18 @@ fun DosisScreen(
                         )
                     }
                 }
-            } else {
-                // Estado cuando no hay datos
+                
+                // Botón para volver
+                Button(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Volver al Plato")
+                }            } else {
+                // Estado cuando no hay datos del cálculo
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -196,7 +225,7 @@ fun DosisScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         Text(
-                            text = "No hay información nutricional disponible",
+                            text = "No hay información del cálculo de dosis disponible",
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center
                         )

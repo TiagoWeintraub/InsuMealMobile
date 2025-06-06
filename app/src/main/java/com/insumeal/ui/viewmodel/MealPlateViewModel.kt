@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.insumeal.api.MealPlateApiClient
 import com.insumeal.models.MealPlate
+import com.insumeal.models.DosisCalculation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -29,10 +30,13 @@ class MealPlateViewModel : ViewModel() {
     // Para los datos del plato usando StateFlow
     private val _mealPlate = MutableStateFlow<MealPlate?>(null)
     val mealPlate: StateFlow<MealPlate?> = _mealPlate
-    
-    // Estado para saber si hemos intentado cargar datos usando StateFlow
+      // Estado para saber si hemos intentado cargar datos usando StateFlow
     private val _hasAttemptedLoad = MutableStateFlow(false)
     val hasAttemptedLoad: StateFlow<Boolean> = _hasAttemptedLoad
+    
+    // Para los datos del cálculo de dosis usando StateFlow
+    private val _dosisCalculation = MutableStateFlow<DosisCalculation?>(null)
+    val dosisCalculation: StateFlow<DosisCalculation?> = _dosisCalculation
     
     // API Client para las operaciones de API
     private val apiClient = MealPlateApiClient()
@@ -143,9 +147,51 @@ class MealPlateViewModel : ViewModel() {
                     }
                     onError(errorMsg)
                 }
-            } catch (e: Exception) {
-                android.util.Log.e("MealPlateViewModel", "Error inesperado al actualizar ingrediente: ${e.message}", e)
+            } catch (e: Exception) {            android.util.Log.e("MealPlateViewModel", "Error inesperado al actualizar ingrediente: ${e.message}", e)
                 onError("Error inesperado: ${e.message}")
+            }
+        }
+    }
+      fun calculateDosis(
+        context: Context,
+        mealPlateId: Int,
+        glycemia: Double,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("MealPlateViewModel", "Calculando dosis para mealPlateId=$mealPlateId con glycemia=$glycemia")
+                _isLoading.value = true
+                
+                val result = apiClient.calculateDosis(context, mealPlateId, glycemia)
+                
+                result.onSuccess { dosisCalculation ->
+                    android.util.Log.d("MealPlateViewModel", "Cálculo de dosis exitoso")
+                    _dosisCalculation.value = dosisCalculation
+                    onSuccess()
+                }.onFailure { error ->
+                    android.util.Log.e("MealPlateViewModel", "Error al calcular dosis: ${error.message}", error)
+                    val errorMsg = when {
+                        error.message?.contains("401") == true -> 
+                            "Error de autenticación. Tu sesión ha expirado."
+                        error.message?.contains("403") == true -> 
+                            "No tienes permiso para realizar esta acción."
+                        error.message?.contains("404") == true -> 
+                            "No se encontró el plato especificado."
+                        error.message?.contains("timeout") == true -> 
+                            "El servidor está tardando demasiado en responder."
+                        error.message?.contains("host") == true -> 
+                            "No se puede conectar al servidor. Verifica tu conexión a internet."
+                        else -> "Error al calcular la dosis: ${error.message}"
+                    }
+                    onError(errorMsg)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateViewModel", "Error inesperado al calcular dosis: ${e.message}", e)
+                onError("Error inesperado: ${e.message}")
+            } finally {
+                _isLoading.value = false
             }
         }
     }
