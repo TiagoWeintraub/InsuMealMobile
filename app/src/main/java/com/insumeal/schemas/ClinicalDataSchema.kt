@@ -8,7 +8,7 @@ data class ClinicalDataSchema(
     @SerializedName("id") val id: Int,
     @SerializedName("ratio") val ratio: Double,
     @SerializedName("sensitivity") val sensitivity: Double,
-    @SerializedName("glycemiaTarget") val glycemiaTarget: Int,
+    @SerializedName("glycemiaTarget") val glycemiaTarget: Double,
     @SerializedName("user_id") val userId: Int
 )
 

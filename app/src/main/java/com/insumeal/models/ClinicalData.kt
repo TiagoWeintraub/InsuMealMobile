@@ -11,9 +11,8 @@ data class ClinicalData(
     
     @SerializedName("sensitivity")
     val sensitivity: Double,
-    
-    @SerializedName("glycemiaTarget")
-    val glycemiaTarget: Int,
+      @SerializedName("glycemiaTarget")
+    val glycemiaTarget: Double,
     
     @SerializedName("user_id")
     val userId: Int
