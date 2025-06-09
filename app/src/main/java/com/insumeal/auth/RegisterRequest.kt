@@ -13,13 +13,11 @@ data class RegisterRequest(
     val email: String,
 
     @SerializedName("password")
-    val password: String,
-
-    @SerializedName("ratio")
-    val ratio: Double,
+    val password: String,    @SerializedName("ratio")
+    val ratio: Int,
 
     @SerializedName("sensitivity")
-    val sensitivity: Double,
+    val sensitivity: Int,
 
     @SerializedName("glycemiaTarget")
     val glycemiaTarget: Int,

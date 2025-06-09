@@ -123,7 +123,7 @@ fun FoodHistoryScreen(navController: NavController) {
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "No hay análisis anteriores",
+                                text = "No hay análisis de comidas anteriores",
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center
                             )

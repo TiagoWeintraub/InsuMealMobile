@@ -36,8 +36,8 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var ratio by remember { mutableStateOf(15.0) }
-    var sensitivity by remember { mutableStateOf(50.0) }
+    var ratio by remember { mutableStateOf(15) }
+    var sensitivity by remember { mutableStateOf(50) }
     var glycemiaTarget by remember { mutableStateOf(100) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -276,56 +276,62 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         ),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.align(Alignment.Start)
-                    )
-
-                    // Campo Ratio
+                    )                    // Campo Ratio
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Ratio: ${ratio.toInt()}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = "Ratio: $ratio mg/dL",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.secondary
                         )
                         Slider(
                             value = ratio.toFloat(),
-                            onValueChange = { ratio = it.toDouble() },
+                            onValueChange = { ratio = it.toInt() },
                             valueRange = 5f..50f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
                                 activeTrackColor = MaterialTheme.colorScheme.primary
                             )
                         )
-                    }
-
-                    // Campo Sensibilidad
+                        Text(
+                            text = "El ratio es la cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }                    // Campo Sensibilidad
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Sensibilidad: ${sensitivity.toInt()}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = "Sensibilidad: $sensitivity mg/dL",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.secondary
                         )
                         Slider(
                             value = sensitivity.toFloat(),
-                            onValueChange = { sensitivity = it.toDouble() },
+                            onValueChange = { sensitivity = it.toInt() },
                             valueRange = 10f..100f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
                                 activeTrackColor = MaterialTheme.colorScheme.primary
                             )
                         )
-                    }
-
-                    // Campo Target de Glucemia
+                        Text(
+                            text = "La sensibilidad indica cuántos mg/dL disminuye la glucemia con una unidad de insulina rápida",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }                    // Campo Target de Glucemia
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = "Target de Glucemia: $glycemiaTarget mg/dL",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.secondary
                         )
                         Slider(
                             value = glycemiaTarget.toFloat(),
@@ -335,6 +341,12 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                                 thumbColor = MaterialTheme.colorScheme.primary,
                                 activeTrackColor = MaterialTheme.colorScheme.primary
                             )
+                        )
+                        Text(
+                            text = "El target de glucemia es el valor objetivo al cual deseas mantener tu nivel de azúcar en sangre",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
 
@@ -381,7 +393,6 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
 
                                 errorMessage = null
                                 isLoading = true
-
                                 CoroutineScope(Dispatchers.IO).launch {
                                     try {
                                         val service = RetrofitClient.retrofit.create(RegisterService::class.java)

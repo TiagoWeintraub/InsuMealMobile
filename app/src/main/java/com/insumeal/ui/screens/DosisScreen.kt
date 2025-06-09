@@ -373,7 +373,7 @@ fun DosisScreen(
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "⚠️ No se recomienda comer alimentos con carbohidratos cuando la glucemia está elevada",
+                                text = "No se recomienda comer alimentos con carbohidratos cuando la glucemia está elevada",
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = FontWeight.Medium
                                 ),
@@ -603,7 +603,7 @@ fun DosisScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         
                         Text(
-                            text = "⚠️ Esta información es orientativa. InsuMeal no asume responsabilidad por el uso de esta estimación.",
+                            text = "Esta información es orientativa. InsuMeal no asume responsabilidad por el uso de esta estimación.",
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Medium
                             ),

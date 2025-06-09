@@ -204,7 +204,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = if (userProfile != null) "Bienvenido ${userProfile!!.username}" else "Bienvenido",
+                                text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido --!",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
