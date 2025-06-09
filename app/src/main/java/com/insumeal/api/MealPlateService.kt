@@ -20,7 +20,15 @@ interface MealPlateService {
         @Path("meal_plate_id") mealPlateId: Int,
         @Body calculateDosisRequest: CalculateDosisRequest
     ): Response<DosisCalculationSchema>
-    
-    @GET("/meal_plate/")
+      @GET("/meal_plate/")
     suspend fun getMealPlateHistory(): Response<List<MealPlateHistorySchema>>
+    
+    @DELETE("/meal_plate/{id_meal_plate}")
+    suspend fun deleteMealPlate(@Path("id_meal_plate") mealPlateId: Int): Response<Unit>
+    
+    @GET("/meal_plate/image/{id_meal_plate}")
+    suspend fun getMealPlateImage(@Path("id_meal_plate") mealPlateId: Int): Response<okhttp3.ResponseBody>
+    
+    @GET("/ingredient/meal_plate/{id_meal_plate}")
+    suspend fun getMealPlateById(@Path("id_meal_plate") mealPlateId: Int): Response<MealPlateSchema>
 }

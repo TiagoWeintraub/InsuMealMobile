@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
+import coil.request.ImageRequest
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -77,9 +78,28 @@ object ImageUtils {
                 if (extensionIndex > 0) {
                     return path.substring(extensionIndex + 1)
                 }
-            }
-            // Por defecto, usamos jpg
+            }            // Por defecto, usamos jpg
             "jpg"
         }
+    }
+    
+    /**
+     * Crea una solicitud de imagen autenticada con token Bearer
+     * @param context Contexto de la aplicación
+     * @param imageUrl URL de la imagen
+     * @return ImageRequest configurado con autenticación
+     */
+    fun createAuthenticatedImageRequest(context: Context, imageUrl: String): ImageRequest {
+        val tokenManager = TokenManager(context)
+        val token = tokenManager.getToken()
+        
+        return ImageRequest.Builder(context)
+            .data(imageUrl)
+            .apply {
+                if (token != null) {
+                    addHeader("Authorization", "Bearer $token")
+                }
+            }
+            .build()
     }
 }

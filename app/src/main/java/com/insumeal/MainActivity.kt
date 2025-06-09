@@ -93,6 +93,14 @@ fun MealPlateScreensContainer(navController: NavHostController) {
         }
         
         composable(
+            route = "foodHistoryMealPlate/{mealPlateId}",
+            arguments = listOf(navArgument("mealPlateId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val mealPlateId = backStackEntry.arguments?.getInt("mealPlateId") ?: 0
+            FoodHistoryMealPlateScreen(navController = navController, mealPlateId = mealPlateId)
+        }
+        
+        composable(
             route = "profile/{userId}",
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->

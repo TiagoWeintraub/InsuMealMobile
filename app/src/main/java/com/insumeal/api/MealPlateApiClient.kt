@@ -252,9 +252,107 @@ class MealPlateApiClient {
                 }
                 
                 return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al obtener historial", e)
+            return@withContext Result.failure(e)
+        }
+    }
+    suspend fun deleteMealPlate(context: Context, mealPlateId: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            // Verificar si hay un token disponible y es válido
+            if (!AuthCheckUtil.checkToken(context)) {
+                Log.e("MealPlateApiClient", "No hay token de autenticación válido")
+                return@withContext Result.failure(Exception("No hay sesión activa. Por favor inicia sesión nuevamente."))
+            }
+
+            Log.d("MealPlateApiClient", "Eliminando meal plate con ID: $mealPlateId")
+            
+            val mealPlateService = getMealPlateService(context)
+            val response = mealPlateService.deleteMealPlate(mealPlateId)
+            
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful) {
+                Log.d("MealPlateApiClient", "Meal plate eliminado exitosamente")
+                return@withContext Result.success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error al eliminar meal plate: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "Meal plate no encontrado"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al eliminar: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
             }
         } catch (e: Exception) {
-            Log.e("MealPlateApiClient", "Error inesperado al obtener historial", e)
+            Log.e("MealPlateApiClient", "Error inesperado al eliminar meal plate", e)
+            return@withContext Result.failure(e)
+        }
+    }
+    suspend fun getMealPlateById(context: Context, mealPlateId: Int): Result<MealPlate> = withContext(Dispatchers.IO) {
+        try {
+            // Verificar si hay un token disponible y es válido
+            if (!AuthCheckUtil.checkToken(context)) {
+                Log.e("MealPlateApiClient", "No hay token de autenticación válido")
+                return@withContext Result.failure(Exception("No hay sesión activa. Por favor inicia sesión nuevamente."))
+            }
+
+            Log.d("MealPlateApiClient", "Obteniendo detalles del meal plate con ID: $mealPlateId")
+            
+            // Usar cliente específico para el historial (10.0.0.179)
+            val historyRetrofit = retrofit2.Retrofit.Builder()
+                .baseUrl("http://10.0.0.179:8000")
+                .client(okhttp3.OkHttpClient.Builder()
+                    .addInterceptor { chain ->
+                        val tokenManager = TokenManager(context)
+                        val token = tokenManager.getToken()
+                        val originalRequest = chain.request()
+                        
+                        val newRequest = if (token != null) {
+                            originalRequest.newBuilder()
+                                .header("Authorization", "Bearer $token")
+                                .build()
+                        } else {
+                            originalRequest
+                        }
+                        chain.proceed(newRequest)
+                    }
+                    .build())
+                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+                .build()
+                
+            val historyService = historyRetrofit.create(MealPlateService::class.java)
+            val response = historyService.getMealPlateById(mealPlateId)
+            
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful && response.body() != null) {
+                val mealPlateSchema = response.body()!!
+                Log.d("MealPlateApiClient", "Detalles del meal plate obtenidos exitosamente")
+                
+                val mealPlateModel = mealPlateSchema.toModel()
+                return@withContext Result.success(mealPlateModel)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error al obtener detalles: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "Meal plate no encontrado"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al obtener detalles: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al obtener detalles del meal plate", e)
             return@withContext Result.failure(e)
         }
     }

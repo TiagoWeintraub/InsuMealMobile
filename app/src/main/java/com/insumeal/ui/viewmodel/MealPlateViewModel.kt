@@ -195,5 +195,49 @@ class MealPlateViewModel : ViewModel() {
             }
         }
     }
+    
+    fun deleteMealPlate(
+        context: Context,
+        mealPlateId: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("MealPlateViewModel", "Eliminando meal plate con ID: $mealPlateId")
+                _isLoading.value = true
+                
+                val result = apiClient.deleteMealPlate(context, mealPlateId)
+                  result.onSuccess {
+                    android.util.Log.d("MealPlateViewModel", "Meal plate eliminado exitosamente")
+                    // Ejecutar onSuccess primero para navegar, luego limpiar datos
+                    onSuccess()
+                    // Limpiar el estado del ViewModel después de navegar
+                    clearData()
+                }.onFailure { error ->
+                    android.util.Log.e("MealPlateViewModel", "Error al eliminar meal plate: ${error.message}", error)
+                    val errorMsg = when {
+                        error.message?.contains("401") == true -> 
+                            "Error de autenticación. Tu sesión ha expirado."
+                        error.message?.contains("403") == true -> 
+                            "No tienes permiso para eliminar este plato."
+                        error.message?.contains("404") == true -> 
+                            "El plato ya no existe o no se pudo encontrar."
+                        error.message?.contains("timeout") == true -> 
+                            "El servidor está tardando demasiado en responder."
+                        error.message?.contains("host") == true -> 
+                            "No se puede conectar al servidor. Verifica tu conexión a internet."
+                        else -> "Error al eliminar el plato: ${error.message}"
+                    }
+                    onError(errorMsg)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateViewModel", "Error inesperado al eliminar meal plate: ${e.message}", e)
+                onError("Error inesperado: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }
 

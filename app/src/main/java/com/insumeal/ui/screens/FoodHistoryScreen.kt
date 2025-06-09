@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -143,9 +145,25 @@ fun FoodHistoryScreen(navController: NavController) {
                             .fillMaxSize()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(historyList) { historyItem ->
-                            MealPlateHistoryCard(historyItem = historyItem)
+                    ) {                        items(historyList) { historyItem ->
+                            MealPlateHistoryCard(
+                                historyItem = historyItem,
+                                onViewDetails = { mealPlateId ->
+                                    navController.navigate("foodHistoryMealPlate/$mealPlateId")
+                                },
+                                onDelete = { mealPlateId ->
+                                    viewModel.deleteMealPlate(
+                                        context = context,
+                                        mealPlateId = mealPlateId,
+                                        onSuccess = {
+                                            // El elemento ya fue removido del ViewModel
+                                        },
+                                        onError = { error ->
+                                            // Aquí podrías mostrar un snackbar o toast con el error
+                                        }
+                                    )
+                                }
+                            )
                         }
                     }
                 }
@@ -155,7 +173,13 @@ fun FoodHistoryScreen(navController: NavController) {
 }
 
 @Composable
-fun MealPlateHistoryCard(historyItem: com.insumeal.models.MealPlateHistory) {
+fun MealPlateHistoryCard(
+    historyItem: com.insumeal.models.MealPlateHistory,
+    onViewDetails: (Int) -> Unit,
+    onDelete: (Int) -> Unit
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -166,16 +190,49 @@ fun MealPlateHistoryCard(historyItem: com.insumeal.models.MealPlateHistory) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Título del plato
-            Text(
-                text = historyItem.type.replaceFirstChar { 
-                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() 
-                },
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.primary
-            )
+            // Título del plato con botones de acción
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = historyItem.type.replaceFirstChar { 
+                        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() 
+                    },
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Botón para ver detalles
+                    IconButton(
+                        onClick = { onViewDetails(historyItem.id) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Visibility,
+                            contentDescription = "Ver detalles",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    // Botón para eliminar
+                    IconButton(
+                        onClick = { showDeleteDialog = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Eliminar",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
             
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -221,6 +278,36 @@ fun MealPlateHistoryCard(historyItem: com.insumeal.models.MealPlateHistory) {
                 }
             }
         }
+    }
+    
+    // Diálogo de confirmación para eliminar
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = {
+                Text("Confirmar eliminación")
+            },
+            text = {
+                Text("¿Estás seguro de que quieres eliminar esta comida? Esta acción no se puede deshacer.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete(historyItem.id)
+                    }
+                ) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

@@ -29,22 +29,8 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.insumeal.ui.viewmodel.MealPlateViewModel
+import com.insumeal.utils.ImageUtils
 import com.insumeal.utils.TokenManager
-
-@Composable
-fun createAuthenticatedImageRequest(context: Context, imageUrl: String): ImageRequest {
-    val tokenManager = TokenManager(context)
-    val token = tokenManager.getToken()
-    
-    return ImageRequest.Builder(context)
-        .data(imageUrl)
-        .apply {
-            if (token != null) {
-                addHeader("Authorization", "Bearer $token")
-            }
-        }
-        .build()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,8 +94,7 @@ fun DosisScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     ),
-                    shape = RoundedCornerShape(16.dp)                ) {
-                    val imageRequest = createAuthenticatedImageRequest(
+                    shape = RoundedCornerShape(16.dp)                ) {                    val imageRequest = ImageUtils.createAuthenticatedImageRequest(
                         context = context,
                         imageUrl = "http://10.0.0.179:8000/meal_plate/image/${mealPlate!!.id}"
                     )

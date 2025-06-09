@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.insumeal.models.Ingredient
@@ -71,16 +72,57 @@ fun MealPlateScreen(
     LaunchedEffect(isLoading) {
         android.util.Log.d("MealPlateScreen", "isLoading cambió: ${isLoading}")
     }
-      LaunchedEffect(hasAttemptedLoad) {
+    LaunchedEffect(hasAttemptedLoad) {
         android.util.Log.d("MealPlateScreen", "hasAttemptedLoad cambió: ${hasAttemptedLoad}")
     }
     
+    // Manejar el botón de volver atrás del sistema (hardware o gesto)
+    BackHandler {
+        // Si hay un plato cargado, eliminarlo antes de volver atrás
+        mealPlate?.let { plate ->
+            mealPlateViewModel.deleteMealPlate(
+                context = context,
+                mealPlateId = plate.id,
+                onSuccess = {
+                    navController.navigateUp()
+                },
+                onError = { error ->
+                    android.util.Log.e("MealPlateScreen", "Error al eliminar plato: $error")
+                    // Incluso si hay error, volver atrás
+                    navController.navigateUp()
+                }
+            )
+        } ?: run {
+            // Si no hay plato, simplemente volver atrás
+            navController.navigateUp()
+        }
+    }
+      
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Detalles del plato") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = { 
+                        // Si hay un plato cargado, eliminarlo antes de volver atrás
+                        mealPlate?.let { plate ->
+                            mealPlateViewModel.deleteMealPlate(
+                                context = context,
+                                mealPlateId = plate.id,
+                                onSuccess = {
+                                    navController.navigateUp()
+                                },
+                                onError = { error ->
+                                    android.util.Log.e("MealPlateScreen", "Error al eliminar plato: $error")
+                                    // Incluso si hay error, volver atrás
+                                    navController.navigateUp()
+                                }
+                            )
+                        } ?: run {
+                            // Si no hay plato, simplemente volver atrás
+                            navController.navigateUp()
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
@@ -92,7 +134,7 @@ fun MealPlateScreen(
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
-            )        }    ) { paddingValues ->
+            )        }) { paddingValues ->
         // Las variables ya están definidas usando collectAsState arriba
         
         if (mealPlate == null) {
@@ -140,7 +182,26 @@ fun MealPlateScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { navController.popBackStack() },
+                            onClick = { 
+                                // Si hay un plato cargado, eliminarlo antes de volver atrás
+                                mealPlate?.let { plate ->
+                                    mealPlateViewModel.deleteMealPlate(
+                                        context = context,
+                                        mealPlateId = plate.id,
+                                        onSuccess = {
+                                            navController.popBackStack()
+                                        },
+                                        onError = { error ->
+                                            android.util.Log.e("MealPlateScreen", "Error al eliminar plato: $error")
+                                            // Incluso si hay error, volver atrás
+                                            navController.popBackStack()
+                                        }
+                                    )
+                                } ?: run {
+                                    // Si no hay plato, simplemente volver atrás
+                                    navController.popBackStack()
+                                }
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
@@ -163,7 +224,26 @@ fun MealPlateScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { navController.popBackStack() },
+                            onClick = { 
+                                // Si hay un plato cargado, eliminarlo antes de volver atrás
+                                mealPlate?.let { plate ->
+                                    mealPlateViewModel.deleteMealPlate(
+                                        context = context,
+                                        mealPlateId = plate.id,
+                                        onSuccess = {
+                                            navController.popBackStack()
+                                        },
+                                        onError = { error ->
+                                            android.util.Log.e("MealPlateScreen", "Error al eliminar plato: $error")
+                                            // Incluso si hay error, volver atrás
+                                            navController.popBackStack()
+                                        }
+                                    )
+                                } ?: run {
+                                    // Si no hay plato, simplemente volver atrás
+                                    navController.popBackStack()
+                                }
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
@@ -171,10 +251,12 @@ fun MealPlateScreen(
                             Text("Volver e intentar de nuevo")
                         }
                     }
-                }
-            }        } else {
+                }            }        } else {
             // Mostrar detalles del plato cuando tenemos datos
-            LazyColumn(
+            // Capturar el valor del plato para evitar problemas de recomposición
+            val currentMealPlate = mealPlate
+            if (currentMealPlate != null) {
+                LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -183,9 +265,8 @@ fun MealPlateScreen(
             ) {                // Título del plato
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text(
-                        text = mealPlate!!.name.uppercase(),
+                      Text(
+                        text = currentMealPlate.name.uppercase(),
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -202,10 +283,8 @@ fun MealPlateScreen(
                             fontWeight = FontWeight.SemiBold
                         ),
                         modifier = Modifier.padding(vertical = 8.dp)                    )
-                }
-                
-                // Lista de ingredientes con capacidad de edición
-                items(mealPlate!!.ingredients) { ingredient ->
+                }                // Lista de ingredientes con capacidad de edición
+                items(currentMealPlate.ingredients) { ingredient ->
                     IngredientEditableCard(
                         ingredient = ingredient,
                         isEditing = editingIngredientId == ingredient.id,
@@ -226,10 +305,9 @@ fun MealPlateScreen(
                             if (newGrams != null && newGrams > 0) {
                                 isUpdating = true
                                 updateError = null
-                                
-                                mealPlateViewModel.updateIngredientGrams(
+                                  mealPlateViewModel.updateIngredientGrams(
                                     context = context,
-                                    mealPlateId = mealPlate!!.id,
+                                    mealPlateId = currentMealPlate.id,
                                     ingredientId = ingredient.id,
                                     newGrams = newGrams,
                                     onSuccess = {
@@ -327,10 +405,9 @@ fun MealPlateScreen(
                                         else -> {
                                             isCalculatingDosis = true
                                             dosisCalculationError = null
-                                            
-                                            mealPlateViewModel.calculateDosis(
+                                              mealPlateViewModel.calculateDosis(
                                                 context = context,
-                                                mealPlateId = mealPlate!!.id,
+                                                mealPlateId = currentMealPlate.id,
                                                 glycemia = glycemiaValue,
                                                 onSuccess = {
                                                     isCalculatingDosis = false
@@ -391,12 +468,12 @@ fun MealPlateScreen(
                             }
                         }
                     }
-                }
-                  // Espacio al final
+                }                // Espacio al final
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+            } // fin del if (currentMealPlate != null)
         }
     }
     
@@ -475,7 +552,7 @@ fun IngredientEditableCard(
                         } ?: ingredient.carbs
                         
                         Text(
-                            text = "≈ ${String.format("%.1f", previewCarbs)} Carbs",
+                            text = "≈ ${String.format("%.1f", previewCarbs)} Carbohidratos",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -548,7 +625,7 @@ fun IngredientEditableCard(
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "${String.format("%.1f", ingredient.carbs)} Carbs",
+                            text = "${String.format("%.1f", ingredient.carbs)} Carbohidratos",
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Medium
                             ),

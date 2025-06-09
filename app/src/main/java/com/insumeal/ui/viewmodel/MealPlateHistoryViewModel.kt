@@ -54,8 +54,38 @@ class MealPlateHistoryViewModel : ViewModel() {
             }
         }
     }
-    
-    fun clearError() {
+      fun clearError() {
         _errorMessage.value = null
+    }
+    
+    fun deleteMealPlate(context: Context, mealPlateId: Int, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val result = apiClient.deleteMealPlate(context, mealPlateId)
+                
+                result.onSuccess {
+                    // Remover el elemento de la lista local
+                    _historyList.value = _historyList.value.filter { it.id != mealPlateId }
+                    onSuccess()
+                }.onFailure { error ->
+                    val errorMsg = when {
+                        error.message?.contains("401") == true -> 
+                            "Error de autenticación. Tu sesión ha expirado."
+                        error.message?.contains("403") == true -> 
+                            "No tienes permiso para eliminar este elemento."
+                        error.message?.contains("404") == true -> 
+                            "El elemento ya no existe."
+                        error.message?.contains("timeout") == true -> 
+                            "El servidor está tardando demasiado en responder."
+                        error.message?.contains("host") == true -> 
+                            "No se puede conectar al servidor. Verifica tu conexión a internet."
+                        else -> "Error al eliminar: ${error.message}"
+                    }
+                    onError(errorMsg)
+                }
+            } catch (e: Exception) {
+                onError("Error inesperado: ${e.message}")
+            }
+        }
     }
 }
