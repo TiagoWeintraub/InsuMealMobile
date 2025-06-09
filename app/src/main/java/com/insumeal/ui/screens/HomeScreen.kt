@@ -95,7 +95,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 drawerItems.forEach { item ->
                     NavigationDrawerItem(
@@ -118,10 +118,9 @@ fun HomeScreen(navController: NavController, context: Context) {
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-                }
+                    )                }
                 // Ítem de Cerrar Sesión separado
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 NavigationDrawerItem(
                     icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar Sesión") },
                     label = { Text("Cerrar Sesión") },
@@ -227,23 +226,23 @@ fun HomeScreen(navController: NavController, context: Context) {
                     // Tarjetas de opciones
                     HomeOptionCard(
                         title = "Analizar Plato de Comida",
-                        description = "Fotografía y analiza los nutrientes de tu comida",
+                        description = "Conocé los carbohidratos e insulina sugerida con una foto de tu comida",
                         icon = Icons.Filled.PhotoCamera,
                         onClick = { navController.navigate("uploadPhoto") }
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
-
                     HomeOptionCard(
                         title = "Ver Historial",
-                        description = "Consulta tus registros alimenticios anteriores",
+                        description = "Consulta tus platos anteriores",
                         icon = Icons.Filled.History,
-                        onClick = { navController.navigate("foodHistory") }
+                        onClick = { navController.navigate("foodHistory") },
+                        showArrow = false
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     HomeOptionCard(
                         title = "Información Clínica",
-                        description = "Consulta tus datos médicos y de salud",
+                        description = "Consulta o modifica tus datos médicos",
                         icon = Icons.Filled.Info,
                         onClick = {
                             val userId = tokenManager.getUserId()

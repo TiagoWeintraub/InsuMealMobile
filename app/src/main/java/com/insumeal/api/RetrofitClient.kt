@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.0.170:8000"
+    private const val BASE_URL = "http://10.0.0.179:8000"
     private var tokenManager: TokenManager? = null
 
     // Inicializa el TokenManager con el contexto

@@ -201,14 +201,13 @@ fun MealPlateScreen(
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
+                        modifier = Modifier.padding(vertical = 8.dp)                    )
                 }
-                  // Lista de ingredientes con capacidad de edición
+                
+                // Lista de ingredientes con capacidad de edición
                 items(mealPlate!!.ingredients) { ingredient ->
                     IngredientEditableCard(
                         ingredient = ingredient,
-                        mealPlateId = mealPlate!!.id,
                         isEditing = editingIngredientId == ingredient.id,
                         editGrams = editGrams,
                         isUpdating = isUpdating,
@@ -244,11 +243,12 @@ fun MealPlateScreen(
                                     }
                                 )
                             } else {
-                                updateError = "Por favor, ingresa un valor válido mayor a 0"
-                            }
+                                updateError = "Por favor, ingresa un valor válido mayor a 0"                            }
                         }
                     )
-                }                  // Campo para ingresar glucemia y botón para calcular dosis
+                }
+                
+                // Campo para ingresar glucemia y botón para calcular dosis
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                     
@@ -279,13 +279,12 @@ fun MealPlateScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                             )
-                            
-                            // Campo de entrada para glucemia
+                              // Campo de entrada para glucemia
                             OutlinedTextField(
                                 value = glycemiaInput,
                                 onValueChange = { glycemiaInput = it },
                                 label = { Text("Glucemia actual (mg/dL)") },
-                                placeholder = { Text("Ej: 150") },
+                                placeholder = { Text("Entre 25 y 250 mg/dL") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 enabled = !isCalculatingDosis,
@@ -296,6 +295,9 @@ fun MealPlateScreen(
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary
                                     )
+                                },
+                                supportingText = {
+                                    Text("Valores permitidos: entre 25 y 250 mg/dL")
                                 }
                             )
                             
@@ -308,33 +310,41 @@ fun MealPlateScreen(
                                     modifier = Modifier.padding(start = 16.dp)
                                 )
                             }
-                            
-                            // Botón para calcular dosis
+                              // Botón para calcular dosis
                             Button(
                                 onClick = { 
                                     val glycemiaValue = glycemiaInput.toDoubleOrNull()
-                                    if (glycemiaValue != null && glycemiaValue > 0) {
-                                        isCalculatingDosis = true
-                                        dosisCalculationError = null
-                                        
-                                        mealPlateViewModel.calculateDosis(
-                                            context = context,
-                                            mealPlateId = mealPlate!!.id,
-                                            glycemia = glycemiaValue,
-                                            onSuccess = {
-                                                isCalculatingDosis = false
-                                                navController.navigate("dosis")
-                                            },
-                                            onError = { error ->
-                                                isCalculatingDosis = false
-                                                dosisCalculationError = error
-                                            }
-                                        )
-                                    } else {
-                                        dosisCalculationError = "Por favor, ingresa un valor válido de glucemia mayor a 0"
+                                    when {
+                                        glycemiaValue == null -> {
+                                            dosisCalculationError = "Por favor, ingresa un valor válido de glucemia"
+                                        }
+                                        glycemiaValue < 25 -> {
+                                            dosisCalculationError = "No se permite calcular dosis con glucemia menor a 25 mg/dL"
+                                        }
+                                        glycemiaValue > 250 -> {
+                                            dosisCalculationError = "No se recomienda consumir carbohidratos con glucemia superior a 250 mg/dL"
+                                        }
+                                        else -> {
+                                            isCalculatingDosis = true
+                                            dosisCalculationError = null
+                                            
+                                            mealPlateViewModel.calculateDosis(
+                                                context = context,
+                                                mealPlateId = mealPlate!!.id,
+                                                glycemia = glycemiaValue,
+                                                onSuccess = {
+                                                    isCalculatingDosis = false
+                                                    navController.navigate("dosis")
+                                                },
+                                                onError = { error ->
+                                                    isCalculatingDosis = false
+                                                    dosisCalculationError = error
+                                                }
+                                            )
+                                        }
                                     }
-                                },
-                                enabled = glycemiaInput.isNotBlank() && !isCalculatingDosis,
+                                },                                enabled = glycemiaInput.isNotBlank() && !isCalculatingDosis &&
+                                          glycemiaInput.toDoubleOrNull()?.let { it >= 25 && it <= 250 } ?: false,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(56.dp),
@@ -382,11 +392,11 @@ fun MealPlateScreen(
                         }
                     }
                 }
-                
-                // Espacio al final
+                  // Espacio al final
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
-                }            }
+                }
+            }
         }
     }
     
@@ -408,7 +418,6 @@ fun MealPlateScreen(
 @Composable
 fun IngredientEditableCard(
     ingredient: Ingredient,
-    mealPlateId: Int,
     isEditing: Boolean,
     editGrams: String,
     isUpdating: Boolean,

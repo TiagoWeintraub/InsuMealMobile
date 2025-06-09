@@ -2,6 +2,7 @@ package com.insumeal.api
 
 import com.insumeal.schemas.MealPlateSchema
 import com.insumeal.schemas.DosisCalculationSchema
+import com.insumeal.schemas.MealPlateHistorySchema
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -14,10 +15,12 @@ interface MealPlateService {
         @Path("meal_plate_id") mealPlateId: Int,
         @Path("ingredient_id") ingredientId: Int,
         @Body updateGramsRequest: UpdateGramsRequest
-    ): Response<MealPlateSchema>
-      @POST("/dosis/calculate/{meal_plate_id}")
+    ): Response<MealPlateSchema>    @POST("/dosis/calculate/{meal_plate_id}")
     suspend fun calculateDosis(
         @Path("meal_plate_id") mealPlateId: Int,
         @Body calculateDosisRequest: CalculateDosisRequest
     ): Response<DosisCalculationSchema>
+    
+    @GET("/meal_plate/")
+    suspend fun getMealPlateHistory(): Response<List<MealPlateHistorySchema>>
 }

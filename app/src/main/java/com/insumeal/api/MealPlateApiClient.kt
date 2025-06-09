@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import com.insumeal.models.MealPlate
 import com.insumeal.models.DosisCalculation
+import com.insumeal.models.MealPlateHistory
 import com.insumeal.schemas.toModel
 import com.insumeal.schemas.DosisCalculationSchema
 import com.insumeal.utils.AuthCheckUtil
@@ -211,9 +212,49 @@ class MealPlateApiClient {
                 }
                 
                 return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al calcular dosis", e)
+            return@withContext Result.failure(e)
+        }
+    }
+
+    suspend fun getMealPlateHistory(context: Context): Result<List<MealPlateHistory>> = withContext(Dispatchers.IO) {
+        try {
+            // Verificar si hay un token disponible y es válido
+            if (!AuthCheckUtil.checkToken(context)) {
+                Log.e("MealPlateApiClient", "No hay token de autenticación válido")
+                return@withContext Result.failure(Exception("No hay sesión activa. Por favor inicia sesión nuevamente."))
+            }
+
+            Log.d("MealPlateApiClient", "Obteniendo historial de meal plates")
+            
+            val mealPlateService = getMealPlateService(context)
+            val response = mealPlateService.getMealPlateHistory()
+            
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful && response.body() != null) {
+                val historySchemas = response.body()!!
+                Log.d("MealPlateApiClient", "Historial obtenido exitosamente: ${historySchemas.size} elementos")
+                
+                val historyModels = historySchemas.map { it.toModel() }
+                return@withContext Result.success(historyModels)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error al obtener historial: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "No se encontraron datos de historial"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al obtener historial: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
             }
         } catch (e: Exception) {
-            Log.e("MealPlateApiClient", "Error inesperado al calcular dosis", e)
+            Log.e("MealPlateApiClient", "Error inesperado al obtener historial", e)
             return@withContext Result.failure(e)
         }
     }

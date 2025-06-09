@@ -17,7 +17,7 @@ class ProfileViewModel(private val userId: Int) : ViewModel() {
 
     private val profileService: ProfileService by lazy {
         Retrofit.Builder()
-            .baseUrl("http://10.0.0.170:8000/")
+            .baseUrl("http://10.0.0.179:8000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ProfileService::class.java)

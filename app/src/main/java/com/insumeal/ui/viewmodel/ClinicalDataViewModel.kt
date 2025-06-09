@@ -18,7 +18,7 @@ class ClinicalDataViewModel : ViewModel() {
 
     private val clinicalDataService: ClinicalDataService by lazy {
         Retrofit.Builder()
-            .baseUrl("http://10.0.0.170:8000/")
+            .baseUrl("http://10.0.0.179:8000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ClinicalDataService::class.java)
