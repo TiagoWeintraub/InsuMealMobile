@@ -172,7 +172,7 @@ fun UploadPhotoScreen(
                     modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
                 ) {
                     Text(
-                        text = "Toma una foto o selecciona una imagen de tu plato",
+                        text = "Toma una foto de tu plato o selecciona una imagen desde la galería",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -188,7 +188,7 @@ fun UploadPhotoScreen(
                             .fillMaxWidth()
                             .height(320.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .background(MaterialTheme.colorScheme.surface)
                     ) {
                         if (bitmap != null) {
                             Image(
@@ -212,7 +212,7 @@ fun UploadPhotoScreen(
                             .fillMaxWidth()
                             .height(260.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.surface),
                         contentAlignment = Alignment.Center
                     ) {
                         // Lista de íconos disponibles actualizada

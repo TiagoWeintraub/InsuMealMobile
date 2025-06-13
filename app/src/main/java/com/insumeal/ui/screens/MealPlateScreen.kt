@@ -166,7 +166,8 @@ fun MealPlateScreen(
                             "Preparando análisis...",
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center
-                        )                    } else if (errorMessage != null) {
+                        )                    }
+                    else if (errorMessage != null) {
                         // Hay un error específico
                         Icon(
                             imageVector = Icons.Default.Warning,
@@ -509,10 +510,7 @@ fun IngredientEditableCard(
             defaultElevation = if (isEditing) 4.dp else 2.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isEditing) 
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            else 
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         if (isEditing) {
