@@ -281,7 +281,12 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Ratio: $ratio mg/dL",
+                            text = "Ratio",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "$ratio gramos de carbohidratos",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -295,7 +300,7 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                             )
                         )
                         Text(
-                            text = "El ratio es la cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida",
+                            text = "Es la cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 4.dp)
@@ -305,7 +310,12 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Sensibilidad: $sensitivity mg/dL",
+                            text = "Sensibilidad",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "$sensitivity mg/dL de glucemia",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -319,7 +329,7 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                             )
                         )
                         Text(
-                            text = "La sensibilidad indica cuántos mg/dL disminuye la glucemia con una unidad de insulina rápida",
+                            text = "Indica cuánto disminuye la glucemia con una unidad de insulina rápida",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 4.dp)
@@ -329,7 +339,12 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Target de Glucemia: $glycemiaTarget mg/dL",
+                            text = "Target de Glucemia ",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "El objetivo es de: $glycemiaTarget mg/dL",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -343,7 +358,7 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                             )
                         )
                         Text(
-                            text = "El target de glucemia es el valor objetivo al cual deseas mantener tu nivel de azúcar en sangre",
+                            text = "Es el valor objetivo al cual deseas mantener tu nivel de glucemia",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 4.dp)

@@ -323,7 +323,7 @@ fun IngredientHistoryCard(ingredient: com.insumeal.models.Ingredient) {
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -337,7 +337,8 @@ fun IngredientHistoryCard(ingredient: com.insumeal.models.Ingredient) {
             Text(
                 text = ingredient.name,
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
                 ),
                 modifier = Modifier.weight(1f)
             )
