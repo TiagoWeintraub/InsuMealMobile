@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,7 +38,7 @@ fun FoodHistoryMealPlateScreen(
     mealPlateId: Int
 ) {
     val context = LocalContext.current
-    val viewModel: FoodHistoryMealPlateViewModel = viewModel()
+    val viewModel = remember { FoodHistoryMealPlateViewModel() }
     
     val mealPlate by viewModel.mealPlate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -176,7 +177,7 @@ fun FoodHistoryMealPlateScreen(
                             )
                         }
                         
-                        // Información nutricional
+                        // Información 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -195,22 +196,21 @@ fun FoodHistoryMealPlateScreen(
                                     Icon(
                                         imageVector = Icons.Default.Analytics,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        tint = MaterialTheme.colorScheme.secondary,
                                         modifier = Modifier.size(24.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Información Nutricional",
+                                        text = "Información",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.Bold
                                         ),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        color = Color.Black
                                     )
                                 }
                                 
                                 Spacer(modifier = Modifier.height(16.dp))
-                                
-                                // Información básica
+                                  // Información básica
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -218,19 +218,22 @@ fun FoodHistoryMealPlateScreen(
                                     NutritionalInfoItem(
                                         label = "Carbohidratos",
                                         value = "${String.format("%.1f", mealPlate!!.totalCarbs)} g",
-                                        icon = Icons.Default.Restaurant
+                                        icon = Icons.Default.Restaurant,
+                                        iconColor = Color(0xFFB8860B) // Amarillo
                                     )
                                     
                                     NutritionalInfoItem(
                                         label = "Glucemia",
                                         value = "${String.format("%.0f", mealPlate!!.glycemia)} mg/dL",
-                                        icon = Icons.Default.Bloodtype
+                                        icon = Icons.Default.Bloodtype,
+                                        iconColor = Color(0xFFFF0000) // Rojo
                                     )
                                     
                                     NutritionalInfoItem(
                                         label = "Dosis",
                                         value = "${String.format("%.2f", mealPlate!!.dosis)} U",
-                                        icon = Icons.Default.MedicalServices
+                                        icon = Icons.Default.MedicalServices,
+                                        iconColor = Color(0xFF00BFFF) // Celeste
                                     )
                                 }
                             }
@@ -247,13 +250,12 @@ fun FoodHistoryMealPlateScreen(
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp)
-                            ) {
-                                Row(
+                            ) {                                Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.List,
+                                        imageVector = Icons.AutoMirrored.Filled.List,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(24.dp)
@@ -287,7 +289,8 @@ fun FoodHistoryMealPlateScreen(
 fun NutritionalInfoItem(
     label: String,
     value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconColor: Color = MaterialTheme.colorScheme.onPrimaryContainer
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -295,21 +298,21 @@ fun NutritionalInfoItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            tint = iconColor,
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = value,
-            style = MaterialTheme.typography.titleMedium.copy(
+            style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold
             ),
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = Color.Black
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Black
         )
     }
 }

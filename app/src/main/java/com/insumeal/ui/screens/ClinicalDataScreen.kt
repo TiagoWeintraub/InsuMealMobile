@@ -26,7 +26,7 @@ import com.insumeal.utils.TokenManager
 @Composable
 fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
     val context = LocalContext.current
-    val clinicalDataViewModel: ClinicalDataViewModel = viewModel()
+    val clinicalDataViewModel = remember { ClinicalDataViewModel() }
     val clinicalData by clinicalDataViewModel.clinicalData.collectAsState()
 
     // Estados para la edición
@@ -84,7 +84,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                         .padding(top = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {                    EditableClinicalDataCard(
+                ) {                    
+                    EditableClinicalDataCard(
                         title = "Sensibilidad a la Insulina",
                         value = clinicalData!!.sensitivity.toInt().toString(),
                         unit = "mg/dl por unidad",
@@ -103,7 +104,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             editValue = ""
                             updateError = null
                         },
-                        onValueChange = { editValue = it },                        onEditConfirm = {
+                        onValueChange = { editValue = it },                        
+                        onEditConfirm = {
                             val newValue = editValue.toIntOrNull()
                             when {
                                 newValue == null -> {
@@ -211,7 +213,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                         fieldName = "glycemiaTarget",
                         isEditing = editingField == "glycemiaTarget",
                         editValue = editValue,
-                        isUpdating = isUpdating,                        onEditStart = { 
+                        isUpdating = isUpdating,                        
+                        onEditStart = { 
                             editingField = "glycemiaTarget"
                             editValue = clinicalData!!.glycemiaTarget.toInt().toString()
                         },
@@ -220,7 +223,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             editValue = ""
                             updateError = null
                         },
-                        onValueChange = { editValue = it },                        onEditConfirm = {
+                        onValueChange = { editValue = it },                        
+                        onEditConfirm = {
                             val newValue = editValue.toIntOrNull()
                             when {
                                 newValue == null -> {
@@ -431,7 +435,7 @@ fun EditableClinicalDataCard(
                         
                         Text(
                             text = unit,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
@@ -503,7 +507,7 @@ fun EditableClinicalDataCard(
                     )
                     Text(
                         text = description,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         modifier = Modifier.padding(top = 4.dp)
                     )
