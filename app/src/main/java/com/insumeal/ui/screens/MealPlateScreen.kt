@@ -525,6 +525,7 @@ fun IngredientEditableCard(
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
+                    color = Color.Black,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                   Row(

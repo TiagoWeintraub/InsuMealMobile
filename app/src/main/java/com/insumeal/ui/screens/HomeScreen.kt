@@ -93,6 +93,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                 Text(
                     "Insumeal Menú",
                     style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -118,7 +119,8 @@ fun HomeScreen(navController: NavController, context: Context) {
                             }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )                }
+                    )
+                }
                 // Ítem de Cerrar Sesión separado
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 NavigationDrawerItem(

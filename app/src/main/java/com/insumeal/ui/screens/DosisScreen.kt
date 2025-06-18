@@ -113,8 +113,9 @@ fun DosisScreen(
                 }
             }            // Información nutricional detallada
             if (mealPlate != null && dosisCalculation != null) {
-                // Estado para controlar el desplegable de dosis
+                // Estado para controlar los desplegables
                 var isDosisExpanded by remember { mutableStateOf(false) }
+                var isCarbsDetailExpanded by remember { mutableStateOf(false) }
                 
                 // Función para determinar el color y icono de glucemia
                 fun getGlycemiaInfo(glycemia: Double): Pair<Color, androidx.compose.ui.graphics.vector.ImageVector> {
@@ -124,232 +125,69 @@ fun DosisScreen(
                         else -> Pair(Color(0xFFEF5350), Icons.Default.Error) // Rojo
                     }
                 }
-                
-                val (glycemiaColor, glycemiaIcon) = getGlycemiaInfo(dosisCalculation!!.glycemia)
-                
-                // Header de información nutricional
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Analytics,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Información Nutricional",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }                // Carbohidratos totales
+                                
+                // Card de Información principal (estilo FoodHistoryMealPlate)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Restaurant,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.size(28.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                            text = "Carbohidratos totales",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        }
-                        Text(
-                            text = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.secondary
-                        )}
-                }                
-                  // Desglose de carbohidratos por ingrediente (desplegable)
-                var isCarbsDetailExpanded by remember { mutableStateOf(false) }
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { isCarbsDetailExpanded = !isCarbsDetailExpanded },
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
+                        modifier = Modifier.padding(20.dp)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.LocalDining,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(
-                                    text = "Desglose de carbohidratos",
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            
-                            Icon(
-                                imageVector = if (isCarbsDetailExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = if (isCarbsDetailExpanded) "Colapsar" else "Expandir",
-                                tint = MaterialTheme.colorScheme.secondary,                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-                        
-                        AnimatedVisibility(
-                            visible = isCarbsDetailExpanded,
-                            enter = expandVertically(),
-                            exit = shrinkVertically()
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 20.dp),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                    thickness = 1.dp
-                                )
-                                
-                                // Lista de ingredientes con sus carbohidratos
-                                if (mealPlate?.ingredients?.isNotEmpty() == true) {
-                                    mealPlate!!.ingredients.forEach { ingredient ->
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.weight(1f)
-                                            ) {
-                                                Text(
-                                                    text = ingredient.name,
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurface,
-                                                )
-                                            }
-                                            
-                                            Text(
-                                                text = "${String.format("%.1f", ingredient.carbs)} g",
-                                                style = MaterialTheme.typography.bodyMedium.copy(
-                                                    fontWeight = FontWeight.SemiBold
-                                                ),
-                                                color = MaterialTheme.colorScheme.secondary
-                                            )
-                                        }
-                                        
-                                        if (ingredient != mealPlate!!.ingredients.last()) {
-                                            HorizontalDivider(
-                                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                                thickness = 1.dp,
-                                                modifier = Modifier.padding(vertical = 6.dp)                                            )
-                                        }
-                                    }
-                                } else {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(
-                                            text = "No hay información detallada de ingredientes disponible",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.padding(vertical = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                  // Glucemia actual
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
-                                imageVector = glycemiaIcon,
+                                imageVector = Icons.Default.Analytics,
                                 contentDescription = null,
-                                tint = glycemiaColor,
-                                modifier = Modifier.size(28.dp)
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(24.dp)
                             )
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Glucemia actual",
+                                text = "Información",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = Color.Black
                             )
                         }
-                        Text(
-                            text = "${String.format("%.0f", dosisCalculation!!.glycemia)} mg/dL",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = glycemiaColor
-                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // Información básica en formato horizontal
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            NutritionalInfoItem(
+                                label = "Carbohidratos",
+                                value = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
+                                icon = Icons.Default.Restaurant,
+                                iconColor = Color(0xFFB8860B) // Amarillo dorado
+                            )
+                              NutritionalInfoItem(
+                                label = "Glucemia",
+                                value = "${String.format("%.0f", dosisCalculation!!.glycemia)} mg/dL",
+                                icon = Icons.Default.Bloodtype,
+                                iconColor = Color(0xFFFF0000) // Rojo
+                            )
+                            
+                            NutritionalInfoItem(
+                                label = "Dosis Total",
+                                value = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
+                                icon = Icons.Default.MedicalServices,
+                                iconColor = Color(0xFF00BFFF) // Celeste
+                            )
+                        }
                     }
-                }
-                  // Mensaje de advertencia si glucemia > 170
+                }                
+                // Mensaje de advertencia si glucemia > 170
                 if (dosisCalculation!!.glycemia > 170) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -381,74 +219,14 @@ fun DosisScreen(
                             )
                         }
                     }
-                }                // Dosis total recomendada (prominente)
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Medication,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
-                            )
-                            
-                            Spacer(modifier = Modifier.width(16.dp))
-                            
-                            Column {
-                                Text(
-                                    text = "DOSIS TOTAL",
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Recomendada",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-                          Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(                                text = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                            )
-                        }
-                    }
                 }
-                
+
                 // Desglose del cálculo (desplegable)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { isDosisExpanded = !isDosisExpanded },
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     ),
@@ -471,9 +249,9 @@ fun DosisScreen(
                                     imageVector = Icons.Default.Calculate,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
+                                    modifier = Modifier.size(24.dp)
                                 )
-                                Spacer(modifier = Modifier.width(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Desglose del cálculo",
                                     style = MaterialTheme.typography.titleMedium.copy(
@@ -489,7 +267,7 @@ fun DosisScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(32.dp)
                             )
-                        }                        
+                        }
                         // Detalles del cálculo (desplegable)
                         AnimatedVisibility(
                             visible = isDosisExpanded,
@@ -574,11 +352,91 @@ fun DosisScreen(
                                         ),
                                         color = MaterialTheme.colorScheme.secondary
                                     )
+                                }                            }
+                        }
+                    }
+                }
+
+                // Desglose de ingredientes (desplegable)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isCarbsDetailExpanded = !isCarbsDetailExpanded },
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocalDining,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Ingredientes Detectados",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            
+                            Icon(
+                                imageVector = if (isCarbsDetailExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = if (isCarbsDetailExpanded) "Colapsar" else "Expandir",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                        
+                        AnimatedVisibility(
+                            visible = isCarbsDetailExpanded,
+                            enter = expandVertically(),
+                            exit = shrinkVertically()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (mealPlate?.ingredients?.isNotEmpty() == true) {
+                                    mealPlate!!.ingredients.forEach { ingredient ->
+                                        IngredientHistoryCard(ingredient = ingredient)
+                                    }
+                                } else {
+                                    Text(
+                                        text = "No hay información detallada de ingredientes disponible",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 16.dp)
+                                    )
                                 }
                             }
                         }
                     }
-                }                // Tarjeta de advertencia/información
+                }
+
+                // Tarjeta de advertencia/información
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
