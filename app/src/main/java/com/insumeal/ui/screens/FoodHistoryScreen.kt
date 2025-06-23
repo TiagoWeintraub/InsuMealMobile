@@ -32,9 +32,9 @@ fun FoodHistoryScreen(navController: NavController) {
     val historyList by viewModel.historyList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
-    
-    // Cargar el historial cuando se inicia la pantalla
+      // Cargar el historial cuando se inicia la pantalla
     LaunchedEffect(Unit) {
+        viewModel.initializeTranslationService()
         viewModel.loadHistory(context)
     }
     
@@ -239,7 +239,9 @@ fun MealPlateHistoryCard(
             // Fecha
             Text(
                 text = "Fecha: ${historyItem.date}",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
@@ -255,12 +257,16 @@ fun MealPlateHistoryCard(
                 ) {
                     Text(
                         text = "Carbohidratos: ${String.format("%.1f", historyItem.totalCarbs)} g",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Glucemia: ${String.format("%.0f", historyItem.glycemia)} mg/dL",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }

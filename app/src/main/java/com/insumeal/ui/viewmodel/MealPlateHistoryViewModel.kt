@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.insumeal.api.MealPlateApiClient
 import com.insumeal.models.MealPlateHistory
+import com.insumeal.services.TranslationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,6 +22,7 @@ class MealPlateHistoryViewModel : ViewModel() {
     val errorMessage: StateFlow<String?> = _errorMessage
     
     private val apiClient = MealPlateApiClient()
+    private val translationService = TranslationService.getInstance()
     
     fun loadHistory(context: Context) {
         viewModelScope.launch {
@@ -29,9 +31,18 @@ class MealPlateHistoryViewModel : ViewModel() {
             
             try {
                 val result = apiClient.getMealPlateHistory(context)
-                
-                result.onSuccess { history ->
-                    _historyList.value = history
+                  result.onSuccess { history ->
+                    // Traducir el historial automáticamente a español
+                    viewModelScope.launch {
+                        try {
+                            val translatedHistory = translationService.translateMealPlateHistoryListToSpanish(history)
+                            _historyList.value = translatedHistory
+                        } catch (e: Exception) {
+                            android.util.Log.e("MealPlateHistoryViewModel", "Error en traducción: ${e.message}", e)
+                            // Si falla la traducción, usar el historial original
+                            _historyList.value = history
+                        }
+                    }
                 }.onFailure { error ->
                     _errorMessage.value = when {
                         error.message?.contains("401") == true -> 
@@ -53,9 +64,22 @@ class MealPlateHistoryViewModel : ViewModel() {
                 _isLoading.value = false
             }
         }
-    }
-      fun clearError() {
+    }      fun clearError() {
         _errorMessage.value = null
+    }
+    
+    /**
+     * Inicializa el servicio de traducción
+     */
+    fun initializeTranslationService() {
+        viewModelScope.launch {
+            try {
+                translationService.initialize()
+                android.util.Log.d("MealPlateHistoryViewModel", "Servicio de traducción inicializado")
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateHistoryViewModel", "Error inicializando servicio de traducción: ${e.message}", e)
+            }
+        }
     }
     
     fun deleteMealPlate(context: Context, mealPlateId: Int, onSuccess: () -> Unit, onError: (String) -> Unit) {

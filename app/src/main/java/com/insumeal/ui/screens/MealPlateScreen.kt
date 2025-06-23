@@ -57,12 +57,14 @@ fun MealPlateScreen(
     // Efecto para sincronizar los estados y hacer logs
     LaunchedEffect(mealPlate) {
         android.util.Log.d("MealPlateScreen", "ViewModel mealPlate cambió: ${mealPlate?.name}")
-    }
-      // Log inicial para verificar el estado al entrar a la pantalla
+    }      // Log inicial para verificar el estado al entrar a la pantalla
     LaunchedEffect(Unit) {
         android.util.Log.d("MealPlateScreen", "Entrando a MealPlateScreen - Estado inicial:")
         android.util.Log.d("MealPlateScreen", "mealPlate=${mealPlate?.name}, isLoading=${isLoading}, hasAttemptedLoad=${hasAttemptedLoad}")
         android.util.Log.d("MealPlateScreen", "ViewModel instance: $mealPlateViewModel")
+        
+        // Inicializar el servicio de traducción
+        mealPlateViewModel.initializeTranslationService()
     }
     // Logs para debugging - observar cambios en el estado
     LaunchedEffect(mealPlate) {
@@ -551,7 +553,7 @@ fun IngredientEditableCard(
                         } ?: ingredient.carbs
                         
                         Text(
-                            text = "≈ ${String.format("%.1f", previewCarbs)} Carbohidratos",
+                            text = "≈ ${String.format("%.1f", previewCarbs)} Gramos de Carbohidratos",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -607,6 +609,7 @@ fun IngredientEditableCard(
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
+                    color = Color.Black,
                     modifier = Modifier.weight(1f)
                 )
                   Row(
@@ -617,14 +620,14 @@ fun IngredientEditableCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "${String.format("%.0f", ingredient.grams)} Gramos",
+                            text = "${String.format("%.0f", ingredient.grams)} g",
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "${String.format("%.1f", ingredient.carbs)} Carbohidratos",
+                            text = "${String.format("%.1f", ingredient.carbs)} g de carbohidratos",
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Medium
                             ),

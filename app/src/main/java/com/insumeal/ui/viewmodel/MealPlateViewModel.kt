@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.insumeal.api.MealPlateApiClient
 import com.insumeal.models.MealPlate
 import com.insumeal.models.DosisCalculation
+import com.insumeal.services.TranslationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,6 +20,12 @@ class MealPlateViewModel : ViewModel() {
     // Para la imagen
     var imageUri by mutableStateOf<Uri?>(null)
     var bitmap by mutableStateOf<Bitmap?>(null)
+    
+    // API Client para las operaciones de API
+    private val apiClient = MealPlateApiClient()
+    
+    // Servicio de traducción
+    private val translationService = TranslationService.getInstance()
     
     // Para el estado de carga usando StateFlow
     private val _isLoading = MutableStateFlow(false)
@@ -29,8 +36,7 @@ class MealPlateViewModel : ViewModel() {
     
     // Para los datos del plato usando StateFlow
     private val _mealPlate = MutableStateFlow<MealPlate?>(null)
-    val mealPlate: StateFlow<MealPlate?> = _mealPlate
-      // Estado para saber si hemos intentado cargar datos usando StateFlow
+    val mealPlate: StateFlow<MealPlate?> = _mealPlate      // Estado para saber si hemos intentado cargar datos usando StateFlow
     private val _hasAttemptedLoad = MutableStateFlow(false)
     val hasAttemptedLoad: StateFlow<Boolean> = _hasAttemptedLoad
     
@@ -38,23 +44,36 @@ class MealPlateViewModel : ViewModel() {
     private val _dosisCalculation = MutableStateFlow<DosisCalculation?>(null)
     val dosisCalculation: StateFlow<DosisCalculation?> = _dosisCalculation
     
-    // API Client para las operaciones de API
-    private val apiClient = MealPlateApiClient()
     fun setImage(uri: Uri?, bmp: Bitmap?) {
         imageUri = uri
         bitmap = bmp
-    }    fun clearData() {
+    }fun clearData() {
         _mealPlate.value = null
         _errorMessage.value = null
         _hasAttemptedLoad.value = false
         _isLoading.value = false
         imageUri = null
         bitmap = null
-    }
-    
+    }    
     fun clearError() {
         _errorMessage.value = null
-    }fun analyzeImage(context: Context, onSuccess: () -> Unit) {
+    }
+    
+    /**
+     * Inicializa el servicio de traducción
+     */
+    fun initializeTranslationService() {
+        viewModelScope.launch {
+            try {
+                translationService.initialize()
+                android.util.Log.d("MealPlateViewModel", "Servicio de traducción inicializado")
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateViewModel", "Error inicializando servicio de traducción: ${e.message}", e)
+            }
+        }
+    }
+    
+    fun analyzeImage(context: Context, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -72,12 +91,24 @@ class MealPlateViewModel : ViewModel() {
                 android.util.Log.d("MealPlateViewModel", "Llamando a apiClient.analyzeImage()")
                 val result = apiClient.analyzeImage(context, imageUri, bitmap)
                 android.util.Log.d("MealPlateViewModel", "Resultado recibido de apiClient")
+
                 result.onSuccess { plate ->
-                    android.util.Log.d("MealPlateViewModel", "Recibido plato con éxito: ${plate.name}, ingredientes: ${plate.ingredients.size}")
-                    _mealPlate.value = plate
-                    android.util.Log.d("MealPlateViewModel", "Estado después de asignar: mealPlate=${_mealPlate.value?.name}")
-                    android.util.Log.d("MealPlateViewModel", "Verificación inmediata: mealPlate es null=${_mealPlate.value == null}")
-                    onSuccess()
+                    android.util.Log.d("MealPlateViewModel", "Recibido plato con éxito: \${plate.name}, ingredientes: \${plate.ingredients.size}")
+
+                    // Traducir el plato automáticamente a español
+                    viewModelScope.launch {
+                        try {
+                            val translatedPlate = translationService.translateMealPlateToSpanish(plate)
+                            _mealPlate.value = translatedPlate
+                            android.util.Log.d("MealPlateViewModel", "Plato traducido: ${translatedPlate.name}")
+                            onSuccess()
+                        } catch (e: Exception) {
+                            android.util.Log.e("MealPlateViewModel", "Error en traducción: ${e.message}", e)
+                            // Si falla la traducción, usar el plato original
+                            _mealPlate.value = plate
+                            onSuccess()
+                        }
+                    }
                 }.onFailure { error ->
                     // Log para ayudar a depurar el problema
                     android.util.Log.e("MealPlateViewModel", "Error: ${error.message}", error)
@@ -240,4 +271,3 @@ class MealPlateViewModel : ViewModel() {
         }
     }
 }
-

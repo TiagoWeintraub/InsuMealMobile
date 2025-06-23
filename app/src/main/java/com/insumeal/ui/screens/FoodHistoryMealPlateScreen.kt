@@ -43,9 +43,9 @@ fun FoodHistoryMealPlateScreen(
     val mealPlate by viewModel.mealPlate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
-    
-    // Cargar los detalles del meal plate cuando se inicia la pantalla
+      // Cargar los detalles del meal plate cuando se inicia la pantalla
     LaunchedEffect(mealPlateId) {
+        viewModel.initializeTranslationService()
         viewModel.loadMealPlateDetails(context, mealPlateId)
     }
     
@@ -351,14 +351,14 @@ fun IngredientHistoryCard(ingredient: com.insumeal.models.Ingredient) {
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "${String.format("%.0f", ingredient.grams)} Gramos",
+                        text = "${String.format("%.0f", ingredient.grams)} g",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "${String.format("%.1f", ingredient.carbs)} Carbohidratos",
+                        text = "${String.format("%.1f", ingredient.carbs)} g de carbohidratos",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Medium
                         ),

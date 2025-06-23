@@ -305,6 +305,7 @@ fun DosisScreen(
                                         Text(
                                             text = "Insulina para corrección",
                                             style = MaterialTheme.typography.titleMedium,
+                                            color = Color.Black,
                                             maxLines = 2
                                         )
                                     }
@@ -342,6 +343,7 @@ fun DosisScreen(
                                         Text(
                                             text = "Insulina para carbohidratos",
                                             style = MaterialTheme.typography.titleMedium,
+                                            color = Color.Black,
                                             maxLines = 2
                                         )
                                     }

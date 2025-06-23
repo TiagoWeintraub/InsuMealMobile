@@ -53,6 +53,8 @@ dependencies {
     // Core Android
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("com.google.android.gms:play-services-tasks:18.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.github.Dhaval2404:ImagePicker:2.1")
 
@@ -80,6 +82,8 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // Google ML Kit Translation
+    implementation("com.google.mlkit:translate:17.0.1")
 }
