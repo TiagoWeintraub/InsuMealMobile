@@ -106,6 +106,36 @@ class MealPlateHistoryViewModel : ViewModel() {
                         else -> "Error al eliminar: ${error.message}"
                     }
                     onError(errorMsg)
+                }            } catch (e: Exception) {
+                onError("Error inesperado: ${e.message}")
+            }
+        }
+    }
+    
+    fun deleteAllMealPlates(context: Context, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val result = apiClient.deleteAllMealPlates(context)
+                
+                result.onSuccess {
+                    // Limpiar la lista local
+                    _historyList.value = emptyList()
+                    onSuccess()
+                }.onFailure { error ->
+                    val errorMsg = when {
+                        error.message?.contains("401") == true -> 
+                            "Error de autenticación. Tu sesión ha expirado."
+                        error.message?.contains("403") == true -> 
+                            "No tienes permiso para eliminar el historial."
+                        error.message?.contains("404") == true -> 
+                            "No hay historial para eliminar."
+                        error.message?.contains("timeout") == true -> 
+                            "El servidor está tardando demasiado en responder."
+                        error.message?.contains("host") == true -> 
+                            "No se puede conectar al servidor. Verifica tu conexión a internet."
+                        else -> "Error al eliminar historial: ${error.message}"
+                    }
+                    onError(errorMsg)
                 }
             } catch (e: Exception) {
                 onError("Error inesperado: ${e.message}")

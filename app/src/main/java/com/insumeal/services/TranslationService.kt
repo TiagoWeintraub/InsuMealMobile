@@ -20,12 +20,14 @@ class TranslationService {
     private var spanishToEnglishTranslator: Translator? = null
     private var isEnglishToSpanishReady = false
     private var isSpanishToEnglishReady = false
-    
-    // Diccionario de traducciones específicas para ingredientes comunes
+      // Diccionario de traducciones específicas para ingredientes comunes
     private val specificTranslations = mapOf(
         "hamburger bun" to "pan de hamburguesa",
         "burger bun" to "pan de hamburguesa",
+        "bun" to "pan",
         "sesame bun" to "pan con sésamo",
+        "whole wheat bun" to "pan integral",
+        "brioche bun" to "pan brioche",
         "french fries" to "papas fritas",
         "potato chips" to "papas fritas",
         "chicken breast" to "pechuga de pollo",
@@ -186,17 +188,20 @@ class TranslationService {
      * Traduce texto de inglés a español
      * @param text Texto en inglés a traducir
      * @return Texto traducido al español, o el texto original si hay error
-     */
-    suspend fun translateEnglishToSpanish(text: String): String = withContext(Dispatchers.IO) {
+     */    suspend fun translateEnglishToSpanish(text: String): String = withContext(Dispatchers.IO) {
         try {
             if (text.isBlank()) return@withContext text
             
-            val lowerCaseText = text.lowercase().trim()
+            val cleanText = text.lowercase().trim()
+            android.util.Log.d("TranslationService", "Traduciendo: '$text' -> texto limpio: '$cleanText'")
             
             // Verificar primero en el diccionario específico
-            specificTranslations[lowerCaseText]?.let { specificTranslation ->
+            specificTranslations[cleanText]?.let { specificTranslation ->
+                android.util.Log.d("TranslationService", "Encontrado en diccionario: '$cleanText' -> '$specificTranslation'")
                 return@withContext capitalizeWords(specificTranslation)
             }
+            
+            android.util.Log.d("TranslationService", "No encontrado en diccionario, usando ML Kit para: '$cleanText'")
             
             // Si no está en el diccionario, usar Google ML Kit
             if (!isEnglishToSpanishReady) {
@@ -204,11 +209,14 @@ class TranslationService {
             }
             
             val translatedText = englishToSpanishTranslator?.translate(text)?.await() ?: text
+            android.util.Log.d("TranslationService", "ML Kit tradujo: '$text' -> '$translatedText'")
             
             // Capitalizar la primera letra de cada palabra
-            capitalizeWords(translatedText)
+            val finalText = capitalizeWords(translatedText)
+            android.util.Log.d("TranslationService", "Resultado final: '$finalText'")
+            finalText
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("TranslationService", "Error traduciendo '$text': ${e.message}", e)
             // Retorna el texto original capitalizado si hay error
             capitalizeWords(text)
         }

@@ -351,8 +351,45 @@ class MealPlateApiClient {
                 
                 return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
             }
+        } catch (e: Exception) {            Log.e("MealPlateApiClient", "Error inesperado al obtener detalles del meal plate", e)
+            return@withContext Result.failure(e)
+        }
+    }
+    
+    suspend fun deleteAllMealPlates(context: Context): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            // Verificar si hay un token disponible y es válido
+            if (!AuthCheckUtil.checkToken(context)) {
+                Log.e("MealPlateApiClient", "No hay token de autenticación válido")
+                return@withContext Result.failure(Exception("No hay sesión activa. Por favor inicia sesión nuevamente."))
+            }
+
+            Log.d("MealPlateApiClient", "Eliminando todo el historial de meal plates")
+            
+            val mealPlateService = getMealPlateService(context)
+            val response = mealPlateService.deleteAllMealPlates()
+            
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful) {
+                Log.d("MealPlateApiClient", "Todo el historial eliminado exitosamente")
+                return@withContext Result.success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error al eliminar historial: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado para eliminar el historial"
+                    404 -> "No se encontraron datos para eliminar"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al eliminar historial: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }
         } catch (e: Exception) {
-            Log.e("MealPlateApiClient", "Error inesperado al obtener detalles del meal plate", e)
+            Log.e("MealPlateApiClient", "Error inesperado al eliminar todo el historial", e)
             return@withContext Result.failure(e)
         }
     }

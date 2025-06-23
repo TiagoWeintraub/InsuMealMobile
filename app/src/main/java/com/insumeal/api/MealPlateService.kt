@@ -28,7 +28,9 @@ interface MealPlateService {
     
     @GET("/meal_plate/image/{id_meal_plate}")
     suspend fun getMealPlateImage(@Path("id_meal_plate") mealPlateId: Int): Response<okhttp3.ResponseBody>
-    
-    @GET("/ingredient/meal_plate/{id_meal_plate}")
+      @GET("/ingredient/meal_plate/{id_meal_plate}")
     suspend fun getMealPlateById(@Path("id_meal_plate") mealPlateId: Int): Response<MealPlateSchema>
+    
+    @DELETE("/meal_plate/all")
+    suspend fun deleteAllMealPlates(): Response<Unit>
 }

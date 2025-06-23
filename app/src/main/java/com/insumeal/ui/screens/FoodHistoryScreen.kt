@@ -32,14 +32,18 @@ fun FoodHistoryScreen(navController: NavController) {
     val historyList by viewModel.historyList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    
+    // Estados para el diálogo de confirmación
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+    var isDeletingAll by remember { mutableStateOf(false) }
+    var deleteAllError by remember { mutableStateOf<String?>(null) }
       // Cargar el historial cuando se inicia la pantalla
     LaunchedEffect(Unit) {
         viewModel.initializeTranslationService()
         viewModel.loadHistory(context)
     }
     
-    Scaffold(
-        topBar = {
+    Scaffold(        topBar = {
             TopAppBar(
                 title = { Text("Historial de Comidas") },
                 navigationIcon = {
@@ -47,6 +51,18 @@ fun FoodHistoryScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { showDeleteAllDialog = true },
+                        enabled = historyList.isNotEmpty() && !isDeletingAll
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Eliminar todo el historial",
+                            tint = if (historyList.isNotEmpty() && !isDeletingAll) Color.White else Color.Gray
                         )
                     }
                 },
@@ -166,9 +182,70 @@ fun FoodHistoryScreen(navController: NavController) {
                             )
                         }
                     }
+                }            }
+        }
+    }
+    
+    // Diálogo de confirmación para eliminar todo el historial
+    if (showDeleteAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAllDialog = false },
+            title = {
+                Text("Eliminar todo el historial")
+            },
+            text = {
+                Text("¿Estás seguro de que quieres eliminar todo el historial de comidas? Esta acción no se puede deshacer.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteAllDialog = false
+                        isDeletingAll = true
+                        deleteAllError = null
+                        
+                        viewModel.deleteAllMealPlates(
+                            context = context,
+                            onSuccess = {
+                                isDeletingAll = false
+                            },
+                            onError = { error ->
+                                isDeletingAll = false
+                                deleteAllError = error
+                            }
+                        )
+                    }
+                ) {
+                    Text("Eliminar todo", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteAllDialog = false }
+                ) {
+                    Text("Cancelar")
                 }
             }
-        }
+        )
+    }
+    
+    // Diálogo de error para eliminar todo
+    deleteAllError?.let { error ->
+        AlertDialog(
+            onDismissRequest = { deleteAllError = null },
+            title = {
+                Text("Error al eliminar historial")
+            },
+            text = {
+                Text(error)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { deleteAllError = null }
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        )
     }
 }
 
