@@ -27,7 +27,7 @@ import java.util.*
 @Composable
 fun FoodHistoryScreen(navController: NavController) {
     val context = LocalContext.current
-    val viewModel: MealPlateHistoryViewModel = viewModel()
+    val viewModel = remember { MealPlateHistoryViewModel() }
     
     val historyList by viewModel.historyList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()

@@ -48,7 +48,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    val userProfileViewModel: UserProfileViewModel = viewModel()
+    val userProfileViewModel = remember { UserProfileViewModel() }
 
     Box(
         modifier = Modifier

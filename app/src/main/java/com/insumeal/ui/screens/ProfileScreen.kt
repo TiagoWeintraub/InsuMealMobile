@@ -4,6 +4,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.insumeal.ui.viewmodel.UserProfileViewModel
 import androidx.compose.foundation.layout.*
@@ -30,7 +31,7 @@ import com.insumeal.utils.TokenManager
 @Composable
 fun ProfileScreen(userId: Int = 1, navController: NavController) {
     val context = LocalContext.current
-    val userProfileViewModel: UserProfileViewModel = viewModel()
+    val userProfileViewModel = remember { UserProfileViewModel() }
     val userProfile by userProfileViewModel.userProfile.collectAsState()
 
     // Si el perfil es nulo, intentamos cargarlo

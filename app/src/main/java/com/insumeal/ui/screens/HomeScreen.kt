@@ -40,10 +40,9 @@ data class DrawerItem(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // Necesario si no usas el padding que provee Scaffold
 @OptIn(ExperimentalMaterial3Api::class) // Para TopAppBar y NavigationDrawer
 @Composable
-fun HomeScreen(navController: NavController, context: Context) {
-    val tokenManager = remember { TokenManager(context) } // Usar remember para TokenManager
+fun HomeScreen(navController: NavController, context: Context) {    val tokenManager = remember { TokenManager(context) } // Usar remember para TokenManager
     val token = tokenManager.getToken()
-    val userProfileViewModel: UserProfileViewModel = viewModel()
+    val userProfileViewModel = remember { UserProfileViewModel() }
     val userProfile by userProfileViewModel.userProfile.collectAsState()
 
     // Para controlar el estado del Navigation Drawer (abierto/cerrado)

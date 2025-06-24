@@ -62,7 +62,8 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp, bottom = 24.dp)
-                    .clip(RoundedCornerShape(16.dp))                    .background(
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 MaterialTheme.colorScheme.primary,  // Celeste
