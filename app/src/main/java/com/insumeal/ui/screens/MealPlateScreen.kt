@@ -587,8 +587,7 @@ fun IngredientEditableCard(
                     // Swipe de izquierda a derecha -> Eliminar
                     showDeleteConfirmation = true
                     false // No dismissamos automáticamente, mostramos el modal
-                }
-                SwipeToDismissBoxValue.EndToStart -> {
+                }                SwipeToDismissBoxValue.EndToStart -> {
                     // Swipe de derecha a izquierda -> Editar
                     editGramsInput = ingredient.grams.toInt().toString()
                     showEditModal = true
@@ -711,14 +710,10 @@ fun IngredientEditableCard(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(0.dp) // Bordes rectos sin redondear
-            ) {// Solo modo visualización, la edición se hace en modal
+            ) {            // Solo modo visualización estática, la edición se hace únicamente mediante swipe
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        editGramsInput = ingredient.grams.toInt().toString()
-                        showEditModal = true
-                    }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -952,9 +947,15 @@ fun IngredientEditableCard(
             textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-    
-    // Modal de edición estético
+      // Modal de edición estético
     if (showEditModal) {
+        // Actualizar el valor cada vez que se abre el modal
+        LaunchedEffect(showEditModal) {
+            if (showEditModal) {
+                editGramsInput = ingredient.grams.toInt().toString()
+            }
+        }
+        
         AlertDialog(
             onDismissRequest = { 
                 showEditModal = false
