@@ -1059,7 +1059,7 @@ fun IngredientEditableCard(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Text(
-                                    text = "Vista previa:",
+                                    text = "Carbohidratos del alimento según los gramos:",
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = FontWeight.Medium
                                     ),

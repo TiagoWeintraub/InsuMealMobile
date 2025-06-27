@@ -148,7 +148,7 @@ fun FoodHistoryMealPlateScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
                         
                         // Imagen del plato
                         Card(
@@ -272,13 +272,57 @@ fun FoodHistoryMealPlateScreen(
                                 }
                                 
                                 Spacer(modifier = Modifier.height(16.dp))
-                                
-                                mealPlate!!.ingredients.forEach { ingredient ->
+                                  mealPlate!!.ingredients.forEach { ingredient ->
                                     IngredientHistoryCard(ingredient = ingredient)
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
                         }
+                        
+                        // Espacio adicional antes del botón
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        // Botón para volver al HomeScreen
+                        Button(
+                            onClick = {
+                                // Navegar al HomeScreen limpiando el stack de navegación
+                                navController.navigate("home") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 6.dp,
+                                pressedElevation = 8.dp
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Home,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = "Volver al Inicio",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
+                        }
+                        
+                        // Espacio final
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

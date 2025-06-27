@@ -91,7 +91,7 @@ class MealPlateViewModel : ViewModel() {
         }
     }
     
-    fun analyzeImage(context: Context, onSuccess: () -> Unit) {
+    fun analyzeImage(context: Context, onSuccess: () -> Unit, onNoFoodDetected: () -> Unit = {}) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -109,9 +109,15 @@ class MealPlateViewModel : ViewModel() {
                 android.util.Log.d("MealPlateViewModel", "Llamando a apiClient.analyzeImage()")
                 val result = apiClient.analyzeImage(context, imageUri, bitmap)
                 android.util.Log.d("MealPlateViewModel", "Resultado recibido de apiClient")
-
                 result.onSuccess { plate ->
-                    android.util.Log.d("MealPlateViewModel", "Recibido plato con éxito: \${plate.name}, ingredientes: \${plate.ingredients.size}")
+                    android.util.Log.d("MealPlateViewModel", "Recibido plato con éxito: \${plate.name}, ingredientes: \${plate.ingredients.size}, id: ${plate.id}")
+
+                    // Verificar si el backend indica que no se detectaron alimentos (ID = -1)
+                    if (plate.id == -1) {
+                        android.util.Log.d("MealPlateViewModel", "No se detectaron alimentos en la imagen (ID = -1)")
+                        onNoFoodDetected()
+                        return@onSuccess
+                    }
 
                     // Traducir el plato automáticamente a español
                     viewModelScope.launch {

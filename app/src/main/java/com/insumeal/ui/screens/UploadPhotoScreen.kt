@@ -51,10 +51,12 @@ fun UploadPhotoScreen(
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    
-    // Observar los StateFlow del ViewModel
+      // Observar los StateFlow del ViewModel
     val isLoading by mealPlateViewModel.isLoading.collectAsState()
     val errorMessage by mealPlateViewModel.errorMessage.collectAsState()
+    
+    // Estado local para cuando no se detectan comidas
+    var showNoFoodDetectedDialog by remember { mutableStateOf(false) }
     
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bmp ->
         if (bmp != null) {
@@ -132,6 +134,74 @@ fun UploadPhotoScreen(
                     Text("Aceptar")
                 }
             },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    }
+
+    // Diálogo cuando no se detectan comidas en la imagen
+    if (showNoFoodDetectedDialog) {
+        AlertDialog(
+            onDismissRequest = { showNoFoodDetectedDialog = false },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(
+                            MaterialTheme.colorScheme.errorContainer,
+                            shape = RoundedCornerShape(32.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Restaurant,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "No se detectaron comidas",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "No hemos podido detectar ningún alimento en la imagen que seleccionaste.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    Text(
+                        text = "• Asegúrate de que la comida esté bien iluminada\n• Intenta tomar la foto desde un ángulo diferente\n• Verifica que los alimentos sean claramente visibles",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showNoFoodDetectedDialog = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Intentar de nuevo")
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
             containerColor = MaterialTheme.colorScheme.surface
         )
     }
@@ -352,14 +422,21 @@ fun UploadPhotoScreen(
             Button(                onClick = {
                     // Usamos el contexto que ya fue capturado anteriormente
                     android.util.Log.d("UploadPhotoScreen", "Iniciando análisis de imagen")
-                    
-                    // El ViewModel ahora maneja el estado internamente
-                    mealPlateViewModel.analyzeImage(context) {
-                        // Callback de éxito - navegar a la siguiente pantalla
-                        android.util.Log.d("UploadPhotoScreen", "Análisis completado con éxito, navegando a MealPlateScreen")
-                        android.util.Log.d("UploadPhotoScreen", "ViewModel instance antes de navegar: $mealPlateViewModel")
-                        navController.navigate("mealPlate")
-                    }
+                      // El ViewModel ahora maneja el estado internamente
+                    mealPlateViewModel.analyzeImage(
+                        context = context,
+                        onSuccess = {
+                            // Callback de éxito - navegar a la siguiente pantalla
+                            android.util.Log.d("UploadPhotoScreen", "Análisis completado con éxito, navegando a MealPlateScreen")
+                            android.util.Log.d("UploadPhotoScreen", "ViewModel instance antes de navegar: $mealPlateViewModel")
+                            navController.navigate("mealPlate")
+                        },
+                        onNoFoodDetected = {
+                            // Callback cuando no se detectan comidas
+                            android.util.Log.d("UploadPhotoScreen", "No se detectaron comidas en la imagen")
+                            showNoFoodDetectedDialog = true
+                        }
+                    )
                 },
                 enabled = (bitmap != null || imageUri != null) && !isLoading,
                 modifier = Modifier

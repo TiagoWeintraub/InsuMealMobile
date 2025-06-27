@@ -127,7 +127,7 @@ fun DosisScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 
-                Spacer(modifier = Modifier.height(16.dp))                  // Imagen del plato
+                Spacer(modifier = Modifier.height(5.dp))                  // Imagen del plato
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()

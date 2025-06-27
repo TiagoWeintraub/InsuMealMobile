@@ -37,7 +37,7 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var ratio by remember { mutableStateOf(15) }
-    var sensitivity by remember { mutableStateOf(50) }
+    var sensitivity by remember { mutableStateOf(30) }
     var glycemiaTarget by remember { mutableStateOf(100) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -294,7 +294,7 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         Slider(
                             value = ratio.toFloat(),
                             onValueChange = { ratio = it.toInt() },
-                            valueRange = 5f..50f,
+                            valueRange = 5f..30f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
                                 activeTrackColor = MaterialTheme.colorScheme.primary
