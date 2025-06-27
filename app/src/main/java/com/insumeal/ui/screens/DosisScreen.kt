@@ -1,6 +1,7 @@
 package com.insumeal.ui.screens
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -38,18 +39,69 @@ import com.insumeal.utils.TokenManager
 fun DosisScreen(
     navController: NavController,
     mealPlateViewModel: MealPlateViewModel
-) {
-    // Observar los StateFlow del ViewModel
+) {    // Observar los StateFlow del ViewModel
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val dosisCalculation by mealPlateViewModel.dosisCalculation.collectAsState()
     val context = LocalContext.current
-      Scaffold(
+    
+    // Manejar el botón de volver atrás del sistema (hardware o gesto)
+    BackHandler {
+        // Si hay un plato cargado, eliminarlo antes de volver atrás
+        mealPlate?.let { plate ->
+            mealPlateViewModel.deleteMealPlate(
+                context = context,
+                mealPlateId = plate.id,
+                onSuccess = {
+                    navController.navigateUp()
+                },
+                onError = { error ->
+                    android.util.Log.e("DosisScreen", "Error al eliminar plato: $error")
+                    // Incluso si hay error, volver atrás
+                    navController.navigateUp()
+                }
+            )
+        } ?: run {
+            // Si no hay plato, simplemente volver atrás
+            navController.navigateUp()
+        }
+    }
+    
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Cálculo de Dosis") },
+                navigationIcon = {
+                    IconButton(onClick = { 
+                        // Si hay un plato cargado, eliminarlo antes de volver atrás
+                        mealPlate?.let { plate ->
+                            mealPlateViewModel.deleteMealPlate(
+                                context = context,
+                                mealPlateId = plate.id,
+                                onSuccess = {
+                                    navController.navigateUp()
+                                },
+                                onError = { error ->
+                                    android.util.Log.e("DosisScreen", "Error al eliminar plato: $error")
+                                    // Incluso si hay error, volver atrás
+                                    navController.navigateUp()
+                                }
+                            )
+                        } ?: run {
+                            // Si no hay plato, simplemente volver atrás
+                            navController.navigateUp()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }) { paddingValues ->
