@@ -3,6 +3,7 @@ package com.insumeal.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.insumeal.api.ProfileService
+import com.insumeal.api.RetrofitClient
 import com.insumeal.models.UserProfile
 import com.insumeal.schemas.toModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,13 +15,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 class UserProfileViewModel : ViewModel() {
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> = _userProfile
-
     private val profileService: ProfileService by lazy {
-        Retrofit.Builder()
-            .baseUrl("http://10.0.0.179:8000/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ProfileService::class.java)
+        RetrofitClient.retrofit.create(ProfileService::class.java)
     }
 
     fun loadUserProfile(authHeader: String, userId: String) {

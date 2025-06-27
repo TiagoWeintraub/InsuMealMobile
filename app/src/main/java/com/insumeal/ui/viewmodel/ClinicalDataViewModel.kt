@@ -3,6 +3,7 @@ package com.insumeal.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.insumeal.api.ClinicalDataService
+import com.insumeal.api.RetrofitClient
 import com.insumeal.api.UpdateClinicalDataRequest
 import com.insumeal.models.ClinicalData
 import com.insumeal.schemas.ClinicalDataSchema
@@ -22,13 +23,8 @@ class ClinicalDataViewModel : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
-
     private val clinicalDataService: ClinicalDataService by lazy {
-        Retrofit.Builder()
-            .baseUrl("http://10.0.0.179:8000/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ClinicalDataService::class.java)
+        RetrofitClient.retrofit.create(ClinicalDataService::class.java)
     }
 
     fun loadClinicalData(authHeader: String, userId: String) {

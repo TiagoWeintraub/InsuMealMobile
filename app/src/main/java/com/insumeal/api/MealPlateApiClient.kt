@@ -301,32 +301,10 @@ class MealPlateApiClient {
                 Log.e("MealPlateApiClient", "No hay token de autenticación válido")
                 return@withContext Result.failure(Exception("No hay sesión activa. Por favor inicia sesión nuevamente."))
             }
-
             Log.d("MealPlateApiClient", "Obteniendo detalles del meal plate con ID: $mealPlateId")
             
-            // Usar cliente específico para el historial (10.0.0.179)
-            val historyRetrofit = retrofit2.Retrofit.Builder()
-                .baseUrl("http://10.0.0.179:8000")
-                .client(okhttp3.OkHttpClient.Builder()
-                    .addInterceptor { chain ->
-                        val tokenManager = TokenManager(context)
-                        val token = tokenManager.getToken()
-                        val originalRequest = chain.request()
-                        
-                        val newRequest = if (token != null) {
-                            originalRequest.newBuilder()
-                                .header("Authorization", "Bearer $token")
-                                .build()
-                        } else {
-                            originalRequest
-                        }
-                        chain.proceed(newRequest)
-                    }
-                    .build())
-                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
-                .build()
-                
-            val historyService = historyRetrofit.create(MealPlateService::class.java)
+            // Usar RetrofitClient centralizado
+            val historyService = getMealPlateService(context)
             val response = historyService.getMealPlateById(mealPlateId)
             
             Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")

@@ -11,8 +11,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.0.179:8000"
+    const val BASE_URL = "http://10.0.0.149:8000"
     private var tokenManager: TokenManager? = null
+
+    // Función para obtener la URL completa de imágenes de meal plates
+    fun getMealPlateImageUrl(mealPlateId: Int): String {
+        return "$BASE_URL/meal_plate/image/$mealPlateId"
+    }
 
     // Inicializa el TokenManager con el contexto
     fun initialize(context: Context) {

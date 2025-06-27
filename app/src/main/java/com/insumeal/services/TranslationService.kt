@@ -120,7 +120,8 @@ class TranslationService {
         "bolognese sauce" to "salsa boloñesa",
         "grated cheese" to "queso rallado",
         "lasagna noodles" to "láminas de lasaña",
-        "lasagna" to "lasaña"
+        "lasagna" to "lasaña",
+        "chícharos" to "arvejas"
     )
     
     companion object {

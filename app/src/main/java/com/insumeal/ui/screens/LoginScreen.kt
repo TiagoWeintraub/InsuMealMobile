@@ -194,13 +194,8 @@ fun LoginScreen(
                                     withContext(Dispatchers.Main) {
                                         TokenManager(context).saveToken(response.accessToken)
                                         TokenManager(context).saveUserId(response.userId)
-                                    }
-                                    // Obtener perfil usando el token
-                                    val profileService = Retrofit.Builder()
-                                        .baseUrl("http://10.0.0.179:8000/")
-                                        .addConverterFactory(GsonConverterFactory.create())
-                                        .build()
-                                        .create(ProfileService::class.java)
+                                    }                                    // Obtener perfil usando el token
+                                    val profileService = RetrofitClient.retrofit.create(ProfileService::class.java)
                                     val token = response.accessToken
                                     val userIdStr = response.userId
                                     val authHeader = "Bearer $token"

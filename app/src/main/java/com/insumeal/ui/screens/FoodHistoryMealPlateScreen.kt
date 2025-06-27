@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.insumeal.api.RetrofitClient
 import com.insumeal.ui.viewmodel.FoodHistoryMealPlateViewModel
 import com.insumeal.utils.ImageUtils
 import com.insumeal.utils.TokenManager
@@ -161,7 +162,7 @@ fun FoodHistoryMealPlateScreen(
                             shape = RoundedCornerShape(16.dp)
                         ) {                            val imageRequest = ImageUtils.createAuthenticatedImageRequest(
                                 context = context,
-                                imageUrl = "http://10.0.0.179:8000/meal_plate/image/${mealPlate!!.id}"
+                                imageUrl = RetrofitClient.getMealPlateImageUrl(mealPlate!!.id)
                             )
                             
                             Image(
