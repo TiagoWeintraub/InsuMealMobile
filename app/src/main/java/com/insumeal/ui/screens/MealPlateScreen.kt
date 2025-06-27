@@ -300,12 +300,12 @@ fun MealPlateScreen(
                         ),
                         modifier = Modifier.padding(vertical = 8.dp)                    )
                 }                // Lista de ingredientes con capacidad de edición
-                items(currentMealPlate.ingredients) { ingredient ->
-                    IngredientEditableCard(
+                items(currentMealPlate.ingredients) { ingredient ->                    IngredientEditableCard(
                         ingredient = ingredient,
                         isEditing = editingIngredientId == ingredient.id,
                         editGrams = editGrams,
                         isUpdating = isUpdating,
+                        isLastIngredient = currentMealPlate.ingredients.size == 1,
                         onEditStart = { 
                             editingIngredientId = ingredient.id
                             editGrams = ingredient.grams.toInt().toString()
@@ -345,18 +345,37 @@ fun MealPlateScreen(
                                 deletingIngredientId = ingredient.id
                                 deleteError = null
                                 
-                                mealPlateViewModel.deleteIngredientFromMealPlate(
-                                    context = context,
-                                    mealPlateId = currentPlate.id,
-                                    ingredientId = ingredient.id,
-                                    onSuccess = {
-                                        deletingIngredientId = null
-                                    },
-                                    onError = { error ->
-                                        deletingIngredientId = null
-                                        deleteError = error
-                                    }
-                                )
+                                // Verificar si es el último ingrediente
+                                if (currentPlate.ingredients.size == 1) {
+                                    // Si es el último ingrediente, eliminar todo el meal plate
+                                    mealPlateViewModel.deleteMealPlate(
+                                        context = context,
+                                        mealPlateId = currentPlate.id,
+                                        onSuccess = {
+                                            deletingIngredientId = null
+                                            // Navegar a la pantalla anterior (uploadPhoto)
+                                            navController.navigateUp()
+                                        },
+                                        onError = { error ->
+                                            deletingIngredientId = null
+                                            deleteError = error
+                                        }
+                                    )
+                                } else {
+                                    // Si hay más ingredientes, solo eliminar el ingrediente
+                                    mealPlateViewModel.deleteIngredientFromMealPlate(
+                                        context = context,
+                                        mealPlateId = currentPlate.id,
+                                        ingredientId = ingredient.id,
+                                        onSuccess = {
+                                            deletingIngredientId = null
+                                        },
+                                        onError = { error ->
+                                            deletingIngredientId = null
+                                            deleteError = error
+                                        }
+                                    )
+                                }
                             }
                         },
                         isDeleting = deletingIngredientId == ingredient.id
@@ -549,13 +568,14 @@ fun IngredientEditableCard(
     isEditing: Boolean,
     editGrams: String,
     isUpdating: Boolean,
+    isLastIngredient: Boolean,
     onEditStart: () -> Unit,
     onEditCancel: () -> Unit,
     onGramsChange: (String) -> Unit,
     onEditConfirm: () -> Unit,
     onDeleteIngredient: () -> Unit,
     isDeleting: Boolean = false
-) {    // Estado para el modal de confirmación
+) {// Estado para el modal de confirmación
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
@@ -817,29 +837,48 @@ fun IngredientEditableCard(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-            },
-            text = {
-                Column(
+            },            text = {                Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "¿Realmente quiere borrar el ingrediente:",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text(
-                        text = "\"${ingredient.name}\"?",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    // Verificar si es el último ingrediente para mostrar mensaje apropiado
+                    if (isLastIngredient) {
+                        Text(
+                            text = "Este es el último ingrediente del plato.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "Al eliminarlo se borrará todo el plato y volverás a la pantalla anterior.",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Text(
+                            text = "¿Realmente quiere borrar el ingrediente:",
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "\"${ingredient.name}\"?",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
