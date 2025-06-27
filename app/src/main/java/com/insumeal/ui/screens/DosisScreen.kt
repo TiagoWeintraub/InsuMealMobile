@@ -39,11 +39,15 @@ import com.insumeal.utils.TokenManager
 fun DosisScreen(
     navController: NavController,
     mealPlateViewModel: MealPlateViewModel
-) {    // Observar los StateFlow del ViewModel
+) {
+    // Observar los StateFlow del ViewModel
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val dosisCalculation by mealPlateViewModel.dosisCalculation.collectAsState()
     val context = LocalContext.current
     
+    // Estado para controlar el modal de advertencia
+    var showDisclaimerDialog by remember { mutableStateOf(true) }
+
     // Manejar el botón de volver atrás del sistema (hardware o gesto)
     BackHandler {
         // Si hay un plato cargado, eliminarlo antes de volver atrás
@@ -537,39 +541,7 @@ fun DosisScreen(
                     }
                 }
 
-                // Tarjeta de advertencia/información
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.width(16.dp))
-                        
-                        Text(
-                            text = "Esta información es orientativa. InsuMeal no asume responsabilidad por el uso de esta estimación.",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }                    // Botón para volver al home
+                // Botón para volver al home
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -718,6 +690,56 @@ fun DosisScreen(
             // Espaciado adicional al final para asegurar que el botón sea visible
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    // Modal de advertencia que aparece al cargar la pantalla
+    if (showDisclaimerDialog) {
+        AlertDialog(
+            onDismissRequest = { /* No permitir cerrar tocando fuera */ },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Información Importante",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    text = "Esta información es orientativa. InsuMeal no asume responsabilidad por el uso de esta estimación.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showDisclaimerDialog = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = "Aceptar",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     }
 }
 

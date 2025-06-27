@@ -42,7 +42,7 @@ fun MealPlateScreen(
     mealPlateViewModel: MealPlateViewModel
 ) {
     val context = LocalContext.current
-    
+
     // Usar collectAsState para observar los StateFlow del ViewModel
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val isLoading by mealPlateViewModel.isLoading.collectAsState()
@@ -53,7 +53,7 @@ fun MealPlateScreen(
     var editGramsInput by remember { mutableStateOf("") } // Para el modal de edición
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
-    
+
     // Estados para la eliminación de ingredientes
     var deletingIngredientId by remember { mutableStateOf<Int?>(null) }
     var deleteError by remember { mutableStateOf<String?>(null) }
@@ -69,7 +69,7 @@ fun MealPlateScreen(
     var glycemiaInput by remember { mutableStateOf("") }
     var isCalculatingDosis by remember { mutableStateOf(false) }
     var dosisCalculationError by remember { mutableStateOf<String?>(null) }
-    
+
     // Efecto para restaurar la glucemia guardada
     LaunchedEffect(lastGlycemia) {
         if (lastGlycemia.isNotEmpty() && glycemiaInput.isEmpty()) {
@@ -89,18 +89,18 @@ fun MealPlateScreen(
         android.util.Log.d("MealPlateScreen", "Entrando a MealPlateScreen - Estado inicial:")
         android.util.Log.d("MealPlateScreen", "mealPlate=${mealPlate?.name}, isLoading=${isLoading}, hasAttemptedLoad=${hasAttemptedLoad}")
         android.util.Log.d("MealPlateScreen", "ViewModel instance: $mealPlateViewModel")
-        
+
         // Inicializar el servicio de traducción
         mealPlateViewModel.initializeTranslationService()
     }
-    
+
     LaunchedEffect(isLoading) {
         android.util.Log.d("MealPlateScreen", "isLoading cambió: ${isLoading}")
     }
     LaunchedEffect(hasAttemptedLoad) {
         android.util.Log.d("MealPlateScreen", "hasAttemptedLoad cambió: ${hasAttemptedLoad}")
     }
-    
+
     // Manejar el botón de volver atrás del sistema (hardware o gesto)
     BackHandler {
         // Si hay un plato cargado, eliminarlo antes de volver atrás
@@ -122,13 +122,13 @@ fun MealPlateScreen(
             navController.navigateUp()
         }
     }
-      
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Detalles del plato") },
                 navigationIcon = {
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         // Si hay un plato cargado, eliminarlo antes de volver atrás
                         mealPlate?.let { plate ->
                             mealPlateViewModel.deleteMealPlate(
@@ -161,7 +161,7 @@ fun MealPlateScreen(
                 )
             )        }) { paddingValues ->
         // Las variables ya están definidas usando collectAsState arriba
-        
+
         if (mealPlate == null) {
             // Mostrar pantalla de carga o mensaje si no hay datos
             Box(
@@ -208,7 +208,7 @@ fun MealPlateScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { 
+                            onClick = {
                                 // Si hay un plato cargado, eliminarlo antes de volver atrás
                                 mealPlate?.let { plate ->
                                     mealPlateViewModel.deleteMealPlate(
@@ -250,7 +250,7 @@ fun MealPlateScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { 
+                            onClick = {
                                 // Si hay un plato cargado, eliminarlo antes de volver atrás
                                 mealPlate?.let { plate ->
                                     mealPlateViewModel.deleteMealPlate(
@@ -283,295 +283,295 @@ fun MealPlateScreen(
             val currentMealPlate = mealPlate
             if (currentMealPlate != null) {
                 LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {                // Título del plato
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                      Text(
-                        text = currentMealPlate.name.uppercase(),
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text(
-                        text = "Ingredientes detectados:",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        modifier = Modifier.padding(vertical = 8.dp)                    )
-                }                // Lista de ingredientes con capacidad de edición
-                items(currentMealPlate.ingredients) { ingredient ->
-                    IngredientEditableCard(
-                        ingredient = ingredient,
-                        isEditing = false, // Ya no necesitamos el modo de edición inline
-                        editGrams = "", // Ya no se usa
-                        isUpdating = isUpdating && editingIngredientId == ingredient.id,
-                        isLastIngredient = currentMealPlate.ingredients.size == 1,
-                        onEditStart = { 
-                            // Ya no se usa, la edición se abre desde el modal
-                        },
-                        onEditCancel = { 
-                            // Ya no se usa
-                        },
-                        onGramsChange = { 
-                            // Ya no se usa
-                        },                        onEditConfirm = { newGramsValue ->
-                            // La lógica de actualización usando el valor pasado desde el modal
-                            if (newGramsValue != null && newGramsValue > 0) {
-                                isUpdating = true
-                                editingIngredientId = ingredient.id
-                                updateError = null
-                                  mealPlateViewModel.updateIngredientGrams(
-                                    context = context,
-                                    mealPlateId = currentMealPlate.id,
-                                    ingredientId = ingredient.id,
-                                    newGrams = newGramsValue,
-                                    onSuccess = {
-                                        isUpdating = false
-                                        editingIngredientId = null
-                                        editGramsInput = ""
-                                    },
-                                    onError = { error ->
-                                        isUpdating = false
-                                        editingIngredientId = null
-                                        updateError = error
-                                    }
-                                )
-                            }
-                        },onDeleteIngredient = {
-                            // Usar el estado actual del ViewModel en lugar de currentMealPlate capturado
-                            val currentPlate = mealPlate
-                            if (currentPlate != null) {
-                                deletingIngredientId = ingredient.id
-                                deleteError = null
-                                
-                                // Verificar si es el último ingrediente
-                                if (currentPlate.ingredients.size == 1) {
-                                    // Si es el último ingrediente, eliminar todo el meal plate
-                                    mealPlateViewModel.deleteMealPlate(
-                                        context = context,
-                                        mealPlateId = currentPlate.id,
-                                        onSuccess = {
-                                            deletingIngredientId = null
-                                            // Navegar a la pantalla anterior (uploadPhoto)
-                                            navController.navigateUp()
-                                        },
-                                        onError = { error ->
-                                            deletingIngredientId = null
-                                            deleteError = error
-                                        }
-                                    )
-                                } else {
-                                    // Si hay más ingredientes, solo eliminar el ingrediente
-                                    mealPlateViewModel.deleteIngredientFromMealPlate(
-                                        context = context,
-                                        mealPlateId = currentPlate.id,
-                                        ingredientId = ingredient.id,
-                                        onSuccess = {
-                                            deletingIngredientId = null
-                                        },
-                                        onError = { error ->
-                                            deletingIngredientId = null
-                                            deleteError = error
-                                        }
-                                    )
-                                }
-                            }
-                        },
-                        isDeleting = deletingIngredientId == ingredient.id
-                    )
-                }
-                
-                // Botón para agregar alimento
-                item {
-                    Button(
-                        onClick = {
-                            // Aquí se abrirá el modal para agregar alimento
-                            showAddFoodModal = true
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 4.dp,
-                            pressedElevation = 6.dp
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {                // Título del plato
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Agregar Alimento",
-                            style = MaterialTheme.typography.titleMedium.copy(
+                            text = currentMealPlate.name.uppercase(),
+                            style = MaterialTheme.typography.headlineLarge.copy(
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = Color.White
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Ingredientes detectados:",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            modifier = Modifier.padding(vertical = 8.dp)                    )
+                    }                // Lista de ingredientes con capacidad de edición
+                    items(currentMealPlate.ingredients) { ingredient ->
+                        IngredientEditableCard(
+                            ingredient = ingredient,
+                            isEditing = false, // Ya no necesitamos el modo de edición inline
+                            editGrams = "", // Ya no se usa
+                            isUpdating = isUpdating && editingIngredientId == ingredient.id,
+                            isLastIngredient = currentMealPlate.ingredients.size == 1,
+                            onEditStart = {
+                                // Ya no se usa, la edición se abre desde el modal
+                            },
+                            onEditCancel = {
+                                // Ya no se usa
+                            },
+                            onGramsChange = {
+                                // Ya no se usa
+                            },                        onEditConfirm = { newGramsValue ->
+                                // La lógica de actualización usando el valor pasado desde el modal
+                                if (newGramsValue != null && newGramsValue > 0) {
+                                    isUpdating = true
+                                    editingIngredientId = ingredient.id
+                                    updateError = null
+                                    mealPlateViewModel.updateIngredientGrams(
+                                        context = context,
+                                        mealPlateId = currentMealPlate.id,
+                                        ingredientId = ingredient.id,
+                                        newGrams = newGramsValue,
+                                        onSuccess = {
+                                            isUpdating = false
+                                            editingIngredientId = null
+                                            editGramsInput = ""
+                                        },
+                                        onError = { error ->
+                                            isUpdating = false
+                                            editingIngredientId = null
+                                            updateError = error
+                                        }
+                                    )
+                                }
+                            },onDeleteIngredient = {
+                                // Usar el estado actual del ViewModel en lugar de currentMealPlate capturado
+                                val currentPlate = mealPlate
+                                if (currentPlate != null) {
+                                    deletingIngredientId = ingredient.id
+                                    deleteError = null
+
+                                    // Verificar si es el último ingrediente
+                                    if (currentPlate.ingredients.size == 1) {
+                                        // Si es el último ingrediente, eliminar todo el meal plate
+                                        mealPlateViewModel.deleteMealPlate(
+                                            context = context,
+                                            mealPlateId = currentPlate.id,
+                                            onSuccess = {
+                                                deletingIngredientId = null
+                                                // Navegar a la pantalla anterior (uploadPhoto)
+                                                navController.navigateUp()
+                                            },
+                                            onError = { error ->
+                                                deletingIngredientId = null
+                                                deleteError = error
+                                            }
+                                        )
+                                    } else {
+                                        // Si hay más ingredientes, solo eliminar el ingrediente
+                                        mealPlateViewModel.deleteIngredientFromMealPlate(
+                                            context = context,
+                                            mealPlateId = currentPlate.id,
+                                            ingredientId = ingredient.id,
+                                            onSuccess = {
+                                                deletingIngredientId = null
+                                            },
+                                            onError = { error ->
+                                                deletingIngredientId = null
+                                                deleteError = error
+                                            }
+                                        )
+                                    }
+                                }
+                            },
+                            isDeleting = deletingIngredientId == ingredient.id
                         )
                     }
-                }
 
-                // Campo para ingresar glucemia y botón para calcular dosis
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Tarjeta para el cálculo de dosis
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
+                    // Botón para agregar alimento
+                    item {
+                        Button(
+                            onClick = {
+                                // Aquí se abrirá el modal para agregar alimento
+                                showAddFoodModal = true
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                                .height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 4.dp,
+                                pressedElevation = 6.dp
+                            )
                         ) {
-
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Cálculo de Dosis",
-                                style = MaterialTheme.typography.titleLarge.copy(
+                                text = "Agregar Alimento",
+                                style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
-                                color = MaterialTheme.colorScheme.primary
+                                color = Color.White
                             )
-                            
-                            Text(
-                                text = "Ingresa tu nivel actual de glucemia para calcular la dosis de insulina recomendada:",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                        }
+                    }
+
+                    // Campo para ingresar glucemia y botón para calcular dosis
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Tarjeta para el cálculo de dosis
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
                             )
-                              // Campo de entrada para glucemia
-                            OutlinedTextField(
-                                value = glycemiaInput,
-                                onValueChange = { glycemiaInput = it },
-                                label = { Text("Glucemia actual (mg/dL)") },
-                                placeholder = { Text("Entre 25 y 250 mg/dL") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                singleLine = true,
-                                enabled = !isCalculatingDosis,
-                                modifier = Modifier.fillMaxWidth(),
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Bloodtype,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                                supportingText = {
-                                    Text("Valores permitidos: entre 25 y 250 mg/dL")
-                                }
-                            )
-                            
-                            // Mostrar error si lo hay
-                            if (dosisCalculationError != null) {
-                                Text(
-                                    text = dosisCalculationError!!,
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(start = 16.dp)
-                                )
-                            }
-                              // Botón para calcular dosis
-                            Button(
-                                onClick = { 
-                                    val glycemiaValue = glycemiaInput.toDoubleOrNull()
-                                    when {
-                                        glycemiaValue == null -> {
-                                            dosisCalculationError = "Por favor, ingresa un valor válido de glucemia"
-                                        }
-                                        glycemiaValue < 25 -> {
-                                            dosisCalculationError = "No se permite calcular dosis con glucemia menor a 25 mg/dL"
-                                        }
-                                        glycemiaValue > 250 -> {
-                                            dosisCalculationError = "No se recomienda consumir carbohidratos con glucemia superior a 250 mg/dL"
-                                        }
-                                        else -> {
-                                            isCalculatingDosis = true
-                                            dosisCalculationError = null
-                                              mealPlateViewModel.calculateDosis(
-                                                context = context,
-                                                mealPlateId = currentMealPlate.id,
-                                                glycemia = glycemiaValue,
-                                                onSuccess = {
-                                                    isCalculatingDosis = false
-                                                    navController.navigate("dosis")
-                                                },
-                                                onError = { error ->
-                                                    isCalculatingDosis = false
-                                                    dosisCalculationError = error
-                                                }
-                                            )
-                                        }
-                                    }
-                                },                                enabled = glycemiaInput.isNotBlank() && !isCalculatingDosis &&
-                                          glycemiaInput.toDoubleOrNull()?.let { it >= 25 && it <= 250 } ?: false,
+                        ) {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                ),
-                                elevation = ButtonDefaults.buttonElevation(
-                                    defaultElevation = 6.dp,
-                                    pressedElevation = 8.dp
-                                )
+                                    .padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                if (isCalculatingDosis) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(24.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color.White
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                Text(
+                                    text = "Cálculo de Dosis",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                                Text(
+                                    text = "Ingresa tu nivel actual de glucemia para calcular la dosis de insulina recomendada:",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                )
+                                // Campo de entrada para glucemia
+                                OutlinedTextField(
+                                    value = glycemiaInput,
+                                    onValueChange = { glycemiaInput = it },
+                                    label = { Text("Glucemia actual (mg/dL)") },
+                                    placeholder = { Text("Entre 25 y 250 mg/dL") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    singleLine = true,
+                                    enabled = !isCalculatingDosis,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Bloodtype,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    supportingText = {
+                                        Text("Valores permitidos: entre 25 y 250 mg/dL")
+                                    }
+                                )
+
+                                // Mostrar error si lo hay
+                                if (dosisCalculationError != null) {
                                     Text(
-                                        text = "Calculando...",
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        color = Color.White
+                                        text = dosisCalculationError!!,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(start = 16.dp)
                                     )
-                                } else {
-                                    
-                                    Text(
-                                        text = "Calcular Dosis",
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        color = Color.White
+                                }
+                                // Botón para calcular dosis
+                                Button(
+                                    onClick = {
+                                        val glycemiaValue = glycemiaInput.toDoubleOrNull()
+                                        when {
+                                            glycemiaValue == null -> {
+                                                dosisCalculationError = "Por favor, ingresa un valor válido de glucemia"
+                                            }
+                                            glycemiaValue < 25 -> {
+                                                dosisCalculationError = "No se permite calcular dosis con glucemia menor a 25 mg/dL"
+                                            }
+                                            glycemiaValue > 250 -> {
+                                                dosisCalculationError = "No se recomienda consumir carbohidratos con glucemia superior a 250 mg/dL"
+                                            }
+                                            else -> {
+                                                isCalculatingDosis = true
+                                                dosisCalculationError = null
+                                                mealPlateViewModel.calculateDosis(
+                                                    context = context,
+                                                    mealPlateId = currentMealPlate.id,
+                                                    glycemia = glycemiaValue,
+                                                    onSuccess = {
+                                                        isCalculatingDosis = false
+                                                        navController.navigate("dosis")
+                                                    },
+                                                    onError = { error ->
+                                                        isCalculatingDosis = false
+                                                        dosisCalculationError = error
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    },                                enabled = glycemiaInput.isNotBlank() && !isCalculatingDosis &&
+                                            glycemiaInput.toDoubleOrNull()?.let { it >= 25 && it <= 250 } ?: false,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(
+                                        defaultElevation = 6.dp,
+                                        pressedElevation = 8.dp
                                     )
+                                ) {
+                                    if (isCalculatingDosis) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(24.dp),
+                                            strokeWidth = 2.dp,
+                                            color = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Calculando...",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = Color.White
+                                        )
+                                    } else {
+
+                                        Text(
+                                            text = "Calcular Dosis",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = Color.White
+                                        )
+                                    }
                                 }
                             }
                         }
+                    }                // Espacio al final
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
-                }                // Espacio al final
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
-            }
             } // fin del if (currentMealPlate != null)
         }
     }
-      // Diálogo de error para actualizaciones
+    // Diálogo de error para actualizaciones
     if (updateError != null) {
         AlertDialog(
             onDismissRequest = { updateError = null },
@@ -584,7 +584,7 @@ fun MealPlateScreen(
             }
         )
     }
-    
+
     // Diálogo de error para eliminaciones
     if (deleteError != null) {
         AlertDialog(
@@ -846,11 +846,11 @@ fun IngredientEditableCard(
                     showDeleteConfirmation = true
                     false // No dismissamos automáticamente, mostramos el modal
                 }                SwipeToDismissBoxValue.EndToStart -> {
-                    // Swipe de derecha a izquierda -> Editar
-                    editGramsInput = ingredient.grams.toInt().toString()
-                    showEditModal = true
-                    false // No dismissamos automáticamente, mostramos el modal
-                }
+                // Swipe de derecha a izquierda -> Editar
+                editGramsInput = ingredient.grams.toInt().toString()
+                showEditModal = true
+                false // No dismissamos automáticamente, mostramos el modal
+            }
                 else -> false
             }
         },
@@ -901,7 +901,9 @@ fun IngredientEditableCard(
         // SwipeToDismissBox con la card del ingrediente
         SwipeToDismissBox(
             state = dismissState,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .zIndex(1f), // ✅ Nuevo: zIndex para el contenedor
             enableDismissFromStartToEnd = true,
             enableDismissFromEndToStart = true,
             backgroundContent = {
@@ -961,14 +963,16 @@ fun IngredientEditableCard(
                     }
                 }
             }
-        ) {            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(0.dp) // Bordes rectos sin redondear
-            ) {            // Solo modo visualización estática, la edición se hace únicamente mediante swipe
+        ) {
+            Card(
+            modifier = Modifier.fillMaxWidth()
+                .zIndex(2f),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(0.dp) // Bordes rectos sin redondear
+        ) {            // Solo modo visualización estática, la edición se hace únicamente mediante swipe
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -976,34 +980,34 @@ fun IngredientEditableCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Text(
+                    text = ingredient.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
                     Text(
-                        text = ingredient.name,
+                        text = "${String.format("%.0f", ingredient.grams)}g",
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold
                         ),
-                        color = Color.Black,
-                        modifier = Modifier.weight(1f)
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    Column(
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        Text(
-                            text = "${String.format("%.0f", ingredient.grams)}g",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "${String.format("%.1f", ingredient.carbs)}g de HC",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
+                    Text(
+                        text = "${String.format("%.1f", ingredient.carbs)}g de HC",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 }
             }
+        }
         }
 
         // Lengüeta de editar que sobresale del lado derecho
@@ -1205,7 +1209,7 @@ fun IngredientEditableCard(
             textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-      // Modal de edición estético
+    // Modal de edición estético
     if (showEditModal) {
         // Actualizar el valor cada vez que se abre el modal
         LaunchedEffect(showEditModal) {
@@ -1232,11 +1236,11 @@ fun IngredientEditableCard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        tint = Color(0xFF6B9DC3),
-                        modifier = Modifier.size(32.dp)
-                    )
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = Color(0xFF6B9DC3),
+                    modifier = Modifier.size(32.dp)
+                )
                 }
             },
             title = {
@@ -1311,11 +1315,11 @@ fun IngredientEditableCard(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {                                Icon(
-                                    imageVector = Icons.Default.Restaurant,
-                                    contentDescription = null,
-                                    tint = Color(0xFF6B9DC3),
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                imageVector = Icons.Default.Restaurant,
+                                contentDescription = null,
+                                tint = Color(0xFF6B9DC3),
+                                modifier = Modifier.size(20.dp)
+                            )
                                 Text(
                                     text = "Carbohidratos del alimento según los gramos:",
                                     style = MaterialTheme.typography.bodyMedium.copy(
