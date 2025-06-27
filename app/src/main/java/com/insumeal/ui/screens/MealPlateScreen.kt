@@ -42,22 +42,29 @@ fun MealPlateScreen(
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val isLoading by mealPlateViewModel.isLoading.collectAsState()
     val errorMessage by mealPlateViewModel.errorMessage.collectAsState()
-    val hasAttemptedLoad by mealPlateViewModel.hasAttemptedLoad.collectAsState()
-      // Estados para la edición de ingredientes
+    val hasAttemptedLoad by mealPlateViewModel.hasAttemptedLoad.collectAsState()      // Estados para la edición de ingredientes
     var editingIngredientId by remember { mutableStateOf<Int?>(null) }
     var editGrams by remember { mutableStateOf("") }
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
     
+    // Estados para la eliminación de ingredientes
+    var deletingIngredientId by remember { mutableStateOf<Int?>(null) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
+    
     // Estados para el cálculo de dosis
     var glycemiaInput by remember { mutableStateOf("") }
     var isCalculatingDosis by remember { mutableStateOf(false) }
-    var dosisCalculationError by remember { mutableStateOf<String?>(null) }
-    
-    // Efecto para sincronizar los estados y hacer logs
+    var dosisCalculationError by remember { mutableStateOf<String?>(null) }      // Efecto para sincronizar los estados y hacer logs
     LaunchedEffect(mealPlate) {
         android.util.Log.d("MealPlateScreen", "ViewModel mealPlate cambió: ${mealPlate?.name}")
-    }      // Log inicial para verificar el estado al entrar a la pantalla
+        mealPlate?.let { plate ->
+            android.util.Log.d("MealPlateScreen", "Número de ingredientes: ${plate.ingredients.size}")
+            plate.ingredients.forEachIndexed { index, ingredient ->
+                android.util.Log.d("MealPlateScreen", "Ingrediente $index: ${ingredient.name} (ID: ${ingredient.id})")
+            }
+        }
+    }// Log inicial para verificar el estado al entrar a la pantalla
     LaunchedEffect(Unit) {
         android.util.Log.d("MealPlateScreen", "Entrando a MealPlateScreen - Estado inicial:")
         android.util.Log.d("MealPlateScreen", "mealPlate=${mealPlate?.name}, isLoading=${isLoading}, hasAttemptedLoad=${hasAttemptedLoad}")
@@ -65,10 +72,6 @@ fun MealPlateScreen(
         
         // Inicializar el servicio de traducción
         mealPlateViewModel.initializeTranslationService()
-    }
-    // Logs para debugging - observar cambios en el estado
-    LaunchedEffect(mealPlate) {
-        android.util.Log.d("MealPlateScreen", "mealPlate cambió: ${mealPlate?.name}")
     }
     
     LaunchedEffect(isLoading) {
@@ -325,7 +328,25 @@ fun MealPlateScreen(
                                 )
                             } else {
                                 updateError = "Por favor, ingresa un valor válido mayor a 0"                            }
-                        }
+                        },
+                        onDeleteIngredient = {
+                            deletingIngredientId = ingredient.id
+                            deleteError = null
+                            
+                            mealPlateViewModel.deleteIngredientFromMealPlate(
+                                context = context,
+                                mealPlateId = currentMealPlate.id,
+                                ingredientId = ingredient.id,
+                                onSuccess = {
+                                    deletingIngredientId = null
+                                },
+                                onError = { error ->
+                                    deletingIngredientId = null
+                                    deleteError = error
+                                }
+                            )
+                        },
+                        isDeleting = deletingIngredientId == ingredient.id
                     )
                 }
                 
@@ -479,8 +500,7 @@ fun MealPlateScreen(
             } // fin del if (currentMealPlate != null)
         }
     }
-    
-    // Diálogo de error para actualizaciones
+      // Diálogo de error para actualizaciones
     if (updateError != null) {
         AlertDialog(
             onDismissRequest = { updateError = null },
@@ -488,6 +508,20 @@ fun MealPlateScreen(
             text = { Text(updateError!!) },
             confirmButton = {
                 TextButton(onClick = { updateError = null }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+    
+    // Diálogo de error para eliminaciones
+    if (deleteError != null) {
+        AlertDialog(
+            onDismissRequest = { deleteError = null },
+            title = { Text("Error al eliminar ingrediente") },
+            text = { Text(deleteError!!) },
+            confirmButton = {
+                TextButton(onClick = { deleteError = null }) {
                     Text("Aceptar")
                 }
             }
@@ -504,7 +538,9 @@ fun IngredientEditableCard(
     onEditStart: () -> Unit,
     onEditCancel: () -> Unit,
     onGramsChange: (String) -> Unit,
-    onEditConfirm: () -> Unit
+    onEditConfirm: () -> Unit,
+    onDeleteIngredient: () -> Unit,
+    isDeleting: Boolean = false
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -612,7 +648,7 @@ fun IngredientEditableCard(
                     color = Color.Black,
                     modifier = Modifier.weight(1f)
                 )
-                  Row(
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -633,6 +669,28 @@ fun IngredientEditableCard(
                             ),
                             color = MaterialTheme.colorScheme.secondary
                         )
+                    }
+                    
+                    // Botón de eliminar ingrediente
+                    IconButton(
+                        onClick = onDeleteIngredient,
+                        enabled = !isDeleting,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        if (isDeleting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar ingrediente",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                     
                     Icon(

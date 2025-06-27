@@ -269,5 +269,62 @@ class MealPlateViewModel : ViewModel() {
                 _isLoading.value = false
             }
         }
+    }    fun deleteIngredientFromMealPlate(
+        context: Context,
+        mealPlateId: Int,
+        ingredientId: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("MealPlateViewModel", "Eliminando ingrediente: mealPlateId=$mealPlateId, ingredientId=$ingredientId")
+                
+                // Obtener el MealPlate actual
+                val currentMealPlate = _mealPlate.value
+                if (currentMealPlate == null) {
+                    onError("No se encontró información del plato")
+                    return@launch
+                }
+                
+                android.util.Log.d("MealPlateViewModel", "Ingredientes antes de eliminar: ${currentMealPlate.ingredients.size}")
+                currentMealPlate.ingredients.forEach { ingredient ->
+                    android.util.Log.d("MealPlateViewModel", "Ingrediente: ${ingredient.name} (ID: ${ingredient.id})")
+                }
+                
+                val result = apiClient.deleteIngredientFromMealPlate(context, currentMealPlate, ingredientId)
+                
+                result.onSuccess { updatedMealPlate ->
+                    android.util.Log.d("MealPlateViewModel", "Ingrediente eliminado con éxito")
+                    android.util.Log.d("MealPlateViewModel", "Ingredientes después de eliminar: ${updatedMealPlate.ingredients.size}")
+                    updatedMealPlate.ingredients.forEach { ingredient ->
+                        android.util.Log.d("MealPlateViewModel", "Ingrediente restante: ${ingredient.name} (ID: ${ingredient.id})")
+                    }
+                    
+                    _mealPlate.value = updatedMealPlate
+                    android.util.Log.d("MealPlateViewModel", "Estado del MealPlate actualizado en el ViewModel")
+                    onSuccess()
+                }.onFailure { error ->
+                    android.util.Log.e("MealPlateViewModel", "Error al eliminar ingrediente: ${error.message}", error)
+                    val errorMsg = when {
+                        error.message?.contains("401") == true -> 
+                            "Error de autenticación. Tu sesión ha expirado."
+                        error.message?.contains("403") == true -> 
+                            "No tienes permiso para realizar esta acción."
+                        error.message?.contains("404") == true -> 
+                            "No se encontró el ingrediente o plato especificado."
+                        error.message?.contains("timeout") == true -> 
+                            "El servidor está tardando demasiado en responder."
+                        error.message?.contains("host") == true -> 
+                            "No se puede conectar al servidor. Verifica tu conexión."
+                        else -> "Error al eliminar ingrediente: ${error.message}"
+                    }
+                    onError(errorMsg)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateViewModel", "Error inesperado al eliminar ingrediente: ${e.message}", e)
+                onError("Error inesperado: ${e.message}")
+            }
+        }
     }
 }

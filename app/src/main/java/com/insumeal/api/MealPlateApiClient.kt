@@ -371,4 +371,54 @@ class MealPlateApiClient {
             return@withContext Result.failure(e)
         }
     }
+      suspend fun deleteIngredientFromMealPlate(
+        context: Context,
+        currentMealPlate: MealPlate,
+        ingredientId: Int
+    ): Result<MealPlate> = withContext(Dispatchers.IO) {
+        try {
+            Log.d("MealPlateApiClient", "Eliminando ingrediente: mealPlateId=${currentMealPlate.id}, ingredientId=$ingredientId")
+            
+            val mealPlateService = getMealPlateService(context)
+            val response = mealPlateService.deleteIngredientFromMealPlate(currentMealPlate.id, ingredientId)
+            
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+            
+            if (response.isSuccessful) {
+                Log.d("MealPlateApiClient", "Ingrediente eliminado exitosamente del servidor")
+                
+                // Como el backend no retorna el MealPlate actualizado, 
+                // actualizamos localmente removiendo el ingrediente
+                val updatedIngredients = currentMealPlate.ingredients.filter { it.id != ingredientId }
+                Log.d("MealPlateApiClient", "Ingredientes antes: ${currentMealPlate.ingredients.size}, después: ${updatedIngredients.size}")
+                
+                // Recalcular los carbohidratos totales
+                val newTotalCarbs = updatedIngredients.sumOf { it.carbs }
+                
+                val updatedMealPlate = currentMealPlate.copy(
+                    ingredients = updatedIngredients,
+                    totalCarbs = newTotalCarbs
+                )
+                
+                Log.d("MealPlateApiClient", "MealPlate actualizado localmente: totalCarbs=$newTotalCarbs")
+                return@withContext Result.success(updatedMealPlate)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error al eliminar ingrediente: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+                
+                val errorMessage = when (response.code()) {
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "Ingrediente o plato no encontrado"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al eliminar ingrediente: ${response.message()}"
+                }
+                
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al eliminar ingrediente", e)
+            return@withContext Result.failure(e)
+        }
+    }
 }

@@ -30,7 +30,11 @@ interface MealPlateService {
     suspend fun getMealPlateImage(@Path("id_meal_plate") mealPlateId: Int): Response<okhttp3.ResponseBody>
       @GET("/ingredient/meal_plate/{id_meal_plate}")
     suspend fun getMealPlateById(@Path("id_meal_plate") mealPlateId: Int): Response<MealPlateSchema>
-    
-    @DELETE("/meal_plate/all")
+      @DELETE("/meal_plate/all")
     suspend fun deleteAllMealPlates(): Response<Unit>
+      @DELETE("/meal_plate_ingredient/{meal_plate_id}/{ingredient_id}")
+    suspend fun deleteIngredientFromMealPlate(
+        @Path("meal_plate_id") mealPlateId: Int,
+        @Path("ingredient_id") ingredientId: Int
+    ): Response<Unit>
 }
