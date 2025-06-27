@@ -57,7 +57,14 @@ fun MealPlateScreen(
     // Estados para la eliminación de ingredientes
     var deletingIngredientId by remember { mutableStateOf<Int?>(null) }
     var deleteError by remember { mutableStateOf<String?>(null) }
-      // Estados para el cálculo de dosis
+
+    // Estados para agregar alimentos
+    var showAddFoodModal by remember { mutableStateOf(false) }
+    var foodNameInput by remember { mutableStateOf("") }
+    var isAddingFood by remember { mutableStateOf(false) }
+    var addFoodError by remember { mutableStateOf<String?>(null) }
+
+    // Estados para el cálculo de dosis
     val lastGlycemia by mealPlateViewModel.lastGlycemia.collectAsState()
     var glycemiaInput by remember { mutableStateOf("") }
     var isCalculatingDosis by remember { mutableStateOf(false) }
@@ -303,7 +310,8 @@ fun MealPlateScreen(
                         ),
                         modifier = Modifier.padding(vertical = 8.dp)                    )
                 }                // Lista de ingredientes con capacidad de edición
-                items(currentMealPlate.ingredients) { ingredient ->                    IngredientEditableCard(
+                items(currentMealPlate.ingredients) { ingredient ->
+                    IngredientEditableCard(
                         ingredient = ingredient,
                         isEditing = false, // Ya no necesitamos el modo de edición inline
                         editGrams = "", // Ya no se usa
@@ -384,6 +392,41 @@ fun MealPlateScreen(
                     )
                 }
                 
+                // Botón para agregar alimento
+                item {
+                    Button(
+                        onClick = {
+                            // Aquí se abrirá el modal para agregar alimento
+                            showAddFoodModal = true
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 6.dp
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Agregar Alimento",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color.White
+                        )
+                    }
+                }
+
                 // Campo para ingresar glucemia y botón para calcular dosis
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -555,6 +598,221 @@ fun MealPlateScreen(
             }
         )
     }
+
+    // Diálogo para agregar alimento
+    if (showAddFoodModal) {
+        val currentMealPlate = mealPlate // Capturar el meal plate actual
+        if (currentMealPlate != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showAddFoodModal = false
+                    foodNameInput = ""
+                    addFoodError = null
+                },
+                icon = {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(32.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                },
+                title = {
+                    Text(
+                        text = "Agregar Alimento",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Ingrese el nombre del alimento",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        Text(
+                            text = "Las cantidades se van a poder editar una vez se haya agregado el alimento.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        OutlinedTextField(
+                            value = foodNameInput,
+                            onValueChange = {
+                                foodNameInput = it
+                                // Limpiar error cuando el usuario comience a escribir
+                                if (addFoodError != null) {
+                                    addFoodError = null
+                                }
+                            },
+                            label = { Text("Nombre del alimento") },
+                            placeholder = { Text("Ej: galleta de vainilla") },
+                            singleLine = true,
+                            enabled = !isAddingFood,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                                focusedLabelColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Restaurant,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        )
+
+                        // Mostrar error al agregar alimento si lo hay
+                        if (addFoodError != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = addFoodError!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Botones
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Botón Cancelar
+                            OutlinedButton(
+                                onClick = {
+                                    showAddFoodModal = false
+                                    foodNameInput = ""
+                                    addFoodError = null
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outline
+                                ),
+                                enabled = !isAddingFood
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        "Cancelar",
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    )
+                                }
+                            }
+
+                            // Botón Agregar
+                            Button(
+                                onClick = {
+                                    if (foodNameInput.isNotBlank()) {
+                                        isAddingFood = true
+                                        addFoodError = null
+
+                                        mealPlateViewModel.addFoodToMealPlate(
+                                            context = context,
+                                            mealPlateId = currentMealPlate.id,
+                                            foodName = foodNameInput,
+                                            onSuccess = {
+                                                isAddingFood = false
+                                                showAddFoodModal = false
+                                                foodNameInput = ""
+                                                addFoodError = null
+                                            },
+                                            onError = { error ->
+                                                isAddingFood = false
+                                                addFoodError = error
+                                            }
+                                        )
+                                    } else {
+                                        addFoodError = "El nombre del alimento no puede estar vacío"
+                                    }
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ),
+                                enabled = foodNameInput.isNotBlank() && !isAddingFood
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    if (isAddingFood) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            strokeWidth = 2.dp,
+                                            color = Color.White
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                    Text(
+                                        if (isAddingFood) "Agregando..." else "Agregar",
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = { },
+                dismissButton = { },
+                shape = RoundedCornerShape(20.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -575,7 +833,7 @@ fun IngredientEditableCard(
     // Estados para el modal de edición
     var showEditModal by remember { mutableStateOf(false) }
     var editGramsInput by remember { mutableStateOf("") }
-    
+
     // Estado para el modal de confirmación
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -663,7 +921,7 @@ fun IngredientEditableCard(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                
+
                                 Text(
                                     text = "Eliminar",
                                     color = Color.White,
@@ -693,7 +951,7 @@ fun IngredientEditableCard(
                                         fontWeight = FontWeight.Bold
                                     )
                                 )
-                                
+
                             }
                         }
                     }
@@ -784,7 +1042,7 @@ fun IngredientEditableCard(
     // Modal de confirmación para eliminar - diseño mejorado
     if (showDeleteConfirmation) {
         AlertDialog(
-            onDismissRequest = { 
+            onDismissRequest = {
                 showDeleteConfirmation = false
                 coroutineScope.launch {
                     dismissState.reset()
@@ -831,9 +1089,9 @@ fun IngredientEditableCard(
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         Text(
                             text = "Al eliminarlo se borrará todo el plato y volverás a la pantalla anterior.",
                             style = MaterialTheme.typography.bodyLarge.copy(
@@ -849,9 +1107,9 @@ fun IngredientEditableCard(
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         Text(
                             text = "\"${ingredient.name}\"?",
                             style = MaterialTheme.typography.bodyLarge.copy(
@@ -861,9 +1119,9 @@ fun IngredientEditableCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Botones mejorados con mejor diseño
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -903,7 +1161,7 @@ fun IngredientEditableCard(
                                 )
                             }
                         }
-                        
+
                         // Botón Eliminar
                         Button(
                             onClick = {
@@ -955,9 +1213,9 @@ fun IngredientEditableCard(
                 editGramsInput = ingredient.grams.toInt().toString()
             }
         }
-        
+
         AlertDialog(
-            onDismissRequest = { 
+            onDismissRequest = {
                 showEditModal = false
                 editGramsInput = ""
                 coroutineScope.launch {
@@ -1005,7 +1263,7 @@ fun IngredientEditableCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    
+
                     OutlinedTextField(
                         value = editGramsInput,
                         onValueChange = { newValue ->
@@ -1031,9 +1289,9 @@ fun IngredientEditableCard(
                             )
                         }
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     // Vista previa de carbohidratos
                     Card(
                         modifier = Modifier.fillMaxWidth(),                        colors = CardDefaults.cardColors(
@@ -1048,7 +1306,7 @@ fun IngredientEditableCard(
                             val previewCarbs = editGramsInput.toDoubleOrNull()?.let { grams ->
                                 (grams / 100.0) * ingredient.carbsPerHundredGrams
                             } ?: ingredient.carbs
-                            
+
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1066,7 +1324,7 @@ fun IngredientEditableCard(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            
+
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
@@ -1079,9 +1337,9 @@ fun IngredientEditableCard(
                             )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Botones
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),

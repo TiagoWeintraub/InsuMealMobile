@@ -421,4 +421,54 @@ class MealPlateApiClient {
             return@withContext Result.failure(e)
         }
     }
+
+    suspend fun addFoodToMealPlate(
+        context: Context,
+        mealPlateId: Int,
+        foodName: String
+    ): Result<MealPlate> = withContext(Dispatchers.IO) {
+        try {
+            Log.d("MealPlateApiClient", "Agregando alimento '$foodName' al meal plate ID: $mealPlateId")
+
+            val mealPlateService = getMealPlateService(context)
+            val response = mealPlateService.addFoodToMealPlate(mealPlateId, mapOf("food" to foodName))
+
+            Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
+
+            if (response.isSuccessful && response.body() != null) {
+                val responseBody = response.body()!!
+                Log.d("MealPlateApiClient", "Alimento agregado exitosamente")
+
+                // La respuesta contiene meal_plate_details que necesitamos convertir a MealPlate
+                val mealPlateDetails = responseBody.meal_plate_details
+                val mealPlateModel = mealPlateDetails.toModel()
+
+                return@withContext Result.success(mealPlateModel)
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                Log.e("MealPlateApiClient", "Error al agregar alimento: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")
+
+                val errorMessage = when (response.code()) {
+                    400 -> {
+                        // Parsear el error específico del backend
+                        if (errorBody.contains("FOOD_ALREADY_EXISTS")) {
+                            "FOOD_ALREADY_EXISTS"
+                        } else {
+                            "Solicitud inválida: $errorBody"
+                        }
+                    }
+                    401 -> "Error de autenticación"
+                    403 -> "No autorizado"
+                    404 -> "MealPlate no encontrado"
+                    500 -> "Error interno del servidor"
+                    else -> "Error al agregar alimento: ${response.message()}"
+                }
+
+                return@withContext Result.failure(Exception("$errorMessage (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Log.e("MealPlateApiClient", "Error inesperado al agregar alimento", e)
+            return@withContext Result.failure(e)
+        }
+    }
 }

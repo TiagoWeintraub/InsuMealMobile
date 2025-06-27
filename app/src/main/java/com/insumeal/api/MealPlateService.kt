@@ -37,4 +37,10 @@ interface MealPlateService {
         @Path("meal_plate_id") mealPlateId: Int,
         @Path("ingredient_id") ingredientId: Int
     ): Response<Unit>
+
+    @POST("/nutrition/add/food/{meal_plate_id}")
+    suspend fun addFoodToMealPlate(
+        @Path("meal_plate_id") mealPlateId: Int,
+        @Body foodRequest: Map<String, String>
+    ): Response<AddFoodResponse>
 }

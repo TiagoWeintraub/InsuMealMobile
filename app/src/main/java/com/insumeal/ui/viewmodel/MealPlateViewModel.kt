@@ -351,5 +351,61 @@ class MealPlateViewModel : ViewModel() {
                 onError("Error inesperado: ${e.message}")
             }
         }
+    }    fun addFoodToMealPlate(
+        context: Context,
+        mealPlateId: Int,
+        foodName: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("MealPlateViewModel", "Agregando alimento '$foodName' al meal plate ID: $mealPlateId")
+                
+                val result = apiClient.addFoodToMealPlate(context, mealPlateId, foodName)
+                
+                result.onSuccess { updatedMealPlate ->
+                    android.util.Log.d("MealPlateViewModel", "Alimento agregado exitosamente")
+
+                    // Traducir el meal plate actualizado antes de actualizar el estado
+                    viewModelScope.launch {
+                        try {
+                            val translatedMealPlate = translationService.translateMealPlateToSpanish(updatedMealPlate)
+                            android.util.Log.d("MealPlateViewModel", "Meal plate traducido después de agregar alimento")
+
+                            // Actualizar el estado del meal plate con los nuevos datos traducidos
+                            _mealPlate.value = translatedMealPlate
+                            onSuccess()
+                        } catch (e: Exception) {
+                            android.util.Log.e("MealPlateViewModel", "Error en traducción después de agregar alimento: ${e.message}", e)
+                            // Si falla la traducción, usar el meal plate sin traducir
+                            _mealPlate.value = updatedMealPlate
+                            onSuccess()
+                        }
+                    }
+                }.onFailure { error ->
+                    android.util.Log.e("MealPlateViewModel", "Error al agregar alimento: ${error.message}", error)
+                    val errorMsg = when {
+                        error.message?.contains("FOOD_ALREADY_EXISTS") == true -> 
+                            "Este alimento ya está en el plato"
+                        error.message?.contains("MealPlate no encontrado") == true -> 
+                            "El plato no existe o no se pudo encontrar"
+                        error.message?.contains("401") == true -> 
+                            "Error de autenticación. Tu sesión ha expirado."
+                        error.message?.contains("403") == true -> 
+                            "No tienes permiso para agregar alimentos a este plato."
+                        error.message?.contains("timeout") == true -> 
+                            "El servidor está tardando demasiado en responder."
+                        error.message?.contains("host") == true -> 
+                            "No se puede conectar al servidor. Verifica tu conexión a internet."
+                        else -> "Error al agregar el alimento: ${error.message}"
+                    }
+                    onError(errorMsg)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MealPlateViewModel", "Error inesperado al agregar alimento: ${e.message}", e)
+                onError("Error inesperado: ${e.message}")
+            }
+        }
     }
 }
