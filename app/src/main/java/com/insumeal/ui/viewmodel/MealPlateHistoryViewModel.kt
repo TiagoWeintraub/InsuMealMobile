@@ -1,5 +1,6 @@
 package com.insumeal.ui.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +16,7 @@ class MealPlateHistoryViewModel : ViewModel() {
     private val _historyList = MutableStateFlow<List<MealPlateHistory>>(emptyList())
     val historyList: StateFlow<List<MealPlateHistory>> = _historyList
     
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true) // Iniciar con true para mostrar carga inmediatamente
     val isLoading: StateFlow<Boolean> = _isLoading
     
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -24,6 +25,7 @@ class MealPlateHistoryViewModel : ViewModel() {
     private val apiClient = MealPlateApiClient()
     private val translationService = TranslationService.getInstance()
     
+    @SuppressLint("SuspiciousIndentation")
     fun loadHistory(context: Context) {
         viewModelScope.launch {
             _isLoading.value = true

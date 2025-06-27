@@ -25,24 +25,23 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FoodHistoryScreen(navController: NavController) {
+fun FoodHistoryScreen(
+    navController: NavController,
+    viewModel: MealPlateHistoryViewModel? = null // Hacer el ViewModel opcional
+) {
     val context = LocalContext.current
-    val viewModel = remember { MealPlateHistoryViewModel() }
-    
-    val historyList by viewModel.historyList.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    
+    // Usar el ViewModel pasado como parámetro o crear uno nuevo si no se proporciona
+    val historyViewModel = viewModel ?: remember { MealPlateHistoryViewModel() }
+
+    val historyList by historyViewModel.historyList.collectAsState()
+    val isLoading by historyViewModel.isLoading.collectAsState()
+    val errorMessage by historyViewModel.errorMessage.collectAsState()
+
     // Estados para el diálogo de confirmación
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     var isDeletingAll by remember { mutableStateOf(false) }
     var deleteAllError by remember { mutableStateOf<String?>(null) }
-      // Cargar el historial cuando se inicia la pantalla
-    LaunchedEffect(Unit) {
-        viewModel.initializeTranslationService()
-        viewModel.loadHistory(context)
-    }
-    
+
     Scaffold(        topBar = {
             TopAppBar(
                 title = { Text("Historial de Comidas") },
@@ -81,19 +80,42 @@ fun FoodHistoryScreen(navController: NavController) {
         ) {
             when {
                 isLoading -> {
-                    // Mostrar indicador de carga
+                    // Mostrar indicador de carga mejorado
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(32.dp)
                         ) {
-                            CircularProgressIndicator()
-                            Spacer(modifier = Modifier.height(16.dp))
+                            // Círculo de carga más grande y con colores del tema
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(60.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 6.dp
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            // Texto principal más prominente
                             Text(
-                                "Cargando historial...",
-                                style = MaterialTheme.typography.bodyLarge
+                                text = "Cargando historial de comidas",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Texto secundario más descriptivo
+                            Text(
+                                text = "Obteniendo tus análisis anteriores...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -118,8 +140,8 @@ fun FoodHistoryScreen(navController: NavController) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
                                 onClick = {
-                                    viewModel.clearError()
-                                    viewModel.loadHistory(context)
+                                    historyViewModel.clearError()
+                                    historyViewModel.loadHistory(context)
                                 }
                             ) {
                                 Text("Reintentar")
@@ -128,8 +150,8 @@ fun FoodHistoryScreen(navController: NavController) {
                     }
                 }
                 
-                historyList.isEmpty() -> {
-                    // Mostrar mensaje cuando no hay datos
+                !isLoading && historyList.isEmpty() -> {
+                    // Mostrar mensaje cuando no hay datos (solo cuando NO se está cargando)
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -155,20 +177,21 @@ fun FoodHistoryScreen(navController: NavController) {
                 }
                 
                 else -> {
-                    // Mostrar lista del historial
+                    // Mostrar lista del historial (solo cuando NO se está cargando Y hay datos)
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {                        items(historyList) { historyItem ->
+                    ) {
+                        items(historyList) { historyItem ->
                             MealPlateHistoryCard(
                                 historyItem = historyItem,
                                 onViewDetails = { mealPlateId ->
                                     navController.navigate("foodHistoryMealPlate/$mealPlateId")
                                 },
                                 onDelete = { mealPlateId ->
-                                    viewModel.deleteMealPlate(
+                                    historyViewModel.deleteMealPlate(
                                         context = context,
                                         mealPlateId = mealPlateId,
                                         onSuccess = {
@@ -182,7 +205,8 @@ fun FoodHistoryScreen(navController: NavController) {
                             )
                         }
                     }
-                }            }
+                }
+            }
         }
     }
     
@@ -203,7 +227,7 @@ fun FoodHistoryScreen(navController: NavController) {
                         isDeletingAll = true
                         deleteAllError = null
                         
-                        viewModel.deleteAllMealPlates(
+                        historyViewModel.deleteAllMealPlates(
                             context = context,
                             onSuccess = {
                                 isDeletingAll = false
@@ -393,4 +417,3 @@ fun MealPlateHistoryCard(
         )
     }
 }
-

@@ -314,7 +314,16 @@ fun FoodHistoryMealPlateScreen(
                                             thickness = 1.dp
                                         )
 
-                                        // Glucemia registrada
+                                        // Calcular dosis de corrección e insulina para carbohidratos
+                                        val correctionInsulin = if (mealPlate!!.glycemia > 100) {
+                                            // Fórmula típica: (glucemia actual - 100) / 50
+                                            // Esto es una aproximación, la fórmula real puede variar
+                                            (mealPlate!!.glycemia - 100) / 50.0
+                                        } else 0.0
+
+                                        val carbInsulin = mealPlate!!.dosis - correctionInsulin.coerceAtLeast(0.0)
+
+                                        // Insulina para corrección
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             verticalAlignment = Alignment.CenterVertically,
@@ -325,21 +334,21 @@ fun FoodHistoryMealPlateScreen(
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Default.Bloodtype,
+                                                    imageVector = Icons.Default.Healing,
                                                     contentDescription = null,
                                                     tint = MaterialTheme.colorScheme.error,
                                                     modifier = Modifier.size(24.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(12.dp))
                                                 Text(
-                                                    text = "Glucemia registrada",
+                                                    text = "Insulina para corrección",
                                                     style = MaterialTheme.typography.titleMedium,
                                                     color = Color.Black,
                                                     maxLines = 2
                                                 )
                                             }
                                             Text(
-                                                text = "${String.format("%.0f", mealPlate!!.glycemia)} mg/dL",
+                                                text = "${String.format("%.1f", correctionInsulin.coerceAtLeast(0.0))} U",
                                                 style = MaterialTheme.typography.titleMedium.copy(
                                                     fontWeight = FontWeight.Bold
                                                 ),
@@ -352,7 +361,7 @@ fun FoodHistoryMealPlateScreen(
                                             thickness = 1.dp
                                         )
 
-                                        // Total de carbohidratos
+                                        // Insulina para carbohidratos
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             verticalAlignment = Alignment.CenterVertically,
@@ -370,56 +379,18 @@ fun FoodHistoryMealPlateScreen(
                                                 )
                                                 Spacer(modifier = Modifier.width(12.dp))
                                                 Text(
-                                                    text = "Total de carbohidratos",
+                                                    text = "Insulina para carbohidratos",
                                                     style = MaterialTheme.typography.titleMedium,
                                                     color = Color.Black,
                                                     maxLines = 2
                                                 )
                                             }
                                             Text(
-                                                text = "${String.format("%.1f", mealPlate!!.totalCarbs)} g",
+                                                text = "${String.format("%.1f", carbInsulin.coerceAtLeast(0.0))} U",
                                                 style = MaterialTheme.typography.titleMedium.copy(
                                                     fontWeight = FontWeight.Bold
                                                 ),
                                                 color = MaterialTheme.colorScheme.secondary
-                                            )
-                                        }
-
-                                        HorizontalDivider(
-                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                            thickness = 1.dp
-                                        )
-
-                                        // Dosis total calculada
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.weight(1f)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.MedicalServices,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(12.dp))
-                                                Text(
-                                                    text = "Dosis total calculada",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = Color.Black,
-                                                    maxLines = 2
-                                                )
-                                            }
-                                            Text(
-                                                text = "${String.format("%.2f", mealPlate!!.dosis)} U",
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                    fontWeight = FontWeight.Bold
-                                                ),
-                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                     }
@@ -519,14 +490,14 @@ fun FoodHistoryMealPlateScreen(
                                                                 maxLines = 2
                                                             )
                                                             Text(
-                                                                text = "${String.format("%.0f", ingredient.grams)} g",
+                                                                text = "${String.format("%.0f", ingredient.grams)}g",
                                                                 style = MaterialTheme.typography.bodyMedium,
                                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                             )
                                                         }
                                                     }
                                                     Text(
-                                                        text = "${String.format("%.1f", ingredient.carbs)} g carbohidratos",
+                                                        text = "${String.format("%.1f", ingredient.carbs)}g de HC",
                                                         style = MaterialTheme.typography.titleMedium.copy(
                                                             fontWeight = FontWeight.Bold
                                                         ),

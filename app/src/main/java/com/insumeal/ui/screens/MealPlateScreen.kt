@@ -988,14 +988,14 @@ fun IngredientEditableCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "${String.format("%.0f", ingredient.grams)} g",
+                            text = "${String.format("%.0f", ingredient.grams)}g",
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "${String.format("%.1f", ingredient.carbs)} g de carbohidratos",
+                            text = "${String.format("%.1f", ingredient.carbs)}g de HC",
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Medium
                             ),
@@ -1187,7 +1187,7 @@ fun IngredientEditableCard(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
-                                    "Sí, eliminar",
+                                    "Eliminar",
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Medium
                                     )
@@ -1328,7 +1328,7 @@ fun IngredientEditableCard(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "${String.format("%.1f", previewCarbs)} g de carbohidratos",
+                                text = "${String.format("%.1f", previewCarbs)} g de HC",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),

@@ -41,6 +41,10 @@ import coil.compose.rememberAsyncImagePainter
 import com.insumeal.ui.viewmodel.MealPlateViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,17 +62,31 @@ fun UploadPhotoScreen(
     // Estado local para cuando no se detectan comidas
     var showNoFoodDetectedDialog by remember { mutableStateOf(false) }
     
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bmp ->
-        if (bmp != null) {
+    // Crear URI para la foto de alta resolución
+    val photoUri = remember {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "JPEG_${timeStamp}_"
+        val storageDir = context.getExternalFilesDir(null)
+        val imageFile = File.createTempFile(imageFileName, ".jpg", storageDir)
+
+        androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            imageFile
+        )
+    }
+
+    // Cambiar de TakePicturePreview a TakePicture para captura en alta resolución
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
             try {
-                // Guardamos el bitmap y limpiamos la URI para evitar conflictos
-                bitmap = bmp
-                imageUri = null
-                // También establecemos la imagen en el ViewModel directamente
-                mealPlateViewModel.setImage(null, bmp)
+                // Usar la URI de alta resolución en lugar de bitmap
+                imageUri = photoUri
+                bitmap = null
+                mealPlateViewModel.setImage(photoUri, null)
             } catch (e: Exception) {
-                // Mostrar un error si algo sale mal
-                // No podemos asignar directamente, el ViewModel maneja los errores internamente
+                // Manejar errores
+                android.util.Log.e("UploadPhotoScreen", "Error al capturar foto: ${e.message}")
             }
         }
     }
@@ -355,7 +373,7 @@ fun UploadPhotoScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Button(
-                        onClick = { cameraLauncher.launch(null) },
+                        onClick = { cameraLauncher.launch(photoUri) }, // Pasar la URI de alta resolución
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp),
@@ -375,7 +393,7 @@ fun UploadPhotoScreen(
                         )
                         Text(
                             "Tomar Foto",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Bold
                             )
                         )
@@ -402,7 +420,7 @@ fun UploadPhotoScreen(
                         )
                         Text(
                             "Galería",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Bold
                             )
                         )
@@ -478,5 +496,3 @@ fun UploadPhotoScreen(
         } // END OF: Bottom Content Column
         } // END OF: Main Column
     } // END OF: Scaffold
-
-

@@ -493,14 +493,14 @@ fun DosisScreen(
                                                         maxLines = 2
                                                     )
                                                     Text(
-                                                        text = "${String.format("%.0f", ingredient.grams)} g",
+                                                        text = "${String.format("%.0f", ingredient.grams)}g",
                                                         style = MaterialTheme.typography.bodyMedium,
                                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                     )
                                                 }
                                             }
                                             Text(
-                                                text = "${String.format("%.1f", ingredient.carbs)} g carbohidratos",
+                                                text = "${String.format("%.1f", ingredient.carbs)}g de HC",
                                                 style = MaterialTheme.typography.titleMedium.copy(
                                                     fontWeight = FontWeight.Bold
                                                 ),

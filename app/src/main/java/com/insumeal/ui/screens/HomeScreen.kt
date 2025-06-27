@@ -237,7 +237,7 @@ fun HomeScreen(navController: NavController, context: Context) {    val tokenMan
                         title = "Ver Historial",
                         description = "Consulta tus platos anteriores",
                         icon = Icons.Filled.History,
-                        onClick = { navController.navigate("foodHistory") },
+                        onClick = { navController.navigate("loadingHistory") }, // Cambiar a loadingHistory
                         showArrow = false
                     )
                     Spacer(modifier = Modifier.height(12.dp))

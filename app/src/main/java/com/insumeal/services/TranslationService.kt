@@ -124,7 +124,8 @@ class TranslationService {
         "beans" to "arvejas",
         "pie" to "tarta",
         "pie crust" to "masa de tarta",
-        "quiche" to "tarta"
+        "quiche" to "tarta",
+        "avocado" to "palta"
     )
     
     companion object {

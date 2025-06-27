@@ -40,9 +40,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MealPlateScreensContainer(navController: NavHostController) {
-    // Crear el ViewModel compartido en un contexto @Composable con una key específica para mantenerlo
+    // Crear los ViewModels compartidos en un contexto @Composable con keys específicas para mantenerlos
     val mealPlateViewModel: com.insumeal.ui.viewmodel.MealPlateViewModel = viewModel(key = "shared_meal_plate_vm")
-    
+    val historyViewModel: com.insumeal.ui.viewmodel.MealPlateHistoryViewModel = viewModel(key = "shared_history_vm")
+
     NavHost(
         navController = navController,
         startDestination = "login"
@@ -88,8 +89,13 @@ fun MealPlateScreensContainer(navController: NavHostController) {
         composable("dosis") {
             DosisScreen(navController, mealPlateViewModel)
         }
+
+        composable("loadingHistory") {
+            LoadingHistoryScreen(navController, historyViewModel)
+        }
+
         composable("foodHistory") {
-            FoodHistoryScreen(navController)
+            FoodHistoryScreen(navController, historyViewModel)
         }
         
         composable(
@@ -117,4 +123,3 @@ fun MealPlateScreensContainer(navController: NavHostController) {
         }
     }
 }
-
