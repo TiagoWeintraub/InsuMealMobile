@@ -51,11 +51,18 @@ fun MealPlateScreen(
     // Estados para la eliminación de ingredientes
     var deletingIngredientId by remember { mutableStateOf<Int?>(null) }
     var deleteError by remember { mutableStateOf<String?>(null) }
-    
-    // Estados para el cálculo de dosis
+      // Estados para el cálculo de dosis
+    val lastGlycemia by mealPlateViewModel.lastGlycemia.collectAsState()
     var glycemiaInput by remember { mutableStateOf("") }
     var isCalculatingDosis by remember { mutableStateOf(false) }
-    var dosisCalculationError by remember { mutableStateOf<String?>(null) }      // Efecto para sincronizar los estados y hacer logs
+    var dosisCalculationError by remember { mutableStateOf<String?>(null) }
+    
+    // Efecto para restaurar la glucemia guardada
+    LaunchedEffect(lastGlycemia) {
+        if (lastGlycemia.isNotEmpty() && glycemiaInput.isEmpty()) {
+            glycemiaInput = lastGlycemia
+        }
+    }// Efecto para sincronizar los estados y hacer logs
     LaunchedEffect(mealPlate) {
         android.util.Log.d("MealPlateScreen", "ViewModel mealPlate cambió: ${mealPlate?.name}")
         mealPlate?.let { plate ->

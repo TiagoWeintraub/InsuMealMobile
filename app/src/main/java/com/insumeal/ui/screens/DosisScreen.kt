@@ -43,26 +43,16 @@ fun DosisScreen(
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val dosisCalculation by mealPlateViewModel.dosisCalculation.collectAsState()
     val context = LocalContext.current
-    
-    Scaffold(
+      Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Cálculo de Dosis") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    titleContentColor = Color.White
                 )
             )
-        }    ) { paddingValues ->
+        }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,10 +65,9 @@ fun DosisScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             // Nombre del plato en mayúsculas y más grande
-            if (mealPlate != null) {
-                Text(
+            if (mealPlate != null) {                Text(
                     text = mealPlate!!.name.uppercase(),
-                    style = MaterialTheme.typography.titleLarge.copy(
+                    style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.Bold
                     ),
                     textAlign = TextAlign.Center,

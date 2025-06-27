@@ -44,6 +44,10 @@ class MealPlateViewModel : ViewModel() {
     private val _dosisCalculation = MutableStateFlow<DosisCalculation?>(null)
     val dosisCalculation: StateFlow<DosisCalculation?> = _dosisCalculation
     
+    // Para preservar la glucemia ingresada por el usuario
+    private val _lastGlycemia = MutableStateFlow<String>("")
+    val lastGlycemia: StateFlow<String> = _lastGlycemia
+    
     fun setImage(uri: Uri?, bmp: Bitmap?) {
         imageUri = uri
         bitmap = bmp
@@ -57,6 +61,20 @@ class MealPlateViewModel : ViewModel() {
     }    
     fun clearError() {
         _errorMessage.value = null
+    }
+    
+    /**
+     * Función para guardar la glucemia ingresada
+     */
+    fun saveGlycemia(glycemia: String) {
+        _lastGlycemia.value = glycemia
+    }
+    
+    /**
+     * Función para limpiar la glucemia guardada
+     */
+    fun clearGlycemia() {
+        _lastGlycemia.value = ""
     }
     
     /**
@@ -182,8 +200,7 @@ class MealPlateViewModel : ViewModel() {
                 onError("Error inesperado: ${e.message}")
             }
         }
-    }
-      fun calculateDosis(
+    }    fun calculateDosis(
         context: Context,
         mealPlateId: Int,
         glycemia: Double,
@@ -194,6 +211,8 @@ class MealPlateViewModel : ViewModel() {
             try {
                 android.util.Log.d("MealPlateViewModel", "Calculando dosis para mealPlateId=$mealPlateId con glycemia=$glycemia")
                 _isLoading.value = true
+                  // Guardar la glucemia ingresada antes de hacer el cálculo (como entero)
+                _lastGlycemia.value = glycemia.toInt().toString()
                 
                 val result = apiClient.calculateDosis(context, mealPlateId, glycemia)
                 
