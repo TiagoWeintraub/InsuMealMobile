@@ -1,7 +1,11 @@
 package com.insumeal.ui.screens
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,7 +48,12 @@ fun FoodHistoryMealPlateScreen(
     val mealPlate by viewModel.mealPlate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
-      // Cargar los detalles del meal plate cuando se inicia la pantalla
+
+    // Estados para controlar la expansión de los desplegables
+    var isDosisExpanded by remember { mutableStateOf(false) }
+    var isIngredientsExpanded by remember { mutableStateOf(false) }
+
+    // Cargar los detalles del meal plate cuando se inicia la pantalla
     LaunchedEffect(mealPlateId) {
         viewModel.initializeTranslationService()
         viewModel.loadMealPlateDetails(context, mealPlateId)
@@ -240,9 +249,11 @@ fun FoodHistoryMealPlateScreen(
                             }
                         }
                         
-                        // Lista de ingredientes
+                        // Desglose del cálculo (desplegable)
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { isDosisExpanded = !isDosisExpanded },
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
@@ -250,31 +261,304 @@ fun FoodHistoryMealPlateScreen(
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Column(
-                                modifier = Modifier.padding(20.dp)
-                            ) {                                Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Calculate,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Desglose del cálculo",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
                                     Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.List,
-                                        contentDescription = null,
+                                        imageVector = if (isDosisExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (isDosisExpanded) "Colapsar" else "Expandir",
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(32.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Ingredientes Detectados",
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
+                                }
+
+                                // Detalles del cálculo (desplegable)
+                                AnimatedVisibility(
+                                    visible = isDosisExpanded,
+                                    enter = expandVertically(),
+                                    exit = shrinkVertically()
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 20.dp),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        HorizontalDivider(
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                            thickness = 1.dp
+                                        )
+
+                                        // Glucemia registrada
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Bloodtype,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = "Glucemia registrada",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = Color.Black,
+                                                    maxLines = 2
+                                                )
+                                            }
+                                            Text(
+                                                text = "${String.format("%.0f", mealPlate!!.glycemia)} mg/dL",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+
+                                        HorizontalDivider(
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                            thickness = 1.dp
+                                        )
+
+                                        // Total de carbohidratos
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.LocalDining,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.secondary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = "Total de carbohidratos",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = Color.Black,
+                                                    maxLines = 2
+                                                )
+                                            }
+                                            Text(
+                                                text = "${String.format("%.1f", mealPlate!!.totalCarbs)} g",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                        }
+
+                                        HorizontalDivider(
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                            thickness = 1.dp
+                                        )
+
+                                        // Dosis total calculada
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.MedicalServices,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = "Dosis total calculada",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = Color.Black,
+                                                    maxLines = 2
+                                                )
+                                            }
+                                            Text(
+                                                text = "${String.format("%.2f", mealPlate!!.dosis)} U",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Desglose de ingredientes (desplegable)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { isIngredientsExpanded = !isIngredientsExpanded },
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.LocalDining,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Ingredientes Detectados",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    Icon(
+                                        imageVector = if (isIngredientsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (isIngredientsExpanded) "Colapsar" else "Expandir",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(32.dp)
                                     )
                                 }
                                 
-                                Spacer(modifier = Modifier.height(16.dp))
-                                  mealPlate!!.ingredients.forEach { ingredient ->
-                                    IngredientHistoryCard(ingredient = ingredient)
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                AnimatedVisibility(
+                                    visible = isIngredientsExpanded,
+                                    enter = expandVertically(),
+                                    exit = shrinkVertically()
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 20.dp),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        if (mealPlate!!.ingredients.isNotEmpty()) {
+                                            // Línea divisora inicial
+                                            HorizontalDivider(
+                                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                                thickness = 1.dp
+                                            )
+
+                                            mealPlate!!.ingredients.forEachIndexed { index, ingredient ->
+                                                // Información del ingrediente con el mismo estilo que el desglose del cálculo
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.weight(1f)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Restaurant,
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.colorScheme.secondary,
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(12.dp))
+                                                        Column {
+                                                            Text(
+                                                                text = ingredient.name,
+                                                                style = MaterialTheme.typography.titleMedium,
+                                                                color = Color.Black,
+                                                                maxLines = 2
+                                                            )
+                                                            Text(
+                                                                text = "${String.format("%.0f", ingredient.grams)} g",
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                            )
+                                                        }
+                                                    }
+                                                    Text(
+                                                        text = "${String.format("%.1f", ingredient.carbs)} g carbohidratos",
+                                                        style = MaterialTheme.typography.titleMedium.copy(
+                                                            fontWeight = FontWeight.Bold
+                                                        ),
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                }
+
+                                                // Línea divisora entre ingredientes (excepto después del último)
+                                                if (index < mealPlate!!.ingredients.size - 1) {
+                                                    HorizontalDivider(
+                                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                                        thickness = 1.dp
+                                                    )
+                                                }
+                                            }
+                                        } else {
+                                            HorizontalDivider(
+                                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                                thickness = 1.dp
+                                            )
+
+                                            Text(
+                                                text = "No hay información detallada de ingredientes disponible",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 16.dp)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -414,4 +698,3 @@ fun IngredientHistoryCard(ingredient: com.insumeal.models.Ingredient) {
         }
     }
 }
-

@@ -121,7 +121,10 @@ class TranslationService {
         "grated cheese" to "queso rallado",
         "lasagna noodles" to "láminas de lasaña",
         "lasagna" to "lasaña",
-        "beans" to "arvejas"
+        "beans" to "arvejas",
+        "pie" to "tarta",
+        "pie crust" to "masa de tarta",
+        "quiche" to "tarta"
     )
     
     companion object {

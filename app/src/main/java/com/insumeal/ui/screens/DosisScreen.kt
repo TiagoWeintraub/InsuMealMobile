@@ -457,14 +457,71 @@ fun DosisScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    .padding(top = 20.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 if (mealPlate?.ingredients?.isNotEmpty() == true) {
-                                    mealPlate!!.ingredients.forEach { ingredient ->
-                                        IngredientHistoryCard(ingredient = ingredient)
+                                    // Línea divisora inicial
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        thickness = 1.dp
+                                    )
+
+                                    mealPlate!!.ingredients.forEachIndexed { index, ingredient ->
+                                        // Información del ingrediente con el mismo estilo que el desglose del cálculo
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Restaurant,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.secondary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Column {
+                                                    Text(
+                                                        text = ingredient.name,
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        color = Color.Black,
+                                                        maxLines = 2
+                                                    )
+                                                    Text(
+                                                        text = "${String.format("%.0f", ingredient.grams)} g",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                    )
+                                                }
+                                            }
+                                            Text(
+                                                text = "${String.format("%.1f", ingredient.carbs)} g carbohidratos",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                        }
+
+                                        // Línea divisora entre ingredientes (excepto después del último)
+                                        if (index < mealPlate!!.ingredients.size - 1) {
+                                            HorizontalDivider(
+                                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                                thickness = 1.dp
+                                            )
+                                        }
                                     }
                                 } else {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        thickness = 1.dp
+                                    )
+
                                     Text(
                                         text = "No hay información detallada de ingredientes disponible",
                                         style = MaterialTheme.typography.bodyMedium,
