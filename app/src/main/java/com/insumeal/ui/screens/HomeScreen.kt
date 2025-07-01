@@ -281,13 +281,13 @@ fun HomeScreen(navController: NavController, context: Context) {
                             }
                         }
 
-                        // Contenido principal del header
+                        // Solo el logo dentro del gradiente
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
-                                .padding(bottom = 32.dp)
+                                .padding(bottom = 16.dp)
                         ) {
                             // Logo de la app
                             Image(
@@ -297,38 +297,46 @@ fun HomeScreen(navController: NavController, context: Context) {
                                     .size(120.dp),
                                 contentScale = ContentScale.Fit
                             )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Text(
-                                text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido!",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 26.sp
-                                ),
-                                color = Color(0xFF2D3748)
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = "¿Qué vas a comer hoy?",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = Color(0xFF4A5568)
-                            )
                         }
                     }
                 }
 
-                // Contenido principal
+                // Contenido principal (ahora incluye los mensajes fuera del gradiente)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
+                    // Mensajes movidos fuera del gradiente
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp)
+                    ) {
+                        Text(
+                            text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido!",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 26.sp
+                            ),
+                            color = Color(0xFF2D3748),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "¿Qué vas a comer hoy?",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color(0xFF4A5568),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+
                     // Sección de acciones rápidas
                     Text(
                         text = "Acciones Rápidas",

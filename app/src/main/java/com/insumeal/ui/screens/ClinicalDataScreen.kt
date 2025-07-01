@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,14 +20,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -45,6 +45,9 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
 
+    // Estado de scroll
+    val scrollState = rememberScrollState()
+
     // Si los datos clínicos son nulos, intentamos cargarlos
     LaunchedEffect(Unit) {
         if (clinicalData == null) {
@@ -62,12 +65,14 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
     Scaffold(
         containerColor = Color(0xFFF7FAFC)
     ) { paddingValues ->
+        // TODO EL CONTENIDO AHORA ES SCROLLABLE, INCLUYENDO EL HEADER
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState) // SCROLL APLICADO A TODO EL CONTENIDO
                 .background(Color(0xFFF7FAFC))
         ) {
-            // Header con gradiente moderno
+            // Header con gradiente moderno - AHORA SE MUEVE CON EL SCROLL
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,7 +91,7 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 16.dp)
-                            .statusBarsPadding(),
+                            .statusBarsPadding(), // Mantener el statusBarsPadding para evitar superposición
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
@@ -104,433 +109,272 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Text(
-                            text = "Datos Clínicos",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp
-                            ),
-                            color = Color.White
-                        )
+                        // Título centrado
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Datos Clínicos",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                ),
+                                color = Color.White
+                            )
+                        }
                     }
+
+                    // Extender el gradiente
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 
-            // Contenido principal
+            // Contenido principal - AHORA DENTRO DEL SCROLL GENERAL
             if (clinicalData != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Mensaje descriptivo movido desde el header
-                    Text(
-                        text = "Configura tus parámetros médicos para obtener cálculos personalizados",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Color(0xFF4A5568),
-                        textAlign = TextAlign.Center,
+                    // Header de bienvenida - SIN CARD, INTEGRADO AL FONDO
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
+                            .padding(vertical = 8.dp), // Menos padding ya que no hay card
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocalHospital,
+                            contentDescription = null,
+                            tint = Color(0xFFFF6B35),
+                            modifier = Modifier.size(48.dp)
+                        )
 
-                    Text(
-                        text = "Parámetros Médicos",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
-                        ),
-                        color = Color(0xFF2D3748),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    EditableClinicalDataCard(
+                        Text(
+                            text = "Parámetros Médicos",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            ),
+                            color = Color(0xFF2D3748),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Configura tus parámetros médicos para obtener cálculos personalizados de insulina",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 16.sp,
+                                lineHeight = 22.sp
+                            ),
+                            color = Color(0xFF64748B),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // Sección Sensibilidad a la Insulina
+                    ParameterSection(
                         title = "Sensibilidad a la Insulina",
+                        description = "Indica cuántos mg/dL disminuye la glucemia con una unidad de insulina rápida",
+                        icon = Icons.Default.MonitorHeart,
+                        iconColor = Color(0xFF38A169),
                         value = clinicalData!!.sensitivity.toInt().toString(),
                         unit = "mg/dl por unidad",
-                        description = "La sensibilidad indica cuántos mg/dL disminuye la glucemia con una unidad de insulina rápida",
-                        icon = Icons.Default.MonitorHeart,
                         fieldName = "sensitivity",
-                        isEditing = editingField == "sensitivity",
+                        editingField = editingField,
                         editValue = editValue,
                         isUpdating = isUpdating,
-                        onEditStart = { 
+                        onEditStart = {
                             editingField = "sensitivity"
                             editValue = clinicalData!!.sensitivity.toInt().toString()
                         },
-                        onEditCancel = { 
+                        onEditCancel = {
                             editingField = null
                             editValue = ""
                             updateError = null
                         },
                         onValueChange = { editValue = it },
-                        onEditConfirm = {
-                            val newValue = editValue.toIntOrNull()
-                            when {
-                                newValue == null -> {
-                                    updateError = "Por favor, ingresa un número válido"
-                                }
-                                newValue < 10 || newValue > 100 -> {
-                                    updateError = "La sensibilidad debe estar entre 10 y 100"
-                                }
-                                else -> {
-                                    isUpdating = true
-                                    updateError = null
-                                    
-                                    val tokenManager = TokenManager(context)
-                                    val token = tokenManager.getToken()
-                                    val savedUserId = tokenManager.getUserId() ?: userId.toString()
-                                    
-                                    if (token != null) {
-                                        val authHeader = "Bearer $token"
-                                        clinicalDataViewModel.updateClinicalData(
-                                            authHeader = authHeader,
-                                            userId = savedUserId,
-                                            ratio = clinicalData!!.ratio,
-                                            sensitivity = newValue.toDouble(),
-                                            glycemiaTarget = clinicalData!!.glycemiaTarget,
-                                            onSuccess = {
-                                                isUpdating = false
-                                                editingField = null
-                                                editValue = ""
-                                            },
-                                            onError = { error ->
-                                                isUpdating = false
-                                                updateError = error
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        },
                         onUpdateField = { fieldName, newValue ->
                             isUpdating = true
                             updateError = null
-                            
+
                             val tokenManager = TokenManager(context)
                             val token = tokenManager.getToken()
                             val savedUserId = tokenManager.getUserId() ?: userId.toString()
-                            
+
                             if (token != null) {
                                 val authHeader = "Bearer $token"
-                                when (fieldName) {
-                                    "sensitivity" -> {
-                                        clinicalDataViewModel.updateClinicalData(
-                                            authHeader = authHeader,
-                                            userId = savedUserId,
-                                            ratio = clinicalData!!.ratio,
-                                            sensitivity = newValue.toDouble(),
-                                            glycemiaTarget = clinicalData!!.glycemiaTarget,
-                                            onSuccess = {
-                                                isUpdating = false
-                                            },
-                                            onError = { error ->
-                                                isUpdating = false
-                                                updateError = error
-                                            }
-                                        )
+                                clinicalDataViewModel.updateClinicalData(
+                                    authHeader = authHeader,
+                                    userId = savedUserId,
+                                    ratio = clinicalData!!.ratio,
+                                    sensitivity = newValue.toDouble(),
+                                    glycemiaTarget = clinicalData!!.glycemiaTarget,
+                                    onSuccess = { isUpdating = false },
+                                    onError = { error ->
+                                        isUpdating = false
+                                        updateError = error
                                     }
-                                }
+                                )
                             }
                         }
                     )
 
-                    EditableClinicalDataCard(
+                    // Sección Ratio Insulina/Carbohidratos
+                    ParameterSection(
                         title = "Ratio Insulina/Carbohidratos",
+                        description = "Cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida",
+                        icon = Icons.Default.Scale,
+                        iconColor = Color(0xFF4299E1),
                         value = clinicalData!!.ratio.toInt().toString(),
                         unit = "gramos por unidad",
-                        description = "El ratio es la cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida",
-                        icon = Icons.Default.Scale,
                         fieldName = "ratio",
-                        isEditing = editingField == "ratio",
+                        editingField = editingField,
                         editValue = editValue,
                         isUpdating = isUpdating,
-                        onEditStart = { 
+                        onEditStart = {
                             editingField = "ratio"
                             editValue = clinicalData!!.ratio.toInt().toString()
                         },
-                        onEditCancel = { 
+                        onEditCancel = {
                             editingField = null
                             editValue = ""
                             updateError = null
                         },
                         onValueChange = { editValue = it },
-                        onEditConfirm = {
-                            val newValue = editValue.toIntOrNull()
-                            when {
-                                newValue == null -> {
-                                    updateError = "Por favor, ingresa un número válido"
-                                }
-                                newValue < 5 || newValue > 30 -> {
-                                    updateError = "El ratio debe estar entre 5 y 30"
-                                }
-                                else -> {
-                                    isUpdating = true
-                                    updateError = null
-                                    
-                                    val tokenManager = TokenManager(context)
-                                    val token = tokenManager.getToken()
-                                    val savedUserId = tokenManager.getUserId() ?: userId.toString()
-                                    
-                                    if (token != null) {
-                                        val authHeader = "Bearer $token"
-                                        clinicalDataViewModel.updateClinicalData(
-                                            authHeader = authHeader,
-                                            userId = savedUserId,
-                                            ratio = newValue.toDouble(),
-                                            sensitivity = clinicalData!!.sensitivity,
-                                            glycemiaTarget = clinicalData!!.glycemiaTarget,
-                                            onSuccess = {
-                                                isUpdating = false
-                                                editingField = null
-                                                editValue = ""
-                                            },
-                                            onError = { error ->
-                                                isUpdating = false
-                                                updateError = error
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        },
                         onUpdateField = { fieldName, newValue ->
                             isUpdating = true
                             updateError = null
-                            
+
                             val tokenManager = TokenManager(context)
                             val token = tokenManager.getToken()
                             val savedUserId = tokenManager.getUserId() ?: userId.toString()
-                            
+
                             if (token != null) {
                                 val authHeader = "Bearer $token"
-                                when (fieldName) {
-                                    "ratio" -> {
-                                        clinicalDataViewModel.updateClinicalData(
-                                            authHeader = authHeader,
-                                            userId = savedUserId,
-                                            ratio = newValue.toDouble(),
-                                            sensitivity = clinicalData!!.sensitivity,
-                                            glycemiaTarget = clinicalData!!.glycemiaTarget,
-                                            onSuccess = {
-                                                isUpdating = false
-                                            },
-                                            onError = { error ->
-                                                isUpdating = false
-                                                updateError = error
-                                            }
-                                        )
+                                clinicalDataViewModel.updateClinicalData(
+                                    authHeader = authHeader,
+                                    userId = savedUserId,
+                                    ratio = newValue.toDouble(),
+                                    sensitivity = clinicalData!!.sensitivity,
+                                    glycemiaTarget = clinicalData!!.glycemiaTarget,
+                                    onSuccess = { isUpdating = false },
+                                    onError = { error ->
+                                        isUpdating = false
+                                        updateError = error
                                     }
-                                }
+                                )
                             }
                         }
                     )
 
-                    EditableClinicalDataCard(
+                    // Sección Objetivo de Glucemia - ASEGURÁNDONOS QUE ESTÉ COMPLETAMENTE VISIBLE
+                    ParameterSection(
                         title = "Objetivo de Glucemia",
-                        value = clinicalData!!.glycemiaTarget.toInt().toString(),
+                        description = "Nivel de glucosa en sangre que deseas mantener como objetivo",
+                        icon = Icons.Default.Favorite,
+                        iconColor = Color(0xFFE53E3E),
+                        value = (clinicalData?.glycemiaTarget?.toInt() ?: 100).toString(),
                         unit = "mg/dl",
-                        description = "El target de glucemia es el valor objetivo al cual deseas mantener tu nivel de azúcar en sangre",
-                        icon = Icons.Filled.TrackChanges,
                         fieldName = "glycemiaTarget",
-                        isEditing = editingField == "glycemiaTarget",
+                        editingField = editingField,
                         editValue = editValue,
                         isUpdating = isUpdating,
                         onEditStart = {
                             editingField = "glycemiaTarget"
-                            editValue = clinicalData!!.glycemiaTarget.toInt().toString()
+                            editValue = (clinicalData?.glycemiaTarget?.toInt() ?: 100).toString()
                         },
-                        onEditCancel = { 
+                        onEditCancel = {
                             editingField = null
                             editValue = ""
                             updateError = null
                         },
                         onValueChange = { editValue = it },
-                        onEditConfirm = {
-                            val newValue = editValue.toIntOrNull()
-                            when {
-                                newValue == null -> {
-                                    updateError = "Por favor, ingresa un número válido"
-                                }
-                                newValue < 90 || newValue > 120 -> {
-                                    updateError = "El objetivo de glucemia debe estar entre 90 y 120"
-                                }
-                                else -> {
-                                    isUpdating = true
-                                    updateError = null
-                                    
-                                    val tokenManager = TokenManager(context)
-                                    val token = tokenManager.getToken()
-                                    val savedUserId = tokenManager.getUserId() ?: userId.toString()
-                                    
-                                    if (token != null) {
-                                        val authHeader = "Bearer $token"
-                                        clinicalDataViewModel.updateClinicalData(
-                                            authHeader = authHeader,
-                                            userId = savedUserId,
-                                            ratio = clinicalData!!.ratio,
-                                            sensitivity = clinicalData!!.sensitivity,
-                                            glycemiaTarget = newValue.toDouble(),
-                                            onSuccess = {
-                                                isUpdating = false
-                                                editingField = null
-                                                editValue = ""
-                                            },
-                                            onError = { error ->
-                                                isUpdating = false
-                                                updateError = error
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        },
                         onUpdateField = { fieldName, newValue ->
                             isUpdating = true
                             updateError = null
-                            
+
                             val tokenManager = TokenManager(context)
                             val token = tokenManager.getToken()
                             val savedUserId = tokenManager.getUserId() ?: userId.toString()
-                            
+
                             if (token != null) {
                                 val authHeader = "Bearer $token"
-                                when (fieldName) {
-                                    "glycemiaTarget" -> {
-                                        clinicalDataViewModel.updateClinicalData(
-                                            authHeader = authHeader,
-                                            userId = savedUserId,
-                                            ratio = clinicalData!!.ratio,
-                                            sensitivity = clinicalData!!.sensitivity,
-                                            glycemiaTarget = newValue.toDouble(),
-                                            onSuccess = {
-                                                isUpdating = false
-                                            },
-                                            onError = { error ->
-                                                isUpdating = false
-                                                updateError = error
-                                            }
-                                        )
+                                clinicalDataViewModel.updateClinicalData(
+                                    authHeader = authHeader,
+                                    userId = savedUserId,
+                                    ratio = clinicalData?.ratio ?: 15.0,
+                                    sensitivity = clinicalData?.sensitivity ?: 50.0,
+                                    glycemiaTarget = newValue.toDouble(),
+                                    onSuccess = { isUpdating = false },
+                                    onError = { error ->
+                                        isUpdating = false
+                                        updateError = error
                                     }
-                                }
+                                )
                             }
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    // Mostrar error si existe
+                    updateError?.let { error ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFFED7D7)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = Color(0xFFE53E3E),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = error,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color(0xFFE53E3E)
+                                )
+                            }
+                        }
+                    }
+
+                    // ESPACIADO EXTRA AL FINAL PARA ASEGURAR QUE TODO SEA VISIBLE
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             } else {
-                Box(
+                // Estado de carga
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(64.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color(0xFFFF6B35),
-                            modifier = Modifier.size(60.dp),
-                            strokeWidth = 4.dp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Cargando datos clínicos...",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = Color(0xFF718096)
-                        )
-                    }
+                    CircularProgressIndicator(
+                        color = Color(0xFFFF6B35),
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Cargando datos clínicos...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFF64748B)
+                    )
                 }
-            }
-        }
-    }
-
-    // Diálogo de error para actualizaciones
-    if (updateError != null) {
-        AlertDialog(
-            onDismissRequest = { updateError = null },
-            title = {
-                Text(
-                    "Error al actualizar",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color(0xFF2D3748)
-                )
-            },
-            text = {
-                Text(
-                    updateError!!,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF4A5568)
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = { updateError = null },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6B35)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Aceptar", color = Color.White)
-                }
-            },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White
-        )
-    }
-}
-
-@Composable
-fun ClinicalDataCard(
-    title: String,
-    value: String,
-    icon: ImageVector
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
             }
         }
     }
@@ -538,25 +382,24 @@ fun ClinicalDataCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditableClinicalDataCard(
+fun ParameterSection(
     title: String,
-    value: String,
-    unit: String,
     description: String,
     icon: ImageVector,
+    iconColor: Color,
+    value: String,
+    unit: String,
     fieldName: String,
-    isEditing: Boolean,
+    editingField: String?,
     editValue: String,
     isUpdating: Boolean,
     onEditStart: () -> Unit,
     onEditCancel: () -> Unit,
     onValueChange: (String) -> Unit,
-    onEditConfirm: () -> Unit,
-    onUpdateField: (String, Int) -> Unit // Nueva función para manejar la actualización
+    onUpdateField: (String, Int) -> Unit
 ) {
     // Estados para el modal de edición
     var showEditModal by remember { mutableStateOf(false) }
-    var modalEditValue by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
     val dismissState = rememberSwipeToDismissBoxState(
@@ -564,414 +407,388 @@ fun EditableClinicalDataCard(
             when (dismissValue) {
                 SwipeToDismissBoxValue.EndToStart -> {
                     // Swipe de derecha a izquierda -> Editar
-                    modalEditValue = value
                     showEditModal = true
                     false // No dismissamos automáticamente, mostramos el modal
                 }
                 else -> false
             }
         },
-        // Configurar el threshold para requerir más distancia de deslizamiento
-        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
-    )    // Row que contiene la card del dato clínico y la lengüeta de editar con sombra
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // SwipeToDismissBox con la card del dato clínico
-        SwipeToDismissBox(
-            state = dismissState,
-            modifier = Modifier.weight(1f),
-            enableDismissFromStartToEnd = false,
-            enableDismissFromEndToStart = true,
-            backgroundContent = {
-                // Fondo dinámico dependiendo de la dirección del swipe
-                val direction = dismissState.dismissDirection
-                when (direction) {
-                    SwipeToDismissBoxValue.EndToStart -> {
-                        // Fondo azul suave para editar (swipe hacia la izquierda)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFF6B9DC3)),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(end = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = "Editar",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    else -> {
-                        // Fondo por defecto
-                        Box(modifier = Modifier.fillMaxSize())
-                    }
-                }
-            }
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(
-                    topStart = 8.dp,
-                    bottomStart = 8.dp,
-                    topEnd = 0.dp,
-                    bottomEnd = 0.dp
-                ) // Solo bordes izquierdos redondeados
-            ) {
-                // Solo modo visualización estática, la edición se hace únicamente mediante swipe
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "$value $unit",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            }
-        }        // Lengüeta de editar que sobresale del lado derecho con sombra solo externa
-        Box(
-            modifier = Modifier
-                .width(32.dp)
-                .fillMaxHeight()
-        ) {
-            // Sombra personalizada desplazada hacia la derecha
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .offset(x = 2.dp, y = 2.dp)
-                    .background(
-                        Color.Black.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            bottomStart = 0.dp,
-                            topEnd = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    )
-            )
-            
-            // Lengüeta principal
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Color(0xFF6B9DC3), // Color azul suave para editar
-                        shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            bottomStart = 0.dp,
-                            topEnd = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isUpdating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = Color.White
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-        }
-    }
+        // Configurar el threshold para ser más sensible al swipe
+        positionalThreshold = { totalDistance -> totalDistance * 0.25f }
+    )
 
-    // Modal de edición estético
-    if (showEditModal) {
-        // Actualizar el valor cada vez que se abre el modal
-        LaunchedEffect(showEditModal) {
-            if (showEditModal) {
-                modalEditValue = value
-            }
-        }
-        
-        AlertDialog(
-            onDismissRequest = { 
-                showEditModal = false
-                modalEditValue = ""
-                coroutineScope.launch {
-                    dismissState.reset()
-                }
-            },
-            icon = {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            // Header de la sección
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(48.dp)
                         .background(
-                            Color(0xFF6B9DC3).copy(alpha = 0.2f), // Azul suave
-                            shape = RoundedCornerShape(32.dp)
+                            iconColor.copy(alpha = 0.1f),
+                            RoundedCornerShape(12.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color(0xFF6B9DC3),
-                        modifier = Modifier.size(32.dp)
+                        tint = iconColor,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
-            },
-            title = {
-                Text(
-                    text = "Editar $title",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },            text = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Slider con valores según el tipo de campo
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        val (minValue, maxValue, currentValue) = when (fieldName) {
-                            "sensitivity" -> Triple(10f, 100f, modalEditValue.toFloatOrNull() ?: value.toFloat())
-                            "ratio" -> Triple(5f, 30f, modalEditValue.toFloatOrNull() ?: value.toFloat())
-                            "glycemiaTarget" -> Triple(90f, 120f, modalEditValue.toFloatOrNull() ?: value.toFloat())
-                            else -> Triple(0f, 100f, modalEditValue.toFloatOrNull() ?: 0f)
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
+                        color = Color(0xFF2D3748)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp
+                        ),
+                        color = Color(0xFF64748B)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            // Row que contiene la card del parámetro y la lengüeta de editar con swipe
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // SwipeToDismissBox con la card del parámetro
+                SwipeToDismissBox(
+                    state = dismissState,
+                    modifier = Modifier.weight(1f),
+                    enableDismissFromStartToEnd = false,
+                    enableDismissFromEndToStart = true,
+                    backgroundContent = {
+                        // Fondo dinámico dependiendo de la dirección del swipe
+                        val direction = dismissState.dismissDirection
+                        when (direction) {
+                            SwipeToDismissBoxValue.EndToStart -> {
+                                // Fondo azul suave para editar (swipe hacia la izquierda)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(iconColor),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(end = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Editar",
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            else -> {
+                                // Fondo por defecto
+                                Box(modifier = Modifier.fillMaxSize())
+                            }
                         }
-                        
-                        Text(
-                            text = "Valor: ${currentValue.toInt()} $unit",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color(0xFF6B9DC3),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        Slider(
-                            value = currentValue,
-                            onValueChange = { newValue ->
-                                modalEditValue = newValue.toInt().toString()
-                            },
-                            valueRange = minValue..maxValue,
-                            colors = SliderDefaults.colors(
-                                thumbColor = Color(0xFF6B9DC3),
-                                activeTrackColor = Color(0xFF6B9DC3),
-                                inactiveTrackColor = Color(0xFF6B9DC3).copy(alpha = 0.3f)
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        
-                        // Mostrar rango permitido
+                    }
+                ) {
+                    // Card de valor editable con bordes rectos en el lado derecho
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        shape = RoundedCornerShape(
+                            topStart = 12.dp,
+                            bottomStart = 12.dp,
+                            topEnd = 0.dp,
+                            bottomEnd = 0.dp
+                        ) // Solo bordes izquierdos redondeados
+                    ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = "${minValue.toInt()}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "${maxValue.toInt()}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        // Descripción del campo
-                        val descriptionText = when (fieldName) {
-                            "sensitivity" -> "Indica cuánto disminuye la glucemia con una unidad de insulina rápida"
-                            "ratio" -> "Es la cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida"
-                            "glycemiaTarget" -> "Es el valor objetivo al cual deseas mantener tu nivel de glucemia"
-                            else -> ""
-                        }
-                        
-                        Text(
-                            text = descriptionText,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Botones
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Botón Cancelar
-                        OutlinedButton(
-                            onClick = {
-                                showEditModal = false
-                                modalEditValue = ""
-                                coroutineScope.launch {
-                                    dismissState.reset()
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.outline
-                            ),
-                            enabled = !isUpdating
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "Cancelar",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                        }                        // Botón Guardar
-                        Button(
-                            onClick = {
-                                val newValue = modalEditValue.toIntOrNull()
-                                when (fieldName) {
-                                    "sensitivity" -> {
-                                        if (newValue != null && newValue >= 10 && newValue <= 100) {
-                                            onUpdateField(fieldName, newValue)
-                                            showEditModal = false
-                                            modalEditValue = ""
-                                            coroutineScope.launch {
-                                                dismissState.reset()
-                                            }
-                                        }
-                                    }
-                                    "ratio" -> {
-                                        if (newValue != null && newValue >= 5 && newValue <= 30) {
-                                            onUpdateField(fieldName, newValue)
-                                            showEditModal = false
-                                            modalEditValue = ""
-                                            coroutineScope.launch {
-                                                dismissState.reset()
-                                            }
-                                        }
-                                    }
-                                    "glycemiaTarget" -> {
-                                        if (newValue != null && newValue >= 90 && newValue <= 120) {
-                                            onUpdateField(fieldName, newValue)
-                                            showEditModal = false
-                                            modalEditValue = ""
-                                            coroutineScope.launch {
-                                                dismissState.reset()
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6B9DC3),
-                                contentColor = Color.White
-                            ),
-                            enabled = !isUpdating && modalEditValue.isNotBlank()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                if (isUpdating) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color.White
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                                Text(
-                                    if (isUpdating) "Guardando..." else "Guardar",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    text = "$value $unit",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
                     }
                 }
+
+                // Lengüeta de editar que sobresale del lado derecho (AHORA CLICKEABLE COMO BACKUP)
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .fillMaxHeight()
+                ) {
+                    // Sombra desplazada hacia la derecha
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .offset(x = 2.dp, y = 2.dp)
+                            .background(
+                                Color.Black.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    bottomStart = 0.dp,
+                                    topEnd = 12.dp,
+                                    bottomEnd = 12.dp
+                                )
+                            )
+                    )
+
+                    // Lengüeta principal (AHORA CLICKEABLE PARA BACKUP)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                iconColor, // Usar el color temático del parámetro
+                                shape = RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    bottomStart = 0.dp,
+                                    topEnd = 12.dp,
+                                    bottomEnd = 12.dp
+                                )
+                            )
+                            .clickable {
+                                // BACKUP: Si el swipe no funciona, permitir click en la lengüeta
+                                showEditModal = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isUpdating && editingField == fieldName) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = Color.White
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Modal de edición estético (activado por swipe)
+    if (showEditModal) {
+        // Actualizar el valor cada vez que se abre el modal
+        LaunchedEffect(showEditModal) {
+            if (showEditModal) {
+                onEditStart()
+            }
+        }
+
+        EditParameterDialog(
+            title = title,
+            currentValue = value,
+            unit = unit,
+            fieldName = fieldName,
+            icon = icon,
+            iconColor = iconColor,
+            onDismiss = {
+                showEditModal = false
+                onEditCancel()
+                coroutineScope.launch {
+                    dismissState.reset()
+                }
             },
-            confirmButton = { },
-            dismissButton = { },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            onConfirm = { newValue ->
+                onUpdateField(fieldName, newValue)
+                showEditModal = false
+                onEditCancel()
+                coroutineScope.launch {
+                    dismissState.reset()
+                }
+            }
         )
     }
+}
+
+@Composable
+fun EditParameterDialog(
+    title: String,
+    currentValue: String,
+    unit: String,
+    fieldName: String,
+    icon: ImageVector,
+    iconColor: Color,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var editValue by remember { mutableStateOf(currentValue) }
+
+    val (minValue, maxValue) = when (fieldName) {
+        "sensitivity" -> Pair(10f, 100f)
+        "ratio" -> Pair(5f, 30f)
+        "glycemiaTarget" -> Pair(70f, 180f)
+        else -> Pair(0f, 100f)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(
+                        iconColor.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(32.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Editar $title",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val currentValueFloat = editValue.toFloatOrNull() ?: currentValue.toFloat()
+
+                Text(
+                    text = "Valor: ${currentValueFloat.toInt()} $unit",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = iconColor,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Slider(
+                    value = currentValueFloat,
+                    onValueChange = { newValue ->
+                        editValue = newValue.toInt().toString()
+                    },
+                    valueRange = minValue..maxValue,
+                    colors = SliderDefaults.colors(
+                        thumbColor = iconColor,
+                        activeTrackColor = iconColor,
+                        inactiveTrackColor = iconColor.copy(alpha = 0.3f)
+                    )
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "${minValue.toInt()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${maxValue.toInt()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val descriptionText = when (fieldName) {
+                    "sensitivity" -> "Indica cuánto disminuye la glucemia con una unidad de insulina"
+                    "ratio" -> "Gramos de carbohidratos que cubre una unidad de insulina"
+                    "glycemiaTarget" -> "Valor objetivo de glucemia que deseas mantener"
+                    else -> ""
+                }
+
+                Text(
+                    text = descriptionText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    editValue.toIntOrNull()?.let { newValue ->
+                        onConfirm(newValue)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = iconColor
+                )
+            ) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
+        shape = RoundedCornerShape(20.dp)
+    )
 }

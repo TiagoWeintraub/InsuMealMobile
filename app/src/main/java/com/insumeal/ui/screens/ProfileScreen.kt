@@ -53,32 +53,6 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier
-                            .padding(start = 12.dp) // Añadir margen desde el borde izquierdo
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.2f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ),
-                modifier = Modifier.statusBarsPadding()
-            )
-        },
         containerColor = Color(0xFFF7FAFC)
     ) { paddingValues ->
         Column(
@@ -97,65 +71,92 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                             )
                         )
                     )
-                    .padding(top = paddingValues.calculateTopPadding())
-                    .padding(horizontal = 24.dp, vertical = 32.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Avatar grande
-                    Box(
+                Column {
+                    // Top bar integrado en el header igual al HomeScreen
+                    Row(
                         modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(Color(0xFFFF6B35), Color(0xFFFF8E53))
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                            .statusBarsPadding(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (userProfile != null) {
-                            Text(
-                                text = userProfile!!.username.take(2).uppercase(),
-                                style = MaterialTheme.typography.displayMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 48.sp
-                                ),
-                                color = Color.White
-                            )
-                        } else {
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.2f))
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver",
                                 tint = Color.White,
-                                modifier = Modifier.size(60.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    // Contenido del header con avatar y textos
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 32.dp)
+                    ) {
+                        // Avatar grande
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(Color(0xFFFF6B35), Color(0xFFFF8E53))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (userProfile != null) {
+                                Text(
+                                    text = userProfile!!.username.take(2).uppercase(),
+                                    style = MaterialTheme.typography.displayMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 48.sp
+                                    ),
+                                    color = Color.White
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(60.dp)
+                                )
+                            }
+                        }
 
-                    // Nombre del usuario
-                    Text(
-                        text = if (userProfile != null) "${userProfile!!.username} ${userProfile!!.lastName}" else "Cargando...",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 28.sp
-                        ),
-                        color = Color(0xFF2D3748)
-                    )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        // Nombre del usuario
+                        Text(
+                            text = if (userProfile != null) "${userProfile!!.username} ${userProfile!!.lastName}" else "Cargando...",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 28.sp
+                            ),
+                            color = Color(0xFF2D3748)
+                        )
 
-                    Text(
-                        text = "Perfil de Usuario",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Color(0xFF4A5568)
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Perfil de Usuario",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 16.sp
+                            ),
+                            color = Color(0xFF4A5568)
+                        )
+                    }
                 }
             }
 
