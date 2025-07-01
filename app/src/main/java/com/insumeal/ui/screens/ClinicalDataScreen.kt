@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,42 +59,96 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
         }
     }
 
-    // UI para mostrar los datos clínicos
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Datos Clínicos") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
-            )
-        }
+        containerColor = Color(0xFFF7FAFC)
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.TopCenter
+                .background(Color(0xFFF7FAFC))
         ) {
+            // Header con gradiente moderno
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFFFF6B35),
+                                Color(0xFFF7FAFC)
+                            )
+                        )
+                    )
+            ) {
+                Column {
+                    // Top bar integrado en el header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                            .statusBarsPadding(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.2f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Text(
+                            text = "Datos Clínicos",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Contenido principal
             if (clinicalData != null) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        .padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {                    
+                ) {
+                    // Mensaje descriptivo movido desde el header
+                    Text(
+                        text = "Configura tus parámetros médicos para obtener cálculos personalizados",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 16.sp
+                        ),
+                        color = Color(0xFF4A5568),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+
+                    Text(
+                        text = "Parámetros Médicos",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        ),
+                        color = Color(0xFF2D3748),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
                     EditableClinicalDataCard(
                         title = "Sensibilidad a la Insulina",
                         value = clinicalData!!.sensitivity.toInt().toString(),
@@ -111,7 +167,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             editingField = null
                             editValue = ""
                             updateError = null
-                        },                        onValueChange = { editValue = it },
+                        },
+                        onValueChange = { editValue = it },
                         onEditConfirm = {
                             val newValue = editValue.toIntOrNull()
                             when {
@@ -182,6 +239,7 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             }
                         }
                     )
+
                     EditableClinicalDataCard(
                         title = "Ratio Insulina/Carbohidratos",
                         value = clinicalData!!.ratio.toInt().toString(),
@@ -200,7 +258,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             editingField = null
                             editValue = ""
                             updateError = null
-                        },                        onValueChange = { editValue = it },
+                        },
+                        onValueChange = { editValue = it },
                         onEditConfirm = {
                             val newValue = editValue.toIntOrNull()
                             when {
@@ -271,6 +330,7 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             }
                         }
                     )
+
                     EditableClinicalDataCard(
                         title = "Objetivo de Glucemia",
                         value = clinicalData!!.glycemiaTarget.toInt().toString(),
@@ -280,8 +340,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                         fieldName = "glycemiaTarget",
                         isEditing = editingField == "glycemiaTarget",
                         editValue = editValue,
-                        isUpdating = isUpdating,                        
-                        onEditStart = { 
+                        isUpdating = isUpdating,
+                        onEditStart = {
                             editingField = "glycemiaTarget"
                             editValue = clinicalData!!.glycemiaTarget.toInt().toString()
                         },
@@ -289,7 +349,8 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             editingField = null
                             editValue = ""
                             updateError = null
-                        },                        onValueChange = { editValue = it },                        
+                        },
+                        onValueChange = { editValue = it },
                         onEditConfirm = {
                             val newValue = editValue.toIntOrNull()
                             when {
@@ -364,20 +425,29 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             } else {
-                Column(
+                Box(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(60.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Cargando datos clínicos...",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                        .fillMaxSize()
+                        .padding(64.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFFFF6B35),
+                            modifier = Modifier.size(60.dp),
+                            strokeWidth = 4.dp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Cargando datos clínicos...",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color(0xFF718096)
+                        )
+                    }
                 }
             }
         }
@@ -387,13 +457,35 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
     if (updateError != null) {
         AlertDialog(
             onDismissRequest = { updateError = null },
-            title = { Text("Error al actualizar") },
-            text = { Text(updateError!!) },
+            title = {
+                Text(
+                    "Error al actualizar",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF2D3748)
+                )
+            },
+            text = {
+                Text(
+                    updateError!!,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFF4A5568)
+                )
+            },
             confirmButton = {
-                TextButton(onClick = { updateError = null }) {
-                    Text("Aceptar")
+                Button(
+                    onClick = { updateError = null },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF6B35)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Aceptar", color = Color.White)
                 }
-            }
+            },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = Color.White
         )
     }
 }

@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +60,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                     IconButton(
                         onClick = { navController.popBackStack() },
                         modifier = Modifier
+                            .padding(start = 12.dp) // Añadir margen desde el borde izquierdo
                             .size(44.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color.White.copy(alpha = 0.2f))
@@ -68,22 +68,6 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { /* Acción de editar perfil */ },
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.2f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar perfil",
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
