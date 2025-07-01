@@ -1,6 +1,7 @@
 package com.insumeal.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,18 +14,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.insumeal.api.RegisterService
 import com.insumeal.api.RetrofitClient
 import com.insumeal.auth.RegisterRequest
+import com.insumeal.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.insumeal.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,354 +56,248 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Gray50,
+                        Color.White
+                    )
+                )
+            ),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header con gradiente
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 24.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,  // Celeste
-                                MaterialTheme.colorScheme.secondary // Verde
-                            )
-                        )
-                    )
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Header moderno y elegante
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "InsuMeal",
-                        style = MaterialTheme.typography.displayMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Registro",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+                // Logo de la app - más grande y sin card
+                Image(
+                    painter = painterResource(id = R.drawable.logo_insumeal),
+                    contentDescription = "Logo de InsuMeal",
+                    modifier = Modifier
+                        .size(120.dp) // Tamaño mucho más grande
+                        .padding(bottom = 0.dp), // Padding solo en la parte inferior
+                    contentScale = ContentScale.Fit // Mantener proporciones
+                )
+
+                // Logo/Título principal
+                Text(
+                    text = "InsuMeal",
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 36.sp
+                    ),
+                    color = Orange600,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Crea tu cuenta",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp
+                    ),
+                    color = Gray700,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = "Gestiona tu diabetes de forma inteligente",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Gray600,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
 
-            // Formulario en una tarjeta con sombra
+            // Formulario moderno en tarjeta elegante
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        ambientColor = Orange500.copy(alpha = 0.1f)
+                    ),
+                shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface  // Usar GrisClaro para el fondo
-                )
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(28.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // Sección Información Personal
-                    Text(
-                        text = "Información Personal",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.align(Alignment.Start)
+                    SectionHeader(
+                        title = "Información Personal",
+                        icon = Icons.Default.Person
                     )
 
-                    // Campo Nombre
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Nombre") },
+                    // Campos de información personal en fila
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Nombre",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ModernTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = "Nombre",
+                            leadingIcon = Icons.Default.Person,
+                            modifier = Modifier.weight(1f)
                         )
-                    )
 
-                    // Campo Apellido
-                    OutlinedTextField(
-                        value = lastName,
-                        onValueChange = { lastName = it },
-                        label = { Text("Apellido") },
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Apellido",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        ModernTextField(
+                            value = lastName,
+                            onValueChange = { lastName = it },
+                            label = "Apellido",
+                            leadingIcon = Icons.Default.Person,
+                            modifier = Modifier.weight(1f)
                         )
-                    )
+                    }
 
-                    // Campo Email
-                    OutlinedTextField(
+                    ModernTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Correo electrónico") },
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Email,
-                                contentDescription = "Email",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
-                        )
+                        label = "Correo electrónico",
+                        leadingIcon = Icons.Default.Email
                     )
 
                     // Sección Seguridad
-                    Text(
-                        text = "Seguridad",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.align(Alignment.Start)
+                    SectionHeader(
+                        title = "Seguridad",
+                        icon = Icons.Default.Lock
                     )
 
-                    // Campo Contraseña
-                    OutlinedTextField(
+                    ModernPasswordField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Contraseña") },
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Contraseña",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image = if (passwordVisible)
-                                Icons.Filled.Visibility
-                            else Icons.Filled.VisibilityOff
-                            val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = image,
-                                    contentDescription = description,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
-                        )
+                        label = "Contraseña",
+                        isVisible = passwordVisible,
+                        onVisibilityToggle = { passwordVisible = !passwordVisible }
                     )
 
-                    // Campo Confirmar Contraseña
-                    OutlinedTextField(
+                    ModernPasswordField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirmar contraseña") },
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Confirmar contraseña",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image = if (confirmPasswordVisible)
-                                Icons.Filled.Visibility
-                            else Icons.Filled.VisibilityOff
-                            val description = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                            IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                                Icon(
-                                    imageVector = image,
-                                    contentDescription = description,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
-                        )
+                        label = "Confirmar contraseña",
+                        isVisible = confirmPasswordVisible,
+                        onVisibilityToggle = { confirmPasswordVisible = !confirmPasswordVisible }
                     )
 
                     // Sección Parámetros Médicos
-                    Text(
-                        text = "Parámetros Médicos",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.align(Alignment.Start)
-                    )                    // Campo Ratio
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Ratio",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "$ratio gramos de carbohidratos",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Slider(
-                            value = ratio.toFloat(),
-                            onValueChange = { ratio = it.toInt() },
-                            valueRange = 5f..30f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        Text(
-                            text = "Es la cantidad de gramos de carbohidratos que cubre una unidad de insulina rápida",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }                    // Campo Sensibilidad
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Sensibilidad",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "$sensitivity mg/dL de glucemia",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Slider(
-                            value = sensitivity.toFloat(),
-                            onValueChange = { sensitivity = it.toInt() },
-                            valueRange = 10f..100f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        Text(
-                            text = "Indica cuánto disminuye la glucemia con una unidad de insulina rápida",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }                    // Campo Target de Glucemia
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Target de Glucemia ",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "El objetivo es de: $glycemiaTarget mg/dL",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Slider(
-                            value = glycemiaTarget.toFloat(),
-                            onValueChange = { glycemiaTarget = it.toInt() },
-                            valueRange = 90f..120f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        Text(
-                            text = "Es el valor objetivo al cual deseas mantener tu nivel de glucemia",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
+                    SectionHeader(
+                        title = "Configuración Médica",
+                        icon = Icons.Default.Settings
+                    )
 
-                    // Mensaje de error
+                    // Parámetros médicos en tarjetas individuales
+                    ModernSliderCard(
+                        title = "Ratio",
+                        value = ratio,
+                        onValueChange = { ratio = it },
+                        valueRange = 5f..30f,
+                        unit = "g de carbohidratos",
+                        description = "Gramos de carbohidratos que cubre una unidad de insulina"
+                    )
+
+                    ModernSliderCard(
+                        title = "Sensibilidad",
+                        value = sensitivity,
+                        onValueChange = { sensitivity = it },
+                        valueRange = 10f..100f,
+                        unit = "mg/dL",
+                        description = "Disminución de glucemia con una unidad de insulina"
+                    )
+
+                    ModernSliderCard(
+                        title = "Target de Glucemia",
+                        value = glycemiaTarget,
+                        onValueChange = { glycemiaTarget = it },
+                        valueRange = 90f..120f,
+                        unit = "mg/dL objetivo",
+                        description = "Nivel objetivo de glucemia a mantener"
+                    )
+
+                    // Mensaje de error moderno
                     if (errorMessage != null) {
-                        Text(
-                            text = errorMessage!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Error.copy(alpha = 0.1f)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = Error,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = errorMessage!!,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Error
+                                )
+                            }
+                        }
                     }
 
-                    // Botones de acción
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Botones modernos
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Botón Volver
+                        // Botón Volver (secundario)
                         OutlinedButton(
                             onClick = onBackToLogin,
                             modifier = Modifier
                                 .weight(1f)
                                 .height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(16.dp),
                             border = ButtonDefaults.outlinedButtonBorder.copy(
-                                width = 2.dp
+                                width = 1.5.dp,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Orange400, Orange600)
+                                )
+                            ),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Orange600
                             )
                         ) {
-                            Text("Volver")
+                            Text(
+                                "Volver",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
                         }
 
-                        // Botón Registrarse
+                        // Botón Registrarse (principal)
                         Button(
                             onClick = {
                                 if (password != confirmPassword) {
@@ -464,25 +367,227 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                             modifier = Modifier
                                 .weight(1f)
                                 .height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(16.dp),
                             enabled = !isLoading,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                containerColor = Orange600,
+                                disabledContainerColor = Orange600.copy(alpha = 0.6f)
                             )
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(24.dp)
+                                    color = Color.White,
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("Registrarse")
+                                Text(
+                                    "Crear Cuenta",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = Color.White
+                                )
                             }
                         }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
+
+// Componentes reutilizables modernos
+@Composable
+private fun SectionHeader(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Orange600,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            ),
+            color = Gray800
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModernTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        modifier = modifier.fillMaxWidth(),
+        leadingIcon = {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = Orange500,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        shape = RoundedCornerShape(16.dp),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Orange500,
+            unfocusedBorderColor = Gray300,
+            focusedLabelColor = Orange600,
+            unfocusedLabelColor = Gray500,
+            cursorColor = Orange600
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModernPasswordField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isVisible: Boolean,
+    onVisibilityToggle: () -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        modifier = Modifier.fillMaxWidth(),
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = null,
+                tint = Orange500,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton(onClick = onVisibilityToggle) {
+                Icon(
+                    imageVector = if (isVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                    contentDescription = if (isVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                    tint = Orange500,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
+        shape = RoundedCornerShape(16.dp),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Orange500,
+            unfocusedBorderColor = Gray300,
+            focusedLabelColor = Orange600,
+            unfocusedLabelColor = Gray500,
+            cursorColor = Orange600
+        )
+    )
+}
+
+@Composable
+private fun ModernSliderCard(
+    title: String,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    unit: String,
+    description: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Gray50
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Gray800
+                )
+
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Orange500.copy(alpha = 0.1f)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "$value $unit",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Orange700,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Slider(
+                value = value.toFloat(),
+                onValueChange = { onValueChange(it.toInt()) },
+                valueRange = valueRange,
+                colors = SliderDefaults.colors(
+                    thumbColor = Orange600,
+                    activeTrackColor = Orange500,
+                    inactiveTrackColor = Orange200
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = Gray600,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

@@ -2,8 +2,9 @@ package com.insumeal.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -22,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -29,6 +32,7 @@ import com.insumeal.utils.TokenManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.insumeal.ui.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.launch // Para controlar el drawer
+import com.insumeal.R
 
 // Data class para los ítems del Navigation Drawer
 data class DrawerItem(
@@ -196,6 +200,16 @@ fun HomeScreen(navController: NavController, context: Context) {    val tokenMan
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            // Logo de la app - más grande y sin card
+                            Image(
+                                painter = painterResource(id = R.drawable.logo_insumeal),
+                                contentDescription = "Logo de Insumeal",
+                                modifier = Modifier
+                                    .size(120.dp) // Tamaño mucho más grande
+                                    .padding(bottom = 16.dp), // Padding solo en la parte inferior
+                                contentScale = ContentScale.Fit // Mantener proporciones
+                            )
+
                             Text(
                                 text = "InsuMeal",
                                 style = MaterialTheme.typography.displayMedium.copy(
