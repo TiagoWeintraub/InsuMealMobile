@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,11 +29,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.insumeal.utils.TokenManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.insumeal.ui.viewmodel.UserProfileViewModel
-import kotlinx.coroutines.launch // Para controlar el drawer
+import kotlinx.coroutines.launch
 import com.insumeal.R
 
 // Data class para los ítems del Navigation Drawer
@@ -41,17 +44,18 @@ data class DrawerItem(
     val icon: ImageVector
 )
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") // Necesario si no usas el padding que provee Scaffold
-@OptIn(ExperimentalMaterial3Api::class) // Para TopAppBar y NavigationDrawer
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, context: Context) {    val tokenManager = remember { TokenManager(context) } // Usar remember para TokenManager
+fun HomeScreen(navController: NavController, context: Context) {
+    val tokenManager = remember { TokenManager(context) }
     val token = tokenManager.getToken()
     val userProfileViewModel = remember { UserProfileViewModel() }
     val userProfile by userProfileViewModel.userProfile.collectAsState()
 
     // Para controlar el estado del Navigation Drawer (abierto/cerrado)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope() // CoroutineScope para abrir/cerrar el drawer
+    val scope = rememberCoroutineScope()
 
     // Redirigir a login si no hay token
     LaunchedEffect(token) { // Observar cambios en el token también
@@ -91,21 +95,74 @@ fun HomeScreen(navController: NavController, context: Context) {    val tokenMan
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "Insumeal Menú",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            ModalDrawerSheet(
+                modifier = Modifier.width(280.dp),
+                drawerContainerColor = Color.White
+            ) {
+                Spacer(Modifier.height(20.dp))
 
+                // Header del drawer moderno
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    // Avatar del usuario
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(Color(0xFFFF6B35), Color(0xFFFF8E53))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (userProfile != null) userProfile!!.username.take(1).uppercase() else "U",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color.White
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = if (userProfile != null) userProfile!!.username else "Usuario",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = Color(0xFF2D3748)
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    color = Color(0xFFE2E8F0)
+                )
+
+                // Items del menú
                 drawerItems.forEach { item ->
                     NavigationDrawerItem(
-                        icon = { Icon(item.icon, contentDescription = item.title) },
-                        label = { Text(item.title) },
-                        selected = false, // Puedes manejar la selección si es necesario
+                        icon = {
+                            Icon(
+                                item.icon,
+                                contentDescription = item.title,
+                                tint = Color(0xFF64748B)
+                            )
+                        },
+                        label = {
+                            Text(
+                                item.title,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = Color(0xFF2D3748)
+                            )
+                        },
+                        selected = false,
                         onClick = {
                             scope.launch { drawerState.close() }
                             if (item.route == "profile") {
@@ -121,14 +178,38 @@ fun HomeScreen(navController: NavController, context: Context) {    val tokenMan
                                 }
                             }
                         },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.Transparent,
+                            selectedContainerColor = Color(0xFFFFF5F5)
+                        )
                     )
                 }
-                // Ítem de Cerrar Sesión separado
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Ítem de Cerrar Sesión
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    color = Color(0xFFE2E8F0)
+                )
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar Sesión") },
-                    label = { Text("Cerrar Sesión") },
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Cerrar Sesión",
+                            tint = Color(0xFFE53E3E)
+                        )
+                    },
+                    label = {
+                        Text(
+                            "Cerrar Sesión",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color(0xFFE53E3E)
+                        )
+                    },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -138,235 +219,246 @@ fun HomeScreen(navController: NavController, context: Context) {    val tokenMan
                             launchSingleTop = true
                         }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent
+                    )
                 )
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     ) {
         Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {}, // Sin texto al lado del menú
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                            }
-                        }) {
-                            Icon(
-                                Icons.Filled.Menu,
-                                contentDescription = "Abrir menú",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
+            containerColor = Color(0xFFF7FAFC)
         ) { innerPadding ->
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.TopCenter
+                    .background(Color(0xFFF7FAFC))
             ) {
-                Column(
+                // Header principal unificado con gradiente
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Header con gradiente
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                            .clip(RoundedCornerShape(16.dp))                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,  // Celeste
-                                        MaterialTheme.colorScheme.secondary // Verde
-                                    )
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFFFF6B35),
+                                    Color(0xFFF7FAFC)
                                 )
                             )
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        )
+                ) {
+                    Column {
+                        // Top bar integrado en el header
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 16.dp)
+                                .statusBarsPadding(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Logo de la app - más grande y sin card
+                            // Botón de menú
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.2f))
+                            ) {
+                                Icon(
+                                    Icons.Filled.Menu,
+                                    contentDescription = "Abrir menú",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        // Contenido principal del header
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .padding(bottom = 32.dp)
+                        ) {
+                            // Logo de la app
                             Image(
                                 painter = painterResource(id = R.drawable.logo_insumeal),
                                 contentDescription = "Logo de Insumeal",
                                 modifier = Modifier
-                                    .size(120.dp) // Tamaño mucho más grande
-                                    .padding(bottom = 16.dp), // Padding solo en la parte inferior
-                                contentScale = ContentScale.Fit // Mantener proporciones
+                                    .size(120.dp),
+                                contentScale = ContentScale.Fit
                             )
 
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             Text(
-                                text = "InsuMeal",
-                                style = MaterialTheme.typography.displayMedium.copy(
-                                    fontWeight = FontWeight.Bold
+                                text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido!",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 26.sp
                                 ),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = Color(0xFF2D3748)
                             )
+
                             Spacer(modifier = Modifier.height(8.dp))
+
                             Text(
-                                text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido --!",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                text = "¿Qué vas a comer hoy?",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = Color(0xFF4A5568)
                             )
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Sección de funcionalidades
+                // Contenido principal
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    // Sección de acciones rápidas
                     Text(
-                        text = "¿Qué quieres hacer hoy?",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(bottom = 16.dp, start = 8.dp)
+                        text = "Acciones Rápidas",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        ),
+                        color = Color(0xFF2D3748),
+                        modifier = Modifier.padding(bottom = 20.dp)
                     )
 
-                    // Tarjetas de opciones
-                    HomeOptionCard(
-                        title = "Analizar Plato de Comida",
-                        description = "Conocé los carbohidratos e insulina sugerida con una foto de tu comida",
-                        icon = Icons.Filled.PhotoCamera,
-                        onClick = { navController.navigate("uploadPhoto") }
-                    )
+                    // Grid de tarjetas modernas
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ModernActionCard(
+                            title = "Analizar Plato de Comida",
+                            description = "Conocé los carbohidratos e insulina sugerida con una foto de tu comida",
+                            icon = Icons.Filled.PhotoCamera,
+                            backgroundColor = Color(0xFFF0FFF4),
+                            iconColor = Color(0xFF38A169),
+                            onClick = { navController.navigate("uploadPhoto") }
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HomeOptionCard(
-                        title = "Ver Historial",
-                        description = "Consulta tus platos anteriores",
-                        icon = Icons.Filled.History,
-                        onClick = { navController.navigate("loadingHistory") }, // Cambiar a loadingHistory
-                        showArrow = false
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HomeOptionCard(
-                        title = "Información Clínica",
-                        description = "Consulta o modifica tus datos médicos",
-                        icon = Icons.Filled.Info,
-                        onClick = {
-                            val userId = tokenManager.getUserId()
-                            if (userId != null) {
-                                navController.navigate("clinicalData/$userId")
+                        ModernActionCard(
+                            title = "Ver Historial",
+                            description = "Consulta tus platos anteriores",
+                            icon = Icons.Filled.History,
+                            backgroundColor = Color(0xFFF7FAFF),
+                            iconColor = Color(0xFF4299E1),
+                            onClick = { navController.navigate("loadingHistory") }
+                        )
+
+                        ModernActionCard(
+                            title = "Información Clínica",
+                            description = "Consulta o modifica tus datos médicos",
+                            icon = Icons.Filled.Info,
+                            backgroundColor = Color(0xFFFFFAF0),
+                            iconColor = Color(0xFFED8936),
+                            onClick = {
+                                val userId = tokenManager.getUserId()
+                                if (userId != null) {
+                                    navController.navigate("clinicalData/$userId")
+                                }
                             }
-                        },
-                        showArrow = false
-                    )
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-// Composable auxiliar para botones con icono (opcional, para un look más consistente)
-@Composable
-fun ButtonWithIcon(
-    text: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    colors: ButtonColors = ButtonDefaults.buttonColors()
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        colors = colors
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null, // El texto del botón sirve como descripción
-            modifier = Modifier.size(ButtonDefaults.IconSize)
-        )
-        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-        Text(text)
-    }
-}
-
-// Componente para las tarjetas de opciones en el Home
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeOptionCard(
+fun ModernActionCard(
     title: String,
     description: String,
     icon: ImageVector,
-    onClick: () -> Unit,
-    showArrow: Boolean = true // Parámetro para mostrar/ocultar la flecha
+    backgroundColor: Color,
+    iconColor: Color,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            .fillMaxWidth()
+            .height(120.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Color.White
         ),
         onClick = onClick
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxSize()
+                .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Círculo para el icono
-            Box(                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(percent = 50))
-                    .background(MaterialTheme.colorScheme.surface),
+            // Icono con fondo colorido
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(backgroundColor),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
+                    tint = iconColor,
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Texto de la tarjeta
-            Column {
+            // Contenido de texto
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     ),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color(0xFF2D3748)
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp
+                    ),
+                    color = Color(0xFF718096),
+                    maxLines = 2
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Flecha de navegación (opcional)
-            if (showArrow) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            // Flecha
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = Color(0xFFCBD5E0),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
