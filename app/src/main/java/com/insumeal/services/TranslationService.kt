@@ -125,7 +125,8 @@ class TranslationService {
         "pie" to "tarta",
         "pie crust" to "masa de tarta",
         "quiche" to "tarta",
-        "avocado" to "palta"
+        "avocado" to "palta",
+        "pickle" to "pepinillo"
     )
     
     companion object {
