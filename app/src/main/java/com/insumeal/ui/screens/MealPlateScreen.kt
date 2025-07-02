@@ -39,6 +39,646 @@ import com.insumeal.ui.viewmodel.MealPlateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun IngredientEditableCard(
+    ingredient: Ingredient,
+    isEditing: Boolean,
+    editGrams: String,
+    isUpdating: Boolean,
+    isLastIngredient: Boolean,
+    onEditStart: () -> Unit,
+    onEditCancel: () -> Unit,
+    onGramsChange: (String) -> Unit,
+    onEditConfirm: (Double?) -> Unit,
+    onDeleteIngredient: () -> Unit,
+    isDeleting: Boolean = false
+) {
+    // Estados para el modal de edición
+    var showEditModal by remember { mutableStateOf(false) }
+    var editGramsInput by remember { mutableStateOf("") }
+
+    // Estado para el modal de confirmación
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            when (dismissValue) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    // Swipe de izquierda a derecha -> Eliminar
+                    showDeleteConfirmation = true
+                    false // No dismissamos automáticamente, mostramos el modal
+                }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    // Swipe de derecha a izquierda -> Editar
+                    editGramsInput = ingredient.grams.toInt().toString()
+                    showEditModal = true
+                    false // No dismissamos automáticamente, mostramos el modal
+                }
+                else -> false
+            }
+        },
+        // Configurar el threshold para requerir más distancia de deslizamiento
+        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
+    )
+
+    // Row que contiene la lengüeta del basurin y la card del ingrediente
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Lengüeta del basurin que sobresale del lado izquierdo
+        Box(
+            modifier = Modifier
+                .width(32.dp)
+                .fillMaxHeight()
+                .background(
+                    MaterialTheme.colorScheme.error,
+                    shape = RoundedCornerShape(
+                        topStart = 8.dp,
+                        bottomStart = 8.dp,
+                        topEnd = 0.dp,
+                        bottomEnd = 0.dp
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isDeleting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = Color.White
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        // SwipeToDismissBox con la card del ingrediente
+        SwipeToDismissBox(
+            state = dismissState,
+            modifier = Modifier
+                .weight(1f)
+                .zIndex(1f),
+            enableDismissFromStartToEnd = true,
+            enableDismissFromEndToStart = true,
+            backgroundContent = {
+                // Fondo dinámico dependiendo de la dirección del swipe
+                val direction = dismissState.dismissDirection
+                when (direction) {
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        // Fondo rojo para eliminar (swipe hacia la derecha)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.error),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(start = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+
+                                Text(
+                                    text = "Eliminar",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        // Fondo azul suave para editar (swipe hacia la izquierda)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF6B9DC3)),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(end = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Editar",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+
+                            }
+                        }
+                    }
+                    else -> {
+                        // Fondo por defecto
+                        Box(modifier = Modifier.fillMaxSize())
+                    }
+                }
+            }
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .zIndex(2f),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(0.dp) // Bordes rectos sin redondear
+            ) {
+                // Solo modo visualización estática, la edición se hace únicamente mediante swipe
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = ingredient.name,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = Color.Black,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = "${String.format("%.0f", ingredient.grams)}g",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${String.format("%.1f", ingredient.carbs)}g de HC",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+        }
+
+        // Lengüeta de editar que sobresale del lado derecho
+        Box(
+            modifier = Modifier
+                .width(32.dp)
+                .fillMaxHeight()
+                .background(
+                    Color(0xFF6B9DC3), // Color azul suave para editar
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        bottomStart = 0.dp,
+                        topEnd = 8.dp,
+                        bottomEnd = 8.dp
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isUpdating) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = Color.White
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Editar",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+
+    // Modal de confirmación para eliminar - diseño mejorado
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteConfirmation = false
+                coroutineScope.launch {
+                    dismissState.reset()
+                }
+            },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(
+                            MaterialTheme.colorScheme.errorContainer,
+                            shape = RoundedCornerShape(32.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Eliminar ingrediente",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Verificar si es el último ingrediente para mostrar mensaje apropiado
+                    if (isLastIngredient) {
+                        Text(
+                            text = "Este es el último ingrediente del plato.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Al eliminarlo se borrará todo el plato y volverás a la pantalla anterior.",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Text(
+                            text = "¿Realmente quiere borrar el ingrediente:",
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "\"${ingredient.name}\"?",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Botones mejorados con mejor diseño
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Botón Cancelar
+                        OutlinedButton(
+                            onClick = {
+                                showDeleteConfirmation = false
+                                coroutineScope.launch {
+                                    dismissState.reset()
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outline
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    "Cancelar",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                        }
+
+                        // Botón Eliminar
+                        Button(
+                            onClick = {
+                                showDeleteConfirmation = false
+                                onDeleteIngredient()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    "Eliminar",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { },
+            dismissButton = { },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    // Modal de edición estético
+    if (showEditModal) {
+        // Actualizar el valor cada vez que se abre el modal
+        LaunchedEffect(showEditModal) {
+            if (showEditModal) {
+                editGramsInput = ingredient.grams.toInt().toString()
+            }
+        }
+
+        AlertDialog(
+            onDismissRequest = {
+                showEditModal = false
+                editGramsInput = ""
+                coroutineScope.launch {
+                    dismissState.reset()
+                }
+            },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(
+                            Color(0xFF6B9DC3).copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(32.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = Color(0xFF6B9DC3),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Editar cantidad",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = ingredient.name,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = editGramsInput,
+                        onValueChange = { newValue ->
+                            // Solo permitir números y un punto decimal
+                            if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                                editGramsInput = newValue
+                            }
+                        },
+                        label = { Text("Cantidad en gramos") },
+                        placeholder = { Text("Ej: 150") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        enabled = !isUpdating,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF6B9DC3),
+                            focusedLabelColor = Color(0xFF6B9DC3)
+                        ),
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Scale,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Vista previa de carbohidratos
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF6B9DC3).copy(alpha = 0.1f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val previewCarbs = editGramsInput.toDoubleOrNull()?.let { grams ->
+                                (grams / 100.0) * ingredient.carbsPerHundredGrams
+                            } ?: ingredient.carbs
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Restaurant,
+                                    contentDescription = null,
+                                    tint = Color(0xFF6B9DC3),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = "Carbohidratos del alimento según los gramos:",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "${String.format("%.1f", previewCarbs)} g de HC",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = Color(0xFF6B9DC3),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Botones
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Botón Cancelar
+                        OutlinedButton(
+                            onClick = {
+                                showEditModal = false
+                                editGramsInput = ""
+                                coroutineScope.launch {
+                                    dismissState.reset()
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outline
+                            ),
+                            enabled = !isUpdating
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    "Cancelar",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                        }
+
+                        // Botón Guardar
+                        Button(
+                            onClick = {
+                                val newGrams = editGramsInput.toDoubleOrNull()
+                                if (newGrams != null && newGrams > 0) {
+                                    showEditModal = false
+                                    coroutineScope.launch {
+                                        dismissState.reset()
+                                    }
+                                    onEditConfirm(newGrams)
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF6B9DC3),
+                                contentColor = Color.White
+                            ),
+                            enabled = !isUpdating && editGramsInput.toDoubleOrNull()?.let { it > 0 } == true
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (isUpdating) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color.White
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                Text(
+                                    if (isUpdating) "Guardando..." else "Guardar",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { },
+            dismissButton = { },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun MealPlateScreen(
     navController: NavController,
     mealPlateViewModel: MealPlateViewModel
@@ -126,42 +766,8 @@ fun MealPlateScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Detalles del plato") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        // Si hay un plato cargado, eliminarlo antes de volver atrás
-                        mealPlate?.let { plate ->
-                            mealPlateViewModel.deleteMealPlate(
-                                context = context,
-                                mealPlateId = plate.id,
-                                onSuccess = {
-                                    navController.navigateUp()
-                                },
-                                onError = { error ->
-                                    android.util.Log.e("MealPlateScreen", "Error al eliminar plato: $error")
-                                    // Incluso si hay error, volver atrás
-                                    navController.navigateUp()
-                                }
-                            )
-                        } ?: run {
-                            // Si no hay plato, simplemente volver atrás
-                            navController.navigateUp()
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
-            )        }) { paddingValues ->
+        // Eliminar el topBar para que la imagen llegue hasta arriba
+    ) { paddingValues ->
         // Las variables ya están definidas usando collectAsState arriba
 
         if (mealPlate == null) {
@@ -284,46 +890,33 @@ fun MealPlateScreen(
             // Capturar el valor del plato para evitar problemas de recomposición
             val currentMealPlate = mealPlate
             if (currentMealPlate != null) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                Box(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    // Imagen del plato
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(250.dp)
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.White
-                            )
-                        ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // Imagen del plato que ocupa todo el ancho y llega hasta arriba
+                        item {
                             Box(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp) // Altura fija para la imagen
                             ) {
                                 // Mostrar la imagen del plato
                                 if (mealPlateViewModel.bitmap != null) {
                                     Image(
                                         bitmap = mealPlateViewModel.bitmap!!.asImageBitmap(),
                                         contentDescription = "Imagen del plato",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(RoundedCornerShape(16.dp)),
+                                        modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop
                                     )
                                 } else if (mealPlateViewModel.imageUri != null) {
                                     Image(
                                         painter = rememberAsyncImagePainter(model = mealPlateViewModel.imageUri),
                                         contentDescription = "Imagen del plato",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(RoundedCornerShape(16.dp)),
+                                        modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop
                                     )
                                 } else {
@@ -337,8 +930,7 @@ fun MealPlateScreen(
                                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                                     )
-                                                ),
-                                                shape = RoundedCornerShape(16.dp)
+                                                )
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -365,7 +957,7 @@ fun MealPlateScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(80.dp)
+                                        .height(100.dp)
                                         .align(Alignment.BottomCenter)
                                         .background(
                                             brush = Brush.verticalGradient(
@@ -373,15 +965,14 @@ fun MealPlateScreen(
                                                     Color.Transparent,
                                                     Color.Black.copy(alpha = 0.7f)
                                                 )
-                                            ),
-                                            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                                            )
                                         )
                                 )
 
                                 // Título del plato sobre la imagen
                                 Text(
                                     text = currentMealPlate.name.uppercase(),
-                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                    style = MaterialTheme.typography.headlineMedium.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
                                     color = Color.White,
@@ -391,33 +982,25 @@ fun MealPlateScreen(
                                 )
                             }
                         }
-                    }
 
-                    // Sección de ingredientes
-                    item {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        ) {
-                            Text(
-                                text = "Ingredientes detectados",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
+                        // Sección de ingredientes
+                        item {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "Ingredientes detectados",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
                         }
-                    }
 
-                    // Lista de ingredientes con capacidad de edición
-                    items(currentMealPlate.ingredients) { ingredient ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
+                        // Lista de ingredientes con capacidad de edición
+                        items(currentMealPlate.ingredients) { ingredient ->
                             IngredientEditableCard(
                                 ingredient = ingredient,
                                 isEditing = false,
@@ -427,7 +1010,7 @@ fun MealPlateScreen(
                                 onEditStart = { },
                                 onEditCancel = { },
                                 onGramsChange = { },
-                                onEditConfirm = { newGramsValue ->
+                                onEditConfirm = { newGramsValue: Double? ->
                                     // La lógica de actualización usando el valor pasado desde el modal
                                     if (newGramsValue != null && newGramsValue > 0) {
                                         isUpdating = true
@@ -494,17 +1077,9 @@ fun MealPlateScreen(
                                 isDeleting = deletingIngredientId == ingredient.id
                             )
                         }
-                    }
 
-                    // Botón para agregar alimento
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
+                        // Botón para agregar alimento (sin Card)
+                        item {
                             Button(
                                 onClick = {
                                     showAddFoodModal = true
@@ -512,13 +1087,13 @@ fun MealPlateScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(56.dp)
-                                    .padding(12.dp),
-                                shape = RoundedCornerShape(8.dp),
+                                    .padding(horizontal = 16.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.secondary
                                 ),
                                 elevation = ButtonDefaults.buttonElevation(
-                                    defaultElevation = 0.dp
+                                    defaultElevation = 4.dp
                                 )
                             ) {
                                 Icon(
@@ -536,19 +1111,18 @@ fun MealPlateScreen(
                                 )
                             }
                         }
-                    }
 
-                    // Campo para ingresar glucemia y botón para calcular dosis
-                    item {
-                        // Tarjeta para el cálculo de dosis
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.White
+                        // Campo para ingresar glucemia y botón para calcular dosis
+                        item {
+                            // Tarjeta para el cálculo de dosis
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.White
                             )
                         ) {
                             Column(
@@ -702,6 +1276,45 @@ fun MealPlateScreen(
                     item {
                         Spacer(modifier = Modifier.height(24.dp))
                     }
+                }
+
+                // Botón de volver atrás flotando sobre la imagen
+                IconButton(
+                    onClick = {
+                        // Si hay un plato cargado, eliminarlo antes de volver atrás
+                        mealPlate?.let { plate ->
+                            mealPlateViewModel.deleteMealPlate(
+                                context = context,
+                                mealPlateId = plate.id,
+                                onSuccess = {
+                                    navController.navigateUp()
+                                },
+                                onError = { error ->
+                                    android.util.Log.e("MealPlateScreen", "Error al eliminar plato: $error")
+                                    // Incluso si hay error, volver atrás
+                                    navController.navigateUp()
+                                }
+                            )
+                        } ?: run {
+                            // Si no hay plato, simplemente volver atrás
+                            navController.navigateUp()
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .size(48.dp)
+                        .background(
+                            Color.Black.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             } // fin del if (currentMealPlate != null)
         }
@@ -949,634 +1562,5 @@ fun MealPlateScreen(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun IngredientEditableCard(
-    ingredient: Ingredient,
-    isEditing: Boolean,
-    editGrams: String,
-    isUpdating: Boolean,
-    isLastIngredient: Boolean,
-    onEditStart: () -> Unit,
-    onEditCancel: () -> Unit,
-    onGramsChange: (String) -> Unit,
-    onEditConfirm: (Double?) -> Unit,
-    onDeleteIngredient: () -> Unit,
-    isDeleting: Boolean = false
-) {
-    // Estados para el modal de edición
-    var showEditModal by remember { mutableStateOf(false) }
-    var editGramsInput by remember { mutableStateOf("") }
-
-    // Estado para el modal de confirmación
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { dismissValue ->
-            when (dismissValue) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    // Swipe de izquierda a derecha -> Eliminar
-                    showDeleteConfirmation = true
-                    false // No dismissamos automáticamente, mostramos el modal
-                }                SwipeToDismissBoxValue.EndToStart -> {
-                // Swipe de derecha a izquierda -> Editar
-                editGramsInput = ingredient.grams.toInt().toString()
-                showEditModal = true
-                false // No dismissamos automáticamente, mostramos el modal
-            }
-                else -> false
-            }
-        },
-        // Configurar el threshold para requerir más distancia de deslizamiento
-        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
-    )
-
-    // Row que contiene la lengüeta del basurin y la card del ingrediente
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(0.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Lengüeta del basurin que sobresale del lado izquierdo
-        Box(
-            modifier = Modifier
-                .width(32.dp)
-                .fillMaxHeight()
-                .background(
-                    MaterialTheme.colorScheme.error,
-                    shape = RoundedCornerShape(
-                        topStart = 8.dp,
-                        bottomStart = 8.dp,
-                        topEnd = 0.dp,
-                        bottomEnd = 0.dp
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isDeleting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = Color.White
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-
-        // SwipeToDismissBox con la card del ingrediente
-        SwipeToDismissBox(
-            state = dismissState,
-            modifier = Modifier
-                .weight(1f)
-                .zIndex(1f), // ✅ Nuevo: zIndex para el contenedor
-            enableDismissFromStartToEnd = true,
-            enableDismissFromEndToStart = true,
-            backgroundContent = {
-                // Fondo dinámico dependiendo de la dirección del swipe
-                val direction = dismissState.dismissDirection
-                when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> {
-                        // Fondo rojo para eliminar (swipe hacia la derecha)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.error),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(start = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-
-                                Text(
-                                    text = "Eliminar",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    SwipeToDismissBoxValue.EndToStart -> {                        // Fondo azul suave para editar (swipe hacia la izquierda)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFF6B9DC3)),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(end = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = "Editar",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
-
-                            }
-                        }
-                    }
-                    else -> {
-                        // Fondo por defecto
-                        Box(modifier = Modifier.fillMaxSize())
-                    }
-                }
-            }
-        ) {
-            Card(
-            modifier = Modifier.fillMaxWidth()
-                .zIndex(2f),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = RoundedCornerShape(0.dp) // Bordes rectos sin redondear
-        ) {            // Solo modo visualización estática, la edición se hace únicamente mediante swipe
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = ingredient.name,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
-                Column(
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = "${String.format("%.0f", ingredient.grams)}g",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "${String.format("%.1f", ingredient.carbs)}g de HC",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-        }
-        }
-
-        // Lengüeta de editar que sobresale del lado derecho
-        Box(
-            modifier = Modifier
-                .width(32.dp)
-                .fillMaxHeight()
-                .background(
-                    Color(0xFF6B9DC3), // Color azul suave para editar
-                    shape = RoundedCornerShape(
-                        topStart = 0.dp,
-                        bottomStart = 0.dp,
-                        topEnd = 8.dp,
-                        bottomEnd = 8.dp
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isUpdating) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = Color.White
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-    }
-
-    // Modal de confirmación para eliminar - diseño mejorado
-    if (showDeleteConfirmation) {
-        AlertDialog(
-            onDismissRequest = {
-                showDeleteConfirmation = false
-                coroutineScope.launch {
-                    dismissState.reset()
-                }
-            },
-            icon = {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(
-                            MaterialTheme.colorScheme.errorContainer,
-                            shape = RoundedCornerShape(32.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            },
-            title = {
-                Text(
-                    text = "Eliminar ingrediente",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            text = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Verificar si es el último ingrediente para mostrar mensaje apropiado
-                    if (isLastIngredient) {
-                        Text(
-                            text = "Este es el último ingrediente del plato.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "Al eliminarlo se borrará todo el plato y volverás a la pantalla anterior.",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    } else {
-                        Text(
-                            text = "¿Realmente quiere borrar el ingrediente:",
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "\"${ingredient.name}\"?",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Botones mejorados con mejor diseño
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Botón Cancelar
-                        OutlinedButton(
-                            onClick = {
-                                showDeleteConfirmation = false
-                                coroutineScope.launch {
-                                    dismissState.reset()
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.outline
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    "Cancelar",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                        }
-
-                        // Botón Eliminar
-                        Button(
-                            onClick = {
-                                showDeleteConfirmation = false
-                                onDeleteIngredient()
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    "Eliminar",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = { },
-            dismissButton = { },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-    // Modal de edición estético
-    if (showEditModal) {
-        // Actualizar el valor cada vez que se abre el modal
-        LaunchedEffect(showEditModal) {
-            if (showEditModal) {
-                editGramsInput = ingredient.grams.toInt().toString()
-            }
-        }
-
-        AlertDialog(
-            onDismissRequest = {
-                showEditModal = false
-                editGramsInput = ""
-                coroutineScope.launch {
-                    dismissState.reset()
-                }
-            },
-            icon = {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(
-                            Color(0xFF6B9DC3).copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(32.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {                    Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null,
-                    tint = Color(0xFF6B9DC3),
-                    modifier = Modifier.size(32.dp)
-                )
-                }
-            },
-            title = {
-                Text(
-                    text = "Editar cantidad",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            text = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = ingredient.name,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = editGramsInput,
-                        onValueChange = { newValue ->
-                            // Solo permitir números y un punto decimal
-                            if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
-                                editGramsInput = newValue
-                            }
-                        },
-                        label = { Text("Cantidad en gramos") },
-                        placeholder = { Text("Ej: 150") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        enabled = !isUpdating,
-                        modifier = Modifier.fillMaxWidth(),                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF6B9DC3),
-                            focusedLabelColor = Color(0xFF6B9DC3)
-                        ),
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Scale,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Vista previa de carbohidratos
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF6B9DC3).copy(alpha = 0.1f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val previewCarbs = editGramsInput.toDoubleOrNull()?.let { grams ->
-                                (grams / 100.0) * ingredient.carbsPerHundredGrams
-                            } ?: ingredient.carbs
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {                                Icon(
-                                imageVector = Icons.Default.Restaurant,
-                                contentDescription = null,
-                                tint = Color(0xFF6B9DC3),
-                                modifier = Modifier.size(20.dp)
-                            )
-                                Text(
-                                    text = "Carbohidratos del alimento según los gramos:",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = "${String.format("%.1f", previewCarbs)} g de HC",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = Color(0xFF6B9DC3),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Botones
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Botón Cancelar
-                        OutlinedButton(
-                            onClick = {
-                                showEditModal = false
-                                editGramsInput = ""
-                                coroutineScope.launch {
-                                    dismissState.reset()
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.outline
-                            ),
-                            enabled = !isUpdating
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    "Cancelar",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                        }
-
-                        // Botón Guardar
-                        Button(
-                            onClick = {
-                                val newGrams = editGramsInput.toDoubleOrNull()
-                                if (newGrams != null && newGrams > 0) {
-                                    showEditModal = false
-                                    coroutineScope.launch {
-                                        dismissState.reset()
-                                    }
-                                    onEditConfirm(newGrams)
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6B9DC3),
-                                contentColor = Color.White
-                            ),
-                            enabled = !isUpdating && editGramsInput.toDoubleOrNull()?.let { it > 0 } == true
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                if (isUpdating) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color.White
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                                Text(
-                                    if (isUpdating) "Guardando..." else "Guardar",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = { },
-            dismissButton = { },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
 }
 
