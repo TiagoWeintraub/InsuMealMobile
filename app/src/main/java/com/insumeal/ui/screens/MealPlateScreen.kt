@@ -953,12 +953,12 @@ fun MealPlateScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(100.dp)
-                                .align(Alignment.TopCenter)
+                                .align(Alignment.BottomCenter)
                                 .background(
                                     brush = Brush.verticalGradient(
                                         colors = listOf(
-                                            Color.Black.copy(alpha = 0.7f),
-                                            Color.Transparent
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = 0.7f)
                                         )
                                     )
                                 )
@@ -972,8 +972,8 @@ fun MealPlateScreen(
                             ),
                             color = Color.White,
                             modifier = Modifier
-                                .align(Alignment.TopStart)
-                                .padding(16.dp)
+                                .align(Alignment.BottomStart)
+                                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 64.dp)
                         )
                     }
 
@@ -1557,7 +1557,7 @@ fun MealPlateScreen(
                                         )
                                     }
                                     Text(
-                                        if (isAddingFood) "Agregando..." else "Agregar",
+                                        if (isAddingFood) "Agregar" else "Agregar",
                                         style = MaterialTheme.typography.labelLarge.copy(
                                             fontWeight = FontWeight.Medium
                                         )
