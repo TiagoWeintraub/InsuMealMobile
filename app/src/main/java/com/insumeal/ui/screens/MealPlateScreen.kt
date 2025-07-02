@@ -194,7 +194,7 @@ fun IngredientEditableCard(
                     .zIndex(2f),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.White
                 ),
                 shape = RoundedCornerShape(0.dp) // Bordes rectos sin redondear
             ) {
@@ -381,7 +381,7 @@ fun IngredientEditableCard(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(13.dp)
                                 )
                                 Text(
                                     "Cancelar",
@@ -414,7 +414,7 @@ fun IngredientEditableCard(
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                                 Text(
                                     "Eliminar",
@@ -436,7 +436,7 @@ fun IngredientEditableCard(
         )
     }
 
-    // Modal de edición estético
+    // Modal de edición estético y moderno
     if (showEditModal) {
         // Actualizar el valor cada vez que se abre el modal
         LaunchedEffect(showEditModal) {
@@ -454,48 +454,110 @@ fun IngredientEditableCard(
                 }
             },
             icon = {
+                // Icono moderno con gradiente azul (color de lengüeta de editar)
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(80.dp)
                         .background(
-                            Color(0xFF6B9DC3).copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(32.dp)
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0xFF6B9DC3).copy(alpha = 0.15f),
+                                    Color(0xFF6B9DC3).copy(alpha = 0.05f)
+                                )
+                            ),
+                            shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        tint = Color(0xFF6B9DC3),
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(
+                                Color(0xFF6B9DC3).copy(alpha = 0.1f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            tint = Color(0xFF6B9DC3),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             },
             title = {
-                Text(
-                    text = "Editar cantidad",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    Text(
+                        text = "Editar cantidad",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center, // COlor Negro
+                        color = Color.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = ingredient.name,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        textAlign = TextAlign.Center,
+                        color = Color(0xFF6B9DC3),
+                        modifier = Modifier
+                            .background(
+                                Color(0xFF6B9DC3).copy(alpha = 0.08f),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                    .padding(horizontal = 16.dp, vertical = 4.dp))
+                }
             },
             text = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = ingredient.name,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
+                    // Destacar la cantidad actual sin card
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Color(0xFF6B9DC3).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Cantidad actual",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color.Black
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "${String.format("%.0f", ingredient.grams)} gramos",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color(0xFF6B9DC3)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Campo de entrada moderno con colores azules
                     OutlinedTextField(
                         value = editGramsInput,
                         onValueChange = { newValue ->
@@ -504,46 +566,72 @@ fun IngredientEditableCard(
                                 editGramsInput = newValue
                             }
                         },
-                        label = { Text("Cantidad en gramos") },
-                        placeholder = { Text("Ej: 150") },
+                        label = {
+                            Text(
+                                "Nueva cantidad en gramos",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
+                        },
+                        placeholder = {
+                            Text(
+                                "Ej: 150",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         enabled = !isUpdating,
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF6B9DC3),
-                            focusedLabelColor = Color(0xFF6B9DC3)
+                            focusedLabelColor = Color(0xFF6B9DC3),
+                            unfocusedBorderColor = Color(0xFF6B9DC3).copy(alpha = 0.6f),
+                            cursorColor = Color(0xFF6B9DC3)
                         ),
-                        trailingIcon = {
+                        shape = RoundedCornerShape(16.dp),
+                        leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Scale,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = Color(0xFF6B9DC3),
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    // Vista previa de carbohidratos
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF6B9DC3).copy(alpha = 0.1f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                    // Vista previa de carbohidratos sin card
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Color(0xFF6B9DC3).copy(alpha = 0.05f),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val previewCarbs = editGramsInput.toDoubleOrNull()?.let { grams ->
-                                (grams / 100.0) * ingredient.carbsPerHundredGrams
-                            } ?: ingredient.carbs
+                        val previewCarbs = editGramsInput.toDoubleOrNull()?.let { grams ->
+                            (grams / 100.0) * ingredient.carbsPerHundredGrams
+                        } ?: ingredient.carbs
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        // Header de la preview
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        Color(0xFF6B9DC3).copy(alpha = 0.1f),
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Restaurant,
@@ -551,20 +639,41 @@ fun IngredientEditableCard(
                                     tint = Color(0xFF6B9DC3),
                                     modifier = Modifier.size(20.dp)
                                 )
-                                Text(
-                                    text = "Carbohidratos del alimento según los gramos:",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
 
                             Text(
+                                text = "Carbohidratos calculados",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = Color.Black,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Valor de carbohidratos destacado con gradiente azul
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color(0xFF6B9DC3).copy(alpha = 0.15f),
+                                            Color(0xFF6B9DC3).copy(alpha = 0.25f)
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
                                 text = "${String.format("%.1f", previewCarbs)} g de HC",
-                                style = MaterialTheme.typography.titleMedium.copy(
+                                style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
                                 color = Color(0xFF6B9DC3),
@@ -575,12 +684,12 @@ fun IngredientEditableCard(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botones
+                    // Botones modernos - Cancelar en naranja, Guardar en azul
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Botón Cancelar
+                        // Botón Cancelar moderno con colores naranjas
                         OutlinedButton(
                             onClick = {
                                 showEditModal = false
@@ -595,29 +704,32 @@ fun IngredientEditableCard(
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(
                                 1.dp,
-                                MaterialTheme.colorScheme.outline
+                                Color(0xFFFF6B35).copy(alpha = 0.8f)
                             ),
                             enabled = !isUpdating
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(13.dp),
+                                    tint = Color(0xFFFF6B35)
                                 )
                                 Text(
                                     "Cancelar",
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Medium
-                                    )
+                                    ),
+                                    color = Color(0xFFFF6B35),
+                                    maxLines = 1
                                 )
                             }
                         }
 
-                        // Botón Guardar
+                        // Botón Guardar moderno con color azul claro uniforme
                         Button(
                             onClick = {
                                 val newGrams = editGramsInput.toDoubleOrNull()
@@ -634,18 +746,28 @@ fun IngredientEditableCard(
                                 .height(48.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6B9DC3),
-                                contentColor = Color.White
+                                containerColor = if (!isUpdating && editGramsInput.toDoubleOrNull()?.let { it > 0 } == true) {
+                                    Color(0xFF6B9DC3)
+                                } else {
+                                    MaterialTheme.colorScheme.outline
+                                },
+                                contentColor = Color.White,
+                                disabledContainerColor = MaterialTheme.colorScheme.outline,
+                                disabledContentColor = Color.White.copy(alpha = 0.6f)
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 2.dp
                             ),
                             enabled = !isUpdating && editGramsInput.toDoubleOrNull()?.let { it > 0 } == true
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 if (isUpdating) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
+                                        modifier = Modifier.size(14.dp),
                                         strokeWidth = 2.dp,
                                         color = Color.White
                                     )
@@ -653,7 +775,7 @@ fun IngredientEditableCard(
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
                                 }
                                 Text(
@@ -669,10 +791,11 @@ fun IngredientEditableCard(
             },
             confirmButton = { },
             dismissButton = { },
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(28.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            tonalElevation = 8.dp
         )
     }
 }
@@ -1156,21 +1279,21 @@ fun MealPlateScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.Bloodtype,
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    tint = Color.Red,
                                                     modifier = Modifier.size(24.dp)
                                                 )
                                             }
 
                                             Column {
                                                 Text(
-                                                    text = "Cálculo de Dosis",
+                                                    text = "Glucosa en Sangre",
                                                     style = MaterialTheme.typography.titleLarge.copy(
                                                         fontWeight = FontWeight.Bold
                                                     ),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
                                                 Text(
-                                                    text = "Ingresa tu glucemia actual",
+                                                    text = "Ingresa tu glucemia actual para un cálculo preciso en la dosis",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                 )
@@ -1187,13 +1310,6 @@ fun MealPlateScreen(
                                             singleLine = true,
                                             enabled = !isCalculatingDosis,
                                             modifier = Modifier.fillMaxWidth(),
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = Icons.Default.Bloodtype,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary
-                                                )
-                                            },
                                             supportingText = {
                                                 Text("Valores permitidos: entre 25 y 250 mg/dL")
                                             }
@@ -1291,7 +1407,7 @@ fun MealPlateScreen(
                         }
                     }
 
-                    // Botón de volver atrás flotando sobre la imagen
+                    // Botón de volver atrás flotando sobre la imagen con estética consistente
                     IconButton(
                         onClick = {
                             // Si hay un plato cargado, eliminarlo antes de volver atrás
@@ -1316,11 +1432,9 @@ fun MealPlateScreen(
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(16.dp)
-                            .size(48.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.5f),
-                                shape = CircleShape
-                            )
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.2f))
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -1493,7 +1607,7 @@ fun MealPlateScreen(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
                                     Text(
                                         "Cancelar",
