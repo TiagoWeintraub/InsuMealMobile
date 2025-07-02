@@ -230,12 +230,12 @@ fun HomeScreen(navController: NavController, context: Context) {
         }
     ) {
         Scaffold(
-            containerColor = Color(0xFFF7FAFC)
+            containerColor = Color.White // Cambiar a blanco puro
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFF7FAFC))
+                    .background(Color.White) // Cambiar a blanco puro
             ) {
                 // Header principal unificado con gradiente
                 Box(
@@ -245,7 +245,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     Color(0xFFFF6B35),
-                                    Color(0xFFF7FAFC)
+                                    Color.White // Cambiar a blanco puro
                                 )
                             )
                         )
@@ -356,7 +356,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Analizar Plato de Comida",
                             description = "Conocé los carbohidratos e insulina sugerida con una foto de tu comida",
                             icon = Icons.Filled.PhotoCamera,
-                            backgroundColor = Color(0xFFF0FFF4),
+                            MaterialTheme.colorScheme.primaryContainer,
                             iconColor = Color(0xFF38A169),
                             onClick = { navController.navigate("uploadPhoto") }
                         )

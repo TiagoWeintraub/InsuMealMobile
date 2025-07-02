@@ -45,7 +45,7 @@ fun DosisScreen(
     val mealPlate by mealPlateViewModel.mealPlate.collectAsState()
     val dosisCalculation by mealPlateViewModel.dosisCalculation.collectAsState()
     val context = LocalContext.current
-    
+
     // Estado para controlar el modal de advertencia
     var showDisclaimerDialog by remember { mutableStateOf(true) }
 
@@ -74,7 +74,7 @@ fun DosisScreen(
             navController.navigateUp()
         }
     }
-    
+
     Scaffold(
         // Eliminar el topBar para que la imagen llegue hasta arriba
     ) { paddingValues ->
@@ -185,67 +185,61 @@ fun DosisScreen(
                         // Información nutricional detallada
                         if (dosisCalculation != null) {
                             item {
-                                // Card de Información principal
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = Color.White
-                                    ),
-                                    shape = RoundedCornerShape(16.dp)
+                                // Título de la sección con icono verde
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Start // Alineado a la izquierda
                                 ) {
-                                    Column(
-                                        modifier = Modifier.padding(20.dp)
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Analytics,
-                                                contentDescription = null,
-                                                tint = Color.Green,
-                                                modifier = Modifier.size(24.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(
-                                                text = "Información",
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                    fontWeight = FontWeight.Bold
-                                                ),
-                                                color = Color.Black
-                                            )
-                                        }
+                                    Icon(
+                                        imageVector = Icons.Default.Analytics,
+                                        contentDescription = null,
+                                        tint = Color(0xFF4CAF50), // Verde elegante (mantiene el verde)
+                                        modifier = Modifier.size(20.dp) // Icono más pequeño
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Información",
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp // Tamaño más pequeño
+                                        ),
+                                        color = Color.Black // Texto negro
+                                    )
+                                }
 
-                                        Spacer(modifier = Modifier.height(16.dp))
+                                // Tres globos circulares con información nutricional
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    CircularInfoBubble(
+                                        label = "Carbohidratos",
+                                        value = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
+                                        backgroundColor = Color(0xFFFF9800), // Naranja elegante
+                                        icon = Icons.Default.Restaurant,
+                                        modifier = Modifier.weight(1f)
+                                    )
 
-                                        // Información básica en formato horizontal
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceEvenly
-                                        ) {
-                                            NutritionalInfoItem(
-                                                label = "Carbohidratos",
-                                                value = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
-                                                icon = Icons.Default.Restaurant,
-                                                iconColor = Color(0xFFB8860B) // Amarillo dorado
-                                            )
+                                    CircularInfoBubble(
+                                        label = "Glucemia",
+                                        value = "${String.format("%.0f", dosisCalculation!!.glycemia)} mg/dL",
+                                        backgroundColor = Color(0xFFE91E63), // Rosa elegante
+                                        icon = Icons.Default.Bloodtype,
+                                        modifier = Modifier.weight(1f)
+                                    )
 
-                                            NutritionalInfoItem(
-                                                label = "Glucemia",
-                                                value = "${String.format("%.0f", dosisCalculation!!.glycemia)} mg/dL",
-                                                icon = Icons.Default.Bloodtype,
-                                                iconColor = Color(0xFFFF0000) // Rojo
-                                            )
-
-                                            NutritionalInfoItem(
-                                                label = "Dosis Total",
-                                                value = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
-                                                icon = Icons.Default.MedicalServices,
-                                                iconColor = Color(0xFF00BFFF) // Celeste
-                                            )
-                                        }
-                                    }
+                                    CircularInfoBubble(
+                                        label = "Dosis Total",
+                                        value = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
+                                        backgroundColor = Color(0xFF2196F3), // Azul elegante
+                                        icon = Icons.Default.MedicalServices,
+                                        modifier = Modifier.weight(1f)
+                                    )
                                 }
                             }
 
@@ -275,8 +269,8 @@ fun DosisScreen(
                                             Spacer(modifier = Modifier.width(16.dp))
                                             Text(
                                                 text = "No se recomienda comer alimentos con carbohidratos cuando la glucemia está elevada",
-                                                style = MaterialTheme.typography.bodyLarge.copy(
-                                                    fontWeight = FontWeight.Medium
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
                                                 ),
                                                 color = Color(0xFFEF5350)
                                             )
@@ -313,7 +307,7 @@ fun DosisScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.Calculate,
                                                     contentDescription = null,
-                                                    tint = Color.Blue,
+                                                    tint = Color(0xFF2196F3),
                                                     modifier = Modifier.size(24.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(8.dp))
@@ -401,7 +395,7 @@ fun DosisScreen(
                                                         Icon(
                                                             imageVector = Icons.Default.LocalDining,
                                                             contentDescription = null,
-                                                            tint = MaterialTheme.colorScheme.secondary,
+                                                            tint = Color(0xFF2196F3),
                                                             modifier = Modifier.size(24.dp)
                                                         )
                                                         Spacer(modifier = Modifier.width(12.dp))
@@ -417,7 +411,7 @@ fun DosisScreen(
                                                         style = MaterialTheme.typography.titleMedium.copy(
                                                             fontWeight = FontWeight.Bold
                                                         ),
-                                                        color = MaterialTheme.colorScheme.secondary
+                                                        color = Color(0xFF2196F3)
                                                     )
                                                 }
                                             }
@@ -454,7 +448,7 @@ fun DosisScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.LocalDining,
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    tint = Color(0xFFFF9800),
                                                     modifier = Modifier.size(24.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(8.dp))
@@ -564,89 +558,95 @@ fun DosisScreen(
                                 }
                             }
 
-                            // Botón para volver al home
+                            // Botones horizontales: Volver al inicio y Editar el plato
                             item {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    shape = RoundedCornerShape(16.dp)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                // Navegar al home y limpiar el stack
-                                                navController.navigate("home") {
-                                                    popUpTo(navController.graph.startDestinationId) {
-                                                        inclusive = false
+                                    // Botón para volver al home
+                                    Card(
+                                        modifier = Modifier.weight(1f),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    // Navegar al home y limpiar el stack
+                                                    navController.navigate("home") {
+                                                        popUpTo(navController.graph.startDestinationId) {
+                                                            inclusive = false
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            .padding(20.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Home,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp),
+                                                tint = Color.White
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Inicio",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+
+                                    // Botón para editar el plato
+                                    Card(
+                                        modifier = Modifier.weight(1f),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.secondary
+                                        ),
+                                        shape = RoundedCornerShape(16.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Home,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(28.dp),
-                                            tint = Color.White
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Text(
-                                            text = "Volver al Inicio",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = Color.White
-                                        )
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    navController.navigateUp()
+                                                }
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp),
+                                                tint = Color.White
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Editar",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = Color.White
+                                            )
+                                        }
                                     }
                                 }
                             }
 
-                            // Botón para editar el plato
+                            // Espaciado adicional al final
                             item {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary
-                                    ),
-                                    shape = RoundedCornerShape(16.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                navController.navigateUp()
-                                            }
-                                            .padding(20.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(28.dp),
-                                            tint = Color.White
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Text(
-                                            text = "Editar el plato",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-                            }
-
-                            item {
-                                // Espaciado adicional al final
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                         } else {
@@ -778,4 +778,65 @@ fun DosisScreen(
     }
 }
 
+@Composable
+fun CircularInfoBubble(
+    label: String,
+    value: String,
+    backgroundColor: Color,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Globo circular con color de fondo sutil del icono
+        Box(
+            modifier = Modifier
+                .size(55.dp) // Reducido de 75.dp a 65.dp
+                .background(
+                    color = backgroundColor.copy(alpha = 0.1f), // Color de fondo sutil del icono
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
+                .clip(androidx.compose.foundation.shape.CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = backgroundColor,
+                modifier = Modifier.size(30.dp) // Reducido de 36.dp a 30.dp
+            )
+        }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Información debajo del globo con mejor tipografía
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}

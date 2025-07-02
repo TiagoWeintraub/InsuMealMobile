@@ -29,18 +29,18 @@ private val LightColorScheme = lightColorScheme(
     primary = Orange500, // Naranja principal
     secondary = Orange600, // Naranja complementario
     tertiary = SoftOrange, // Naranja suave para acentos
-    primaryContainer = Orange50, // Contenedor naranja muy claro
-    secondaryContainer = Orange100, // Contenedor naranja claro
-    tertiaryContainer = Orange200, // Contenedor naranja medio
-    surface = Surface, // Superficie moderna
-    surfaceVariant = SurfaceVariant, // Variante de superficie
-    background = Gray50, // Fondo gris muy claro
+    primaryContainer = Color.White, // Contenedor blanco puro
+    secondaryContainer = Color.White, // Contenedor blanco puro
+    tertiaryContainer = Color.White, // Contenedor blanco puro
+    surface = Color.White, // Superficie blanca pura
+    surfaceVariant = Color.White, // Variante de superficie blanca
+    background = Color.White, // Fondo blanco puro
     onPrimary = Color.White, // Texto sobre naranja
     onSecondary = Color.White, // Texto sobre naranja secundario
     onTertiary = Gray900, // Texto sobre naranja suave
-    onPrimaryContainer = Orange800, // Texto sobre contenedor primario
-    onSecondaryContainer = Orange700, // Texto sobre contenedor secundario
-    onTertiaryContainer = Orange800, // Texto sobre contenedor terciario
+    onPrimaryContainer = Gray900, // Texto sobre contenedor blanco
+    onSecondaryContainer = Gray900, // Texto sobre contenedor blanco
+    onTertiaryContainer = Gray900, // Texto sobre contenedor blanco
     onBackground = OnSurface, // Texto sobre fondo
     onSurface = OnSurface, // Texto sobre superficie
     onSurfaceVariant = OnSurfaceVariant, // Texto sobre variante de superficie
@@ -52,7 +52,7 @@ private val LightColorScheme = lightColorScheme(
 fun InsuMealTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color está disponible en Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Cambiar a false para forzar el uso de nuestros colores
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

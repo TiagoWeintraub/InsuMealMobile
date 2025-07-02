@@ -58,6 +58,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues) // Aplicar el padding del Scaffold
         ) {
             // Header con gradiente y avatar
             Box(
@@ -256,7 +257,7 @@ fun ModernProfileCard(
             .fillMaxWidth()
             .height(80.dp),
         shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp), // Agregada sombra elegante
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )

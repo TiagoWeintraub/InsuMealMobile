@@ -222,7 +222,7 @@ fun IngredientEditableCard(
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color.Black
                         )
                         Text(
                             text = "${String.format("%.1f", ingredient.carbs)}g de HC",
@@ -1437,7 +1437,7 @@ fun MealPlateScreen(
                             .background(Color.White.copy(alpha = 0.2f))
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.Filled.Close,
                             contentDescription = "Volver",
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)

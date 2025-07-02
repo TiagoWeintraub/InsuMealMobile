@@ -261,12 +261,12 @@ fun UploadPhotoScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF7FAFC)
+        containerColor = Color.White
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF7FAFC))
+                .background(Color.White)
         ) {
             // Header con gradiente igual al HomeScreen
             Box(
@@ -276,7 +276,7 @@ fun UploadPhotoScreen(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 Color(0xFFFF6B35),
-                                Color(0xFFF7FAFC)
+                                Color.White  // Cambiar a blanco puro
                             )
                         )
                     )
