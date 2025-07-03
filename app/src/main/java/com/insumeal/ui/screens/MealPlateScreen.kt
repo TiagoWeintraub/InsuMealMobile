@@ -31,6 +31,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -1091,7 +1094,16 @@ fun MealPlateScreen(
                         Text(
                             text = currentMealPlate.name.uppercase(),
                             style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                // 1. PARA HACER EL TEXTO MÁS GRANDE
+                                fontSize = 28.sp,
+
+                                // 2. PARA AÑADIR LA SOMBRA
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.75f), // Color de la sombra
+                                    offset = Offset(x = 4f, y = 4f),     // Desplazamiento (dónde se dibuja)
+                                    blurRadius = 8f                      // Qué tan difuminada es la sombra
+                                )
                             ),
                             color = Color.White,
                             modifier = Modifier

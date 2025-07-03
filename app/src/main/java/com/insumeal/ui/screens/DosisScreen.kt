@@ -19,8 +19,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -151,7 +153,16 @@ fun DosisScreen(
                     Text(
                         text = currentMealPlate.name.uppercase(),
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            // 1. PARA HACER EL TEXTO MÁS GRANDE
+                            fontSize = 28.sp,
+
+                            // 2. PARA AÑADIR LA SOMBRA
+                            shadow = Shadow(
+                                color = Color.Black.copy(alpha = 0.75f), // Color de la sombra
+                                offset = Offset(x = 4f, y = 4f),     // Desplazamiento (dónde se dibuja)
+                                blurRadius = 8f                      // Qué tan difuminada es la sombra
+                            )
                         ),
                         color = Color.White,
                         modifier = Modifier
