@@ -313,7 +313,7 @@ fun UploadPhotoScreen(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 24.sp
                             ),
-                            color = Color.White
+                            color = Color.Black
                         )
                     }
 

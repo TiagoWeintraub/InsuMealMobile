@@ -120,7 +120,7 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 24.sp
                                 ),
-                                color = Color.White
+                                color = Color.Black
                             )
                         }
                     }

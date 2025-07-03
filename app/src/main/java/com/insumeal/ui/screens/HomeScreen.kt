@@ -367,7 +367,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             icon = Icons.Filled.History,
                             backgroundColor = Color(0xFFF7FAFF),
                             iconColor = Color(0xFF4299E1),
-                            onClick = { navController.navigate("loadingHistory") }
+                            onClick = { navController.navigate("foodHistory") }
                         )
 
                         ModernActionCard(

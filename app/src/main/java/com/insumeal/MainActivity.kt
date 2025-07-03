@@ -91,10 +91,6 @@ fun MealPlateScreensContainer(navController: NavHostController) {
             DosisScreen(navController, mealPlateViewModel)
         }
 
-        composable("loadingHistory") {
-            LoadingHistoryScreen(navController, historyViewModel)
-        }
-
         composable("foodHistory") {
             FoodHistoryScreen(navController, historyViewModel)
         }
