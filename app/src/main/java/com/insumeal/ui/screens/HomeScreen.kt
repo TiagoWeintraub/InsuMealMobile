@@ -242,9 +242,41 @@ fun HomeScreen(navController: NavController, context: Context) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Transparent)
+                        .height(200.dp)
+                        .clip(
+                            androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                val width = size.width
+                                val height = size.height
+
+                                // Crear la forma ondulada completa del contenedor
+                                moveTo(0f, 0f)
+                                lineTo(width, 0f)
+                                lineTo(width, height * 0.75f)
+
+                                // Crear ondas más pronunciadas y elegantes
+                                cubicTo(
+                                    width * 0.85f, height * 0.95f,
+                                    width * 0.65f, height * 0.95f,
+                                    width * 0.5f, height * 0.85f
+                                )
+                                cubicTo(
+                                    width * 0.35f, height * 0.75f,
+                                    width * 0.15f, height * 0.75f,
+                                    0f, height * 0.85f
+                                )
+                                close()
+                            }
+                        )
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Turquoise500,
+                                    Turquoise600
+                                )
+                            )
+                        )
                 ) {
-                    // Forma geométrica ondulada de fondo
+                    // Primera onda natural - fluye desde la izquierda
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -254,22 +286,25 @@ fun HomeScreen(navController: NavController, context: Context) {
                                     val width = size.width
                                     val height = size.height
 
-                                    // Crear una forma con ondas suaves en la parte inferior
+                                    // Onda natural que fluye suavemente
                                     moveTo(0f, 0f)
                                     lineTo(width, 0f)
-                                    lineTo(width, height * 0.75f)
+                                    lineTo(width, height * 0.2f)
 
-                                    // Crear ondas más pronunciadas y elegantes
+                                    // Curva suave que baja en el centro
                                     cubicTo(
-                                        width * 0.85f, height * 0.95f,
-                                        width * 0.65f, height * 0.95f,
-                                        width * 0.5f, height * 0.85f
+                                        width * 0.8f, height * 0.3f,
+                                        width * 0.6f, height * 0.5f,
+                                        width * 0.4f, height * 0.6f
                                     )
+
+                                    // Continúa bajando suavemente hacia la izquierda
                                     cubicTo(
-                                        width * 0.35f, height * 0.75f,
-                                        width * 0.15f, height * 0.75f,
-                                        0f, height * 0.85f
+                                        width * 0.2f, height * 0.7f,
+                                        width * 0.1f, height * 0.8f,
+                                        0f, height * 0.75f
                                     )
+
                                     close()
                                 }
                             )
@@ -283,6 +318,56 @@ fun HomeScreen(navController: NavController, context: Context) {
                             )
                     )
 
+                    // Segunda onda natural - fluye desde la derecha y se cruza
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(
+                                androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                    val width = size.width
+                                    val height = size.height
+
+                                    // Segunda onda con patrón diferente - ondas más pronunciadas
+                                    moveTo(0f, 0f)
+                                    lineTo(width, 0f)
+                                    lineTo(width, height * 0.25f)
+
+                                    // Primera ondulación - baja pronunciada
+                                    cubicTo(
+                                        width * 0.85f, height * 0.45f,
+                                        width * 0.75f, height * 0.55f,
+                                        width * 0.65f, height * 0.4f
+                                    )
+
+                                    // Segunda ondulación - sube
+                                    cubicTo(
+                                        width * 0.55f, height * 0.25f,
+                                        width * 0.45f, height * 0.15f,
+                                        width * 0.35f, height * 0.3f
+                                    )
+
+                                    // Tercera ondulación - baja suave hacia la izquierda
+                                    cubicTo(
+                                        width * 0.25f, height * 0.45f,
+                                        width * 0.15f, height * 0.5f,
+                                        0f, height * 0.4f
+                                    )
+
+                                    close()
+                                }
+                            )
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Turquoise300.copy(alpha = 0.7f), // Más transparente para el efecto de cruce
+                                        Turquoise400.copy(alpha = 0.5f)
+                                    )
+                                )
+                            )
+                    )
+
+                    // Contenido encima de las ondas
                     Column {
                         // Top bar integrado en el header
                         Row(
