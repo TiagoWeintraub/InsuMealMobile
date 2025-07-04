@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.insumeal.ui.theme.Turquoise500
+import com.insumeal.ui.theme.Turquoise600
 import kotlinx.coroutines.launch
 import com.insumeal.ui.viewmodel.ClinicalDataViewModel
 import com.insumeal.utils.TokenManager
@@ -72,30 +74,63 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                 .verticalScroll(scrollState) // SCROLL APLICADO A TODO EL CONTENIDO
                 .background(Color(0xFFF7FAFC))
         ) {
-            // Header con gradiente moderno - AHORA SE MUEVE CON EL SCROLL
+            // Header con forma ondulada elegante
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFFFF6B35),
-                                Color(0xFFF7FAFC)
+                    .background(Color.Transparent)
+            ) {
+                // Forma geométrica ondulada de fondo
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(
+                            androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                val width = size.width
+                                val height = size.height
+
+                                // Crear una forma con ondas suaves en la parte inferior
+                                moveTo(0f, 0f)
+                                lineTo(width, 0f)
+                                lineTo(width, height * 0.75f)
+
+                                // Crear ondas más pronunciadas y elegantes
+                                cubicTo(
+                                    width * 0.85f, height * 0.95f,
+                                    width * 0.65f, height * 0.95f,
+                                    width * 0.5f, height * 0.85f
+                                )
+                                cubicTo(
+                                    width * 0.35f, height * 0.75f,
+                                    width * 0.15f, height * 0.75f,
+                                    0f, height * 0.85f
+                                )
+                                close()
+                            }
+                        )
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Turquoise500,
+                                    Turquoise600
+                                )
                             )
                         )
-                    )
-            ) {
+                )
+
                 Column {
                     // Top bar integrado en el header
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 16.dp)
-                            .statusBarsPadding(), // Mantener el statusBarsPadding para evitar superposición
+                            .statusBarsPadding(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Botón de volver atrás
                         IconButton(
-                            onClick = { navController.popBackStack() },
+                            onClick = { navController.navigateUp() },
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(RoundedCornerShape(12.dp))
@@ -109,24 +144,23 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                             )
                         }
 
-                        // Título centrado
+                        // Título centrado a la misma altura que el botón
                         Box(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .weight(1f)
+                                .offset(x = (-22).dp), // Compensar el ancho del botón para centrar realmente
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Datos Clínicos",
-                                style = MaterialTheme.typography.headlineMedium.copy(
+                                text = "Información Clínica",
+                                style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 24.sp
                                 ),
-                                color = Color.Black
+                                color = Color.White
                             )
                         }
                     }
-
-                    // Extender el gradiente
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 
@@ -138,44 +172,6 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                         .padding(horizontal = 24.dp, vertical = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Header de bienvenida - SIN CARD, INTEGRADO AL FONDO
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp), // Menos padding ya que no hay card
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocalHospital,
-                            contentDescription = null,
-                            tint = Color(0xFFFF6B35),
-                            modifier = Modifier.size(48.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Text(
-                            text = "Parámetros Médicos",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp
-                            ),
-                            color = Color(0xFF2D3748),
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "Configura tus parámetros médicos para obtener cálculos personalizados de insulina",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 16.sp,
-                                lineHeight = 22.sp
-                            ),
-                            color = Color(0xFF64748B),
-                            textAlign = TextAlign.Center
-                        )
-                    }
 
                     // Sección Sensibilidad a la Insulina
                     ParameterSection(

@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.insumeal.ui.theme.Turquoise500
+import com.insumeal.ui.theme.Turquoise600
 import com.insumeal.utils.TokenManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,21 +62,56 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                 .fillMaxSize()
                 .padding(paddingValues) // Aplicar el padding del Scaffold
         ) {
-            // Header con gradiente y avatar
+            // Header con forma ondulada elegante
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFFFF6B35),
-                                Color(0xFFF7FAFC)
+                    .background(Color.Transparent)
+            ) {
+                // Forma geométrica ondulada de fondo
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(
+                            androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                val width = size.width
+                                val height = size.height
+
+                                // Crear una forma con ondas suaves en la parte inferior
+                                moveTo(0f, 0f)
+                                lineTo(width, 0f)
+                                lineTo(width, height * 0.75f)
+
+                                // Crear ondas más pronunciadas y elegantes
+                                cubicTo(
+                                    width * 0.85f, height * 0.95f,
+                                    width * 0.65f, height * 0.95f,
+                                    width * 0.5f, height * 0.85f
+                                )
+                                cubicTo(
+                                    width * 0.35f, height * 0.75f,
+                                    width * 0.15f, height * 0.75f,
+                                    0f, height * 0.85f
+                                )
+                                close()
+                            }
+                        )
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Turquoise500,
+                                    Turquoise600
+                                )
                             )
                         )
-                    )
-            ) {
-                Column {
-                    // Top bar integrado en el header igual al HomeScreen
+                )
+
+                // Contenido encima de la forma ondulada (solo botón y título)
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Top bar integrado en el header
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -82,8 +119,9 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                             .statusBarsPadding(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Botón de volver atrás
                         IconButton(
-                            onClick = { navController.popBackStack() },
+                            onClick = { navController.navigateUp() },
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(RoundedCornerShape(12.dp))
@@ -96,66 +134,77 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                    }
 
-                    // Contenido del header con avatar y textos
+                        // Título centrado a la misma altura que el botón
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .offset(x = (-22).dp), // Compensar el ancho del botón para centrar realmente
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Mi Perfil",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                ),
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                // Avatar posicionado adelante de la onda (fuera del área ondulada)
+                userProfile?.let { profile ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 32.dp)
+                            .padding(top = 120.dp) // Posicionar debajo del header pero adelante de la onda
                     ) {
-                        // Avatar grande
+                        // Avatar del usuario más grande con sombra para destacar
                         Box(
                             modifier = Modifier
-                                .size(120.dp)
+                                .size(100.dp)
                                 .clip(CircleShape)
-                                .background(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(Color(0xFFFF6B35), Color(0xFFFF8E53))
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
+                                .background(Color.White)
+                                .padding(4.dp)
                         ) {
-                            if (userProfile != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                                    .background(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(
+                                                Color(0xFFE91E63),
+                                                Color(0xFFC2185B)
+                                            )
+                                        )
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Text(
-                                    text = userProfile!!.username.take(2).uppercase(),
-                                    style = MaterialTheme.typography.displayMedium.copy(
+                                    text = profile.username.take(1).uppercase(),
+                                    style = MaterialTheme.typography.headlineLarge.copy(
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 48.sp
+                                        fontSize = 42.sp
                                     ),
                                     color = Color.White
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(60.dp)
                                 )
                             }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Nombre del usuario
+                        // Nombre del usuario en negro
                         Text(
-                            text = if (userProfile != null) "${userProfile!!.username} ${userProfile!!.lastName}" else "Cargando...",
-                            style = MaterialTheme.typography.headlineMedium.copy(
+                            text = "${profile.username} ${profile.lastName}",
+                            style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 28.sp
+                                fontSize = 22.sp
                             ),
-                            color = Color(0xFF2D3748)
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "Perfil de Usuario",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 16.sp
-                            ),
-                            color = Color(0xFF4A5568)
+                            color = Color.Black
                         )
                     }
                 }

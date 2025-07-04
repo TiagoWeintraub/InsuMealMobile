@@ -52,8 +52,8 @@ fun DosisScreen(
     var showDisclaimerDialog by remember { mutableStateOf(true) }
 
     // Estados para controlar los desplegables
-    var isDosisExpanded by remember { mutableStateOf(false) }
-    var isCarbsDetailExpanded by remember { mutableStateOf(false) }
+    var isDosisExpanded by remember { mutableStateOf(true) }
+    var isCarbsDetailExpanded by remember { mutableStateOf(true) }
 
     // Manejar el botón de volver atrás del sistema (hardware o gesto)
     BackHandler {

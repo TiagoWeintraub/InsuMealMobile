@@ -59,13 +59,15 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Gray50,
-                        Color.White
-                    )
+                        Turquoise50,
+                        Color.White,
+                        Gray50
+                    ),
+                    startY = 0f,
+                    endY = 1000f
                 )
-            ),
-        contentAlignment = Alignment.TopCenter
-    ) {
+            )
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -97,51 +99,40 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         fontWeight = FontWeight.Bold,
                         fontSize = 36.sp
                     ),
-                    color = Orange600,
+                    color = Turquoise600,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
+                // Subtítulo
                 Text(
-                    text = "Crea tu cuenta",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    text = "Únete a nuestra comunidad",
+                    style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
-                        fontSize = 20.sp
+                        fontSize = 16.sp
                     ),
-                    color = Gray700,
+                    color = Turquoise500,
                     textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "Gestiona tu diabetes de forma inteligente",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Gray600,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
-            // Formulario moderno en tarjeta elegante
+            // Tarjeta de registro modernizada
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(24.dp),
-                        ambientColor = Orange500.copy(alpha = 0.1f)
+                        elevation = 20.dp,
+                        shape = RoundedCornerShape(28.dp)
                     ),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(28.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                        .padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Sección Información Personal
                     SectionHeader(
@@ -282,11 +273,11 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                             border = ButtonDefaults.outlinedButtonBorder.copy(
                                 width = 1.5.dp,
                                 brush = Brush.horizontalGradient(
-                                    colors = listOf(Orange400, Orange600)
+                                    colors = listOf(Turquoise400, Turquoise600)
                                 )
                             ),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Orange600
+                                contentColor = Turquoise600
                             )
                         ) {
                             Text(
@@ -370,8 +361,8 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                             shape = RoundedCornerShape(16.dp),
                             enabled = !isLoading,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Orange600,
-                                disabledContainerColor = Orange600.copy(alpha = 0.6f)
+                                containerColor = Turquoise600,
+                                disabledContainerColor = Turquoise600.copy(alpha = 0.6f)
                             )
                         ) {
                             if (isLoading) {
@@ -412,7 +403,7 @@ private fun SectionHeader(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Orange600,
+            tint = Turquoise600,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -450,18 +441,18 @@ private fun ModernTextField(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = Orange500,
+                tint = Turquoise500,
                 modifier = Modifier.size(20.dp)
             )
         },
         shape = RoundedCornerShape(16.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Orange500,
+            focusedBorderColor = Turquoise500,
             unfocusedBorderColor = Gray300,
-            focusedLabelColor = Orange600,
+            focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
-            cursorColor = Orange600
+            cursorColor = Turquoise600
         )
     )
 }
@@ -489,7 +480,7 @@ private fun ModernPasswordField(
             Icon(
                 imageVector = Icons.Default.Lock,
                 contentDescription = null,
-                tint = Orange500,
+                tint = Turquoise500,
                 modifier = Modifier.size(20.dp)
             )
         },
@@ -499,7 +490,7 @@ private fun ModernPasswordField(
                 Icon(
                     imageVector = if (isVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                     contentDescription = if (isVisible) "Ocultar contraseña" else "Mostrar contraseña",
-                    tint = Orange500,
+                    tint = Turquoise500,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -507,11 +498,11 @@ private fun ModernPasswordField(
         shape = RoundedCornerShape(16.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Orange500,
+            focusedBorderColor = Turquoise500,
             unfocusedBorderColor = Gray300,
-            focusedLabelColor = Orange600,
+            focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
-            cursorColor = Orange600
+            cursorColor = Turquoise600
         )
     )
 }
@@ -553,7 +544,7 @@ private fun ModernSliderCard(
 
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Orange500.copy(alpha = 0.1f)
+                        containerColor = Turquoise500.copy(alpha = 0.1f)
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -562,7 +553,7 @@ private fun ModernSliderCard(
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = Orange700,
+                        color = Turquoise700,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -575,9 +566,9 @@ private fun ModernSliderCard(
                 onValueChange = { onValueChange(it.toInt()) },
                 valueRange = valueRange,
                 colors = SliderDefaults.colors(
-                    thumbColor = Orange600,
-                    activeTrackColor = Orange500,
-                    inactiveTrackColor = Orange200
+                    thumbColor = Turquoise600,
+                    activeTrackColor = Turquoise500,
+                    inactiveTrackColor = Turquoise200
                 ),
                 modifier = Modifier.fillMaxWidth()
             )

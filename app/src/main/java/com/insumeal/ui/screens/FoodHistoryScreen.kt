@@ -24,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.insumeal.ui.theme.Turquoise300
+import com.insumeal.ui.theme.Turquoise500
+import com.insumeal.ui.theme.Turquoise600
 import com.insumeal.ui.viewmodel.MealPlateHistoryViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -61,15 +64,47 @@ fun FoodHistoryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFFFF6B35),
-                                Color.White
+                    .background(Color.Transparent)
+            ) {
+                // Forma geométrica ondulada de fondo
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(
+                            androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                val width = size.width
+                                val height = size.height
+
+                                // Crear una forma con ondas suaves en la parte inferior
+                                moveTo(0f, 0f)
+                                lineTo(width, 0f)
+                                lineTo(width, height * 0.75f)
+
+                                // Crear ondas más pronunciadas y elegantes
+                                cubicTo(
+                                    width * 0.85f, height * 0.95f,
+                                    width * 0.65f, height * 0.95f,
+                                    width * 0.5f, height * 0.85f
+                                )
+                                cubicTo(
+                                    width * 0.35f, height * 0.75f,
+                                    width * 0.15f, height * 0.75f,
+                                    0f, height * 0.85f
+                                )
+                                close()
+                            }
+                        )
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Turquoise500,
+                                    Turquoise600
+                                )
                             )
                         )
-                    )
-            ) {
+                )
+
                 Column {
                     // Top bar integrado en el header
                     Row(
@@ -95,40 +130,26 @@ fun FoodHistoryScreen(
                             )
                         }
 
-                        // Título centrado
-                        Text(
-                            text = "Historial de Comidas",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 22.sp
-                            ),
-                            color = Color.Black,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        // Botón de eliminar todo con estilo moderno
-                        if (historyList.isNotEmpty() && !isDeletingAll) {
-                            IconButton(
-                                onClick = { showDeleteAllDialog = true },
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White.copy(alpha = 0.2f))
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Eliminar todo",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        } else {
-                            // Spacer invisible para mantener el título centrado cuando no hay botón de eliminar
-                            Spacer(modifier = Modifier.size(44.dp))
+                        // Título centrado a la misma altura que el botón
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .offset(x = (-22).dp), // Compensar el ancho del botón para centrar realmente
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Historial de Comidas",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                ),
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
@@ -152,7 +173,7 @@ fun FoodHistoryScreen(
                                 // Círculo de carga con colores del tema
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(64.dp),
-                                    color = Color(0xFFFF6B35),
+                                    color = Turquoise500,
                                     strokeWidth = 6.dp
                                 )
 
@@ -207,13 +228,13 @@ fun FoodHistoryScreen(
                                         modifier = Modifier
                                             .size(80.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFFFF6B35).copy(alpha = 0.1f)),
+                                            .background(Turquoise600.copy(alpha = 0.1f)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Error,
                                             contentDescription = null,
-                                            tint = Color(0xFFFF6B35),
+                                            tint = Turquoise600,
                                             modifier = Modifier.size(40.dp)
                                         )
                                     }
@@ -234,7 +255,7 @@ fun FoodHistoryScreen(
                                     Text(
                                         text = errorMessage!!,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = Color(0xFF4A5568),
+                                        color = Turquoise600,
                                         textAlign = TextAlign.Center
                                     )
 
@@ -246,7 +267,7 @@ fun FoodHistoryScreen(
                                             historyViewModel.loadHistory(context)
                                         },
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFFFF6B35)
+                                            containerColor = Turquoise500
                                         ),
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier.fillMaxWidth()
@@ -296,10 +317,7 @@ fun FoodHistoryScreen(
                                             .clip(CircleShape)
                                             .background(
                                                 brush = Brush.radialGradient(
-                                                    colors = listOf(
-                                                        Color(0xFFFF6B35).copy(alpha = 0.1f),
-                                                        Color(0xFFFF6B35).copy(alpha = 0.05f)
-                                                    )
+                                                    colors = listOf(Color.White,Color.White.copy(alpha = 0.1f) )
                                                 )
                                             ),
                                         contentAlignment = Alignment.Center
@@ -307,7 +325,7 @@ fun FoodHistoryScreen(
                                         Icon(
                                             imageVector = Icons.Filled.History,
                                             contentDescription = null,
-                                            tint = Color(0xFFFF6B35),
+                                            tint = Turquoise300,
                                             modifier = Modifier.size(48.dp)
                                         )
                                     }
@@ -340,7 +358,7 @@ fun FoodHistoryScreen(
                                     Button(
                                         onClick = { navController.navigate("uploadPhoto") },
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFFFF6B35)
+                                            containerColor = Turquoise500
                                         ),
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier.fillMaxWidth()

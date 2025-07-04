@@ -129,6 +129,7 @@ class TranslationService {
         "pickle" to "pepinillo",
         "beef milanese" to "milanesa de carne",
         "chicken milanese" to "milanesa de pollo",
+        "ketchup" to "ketchup"
     )
     
     companion object {

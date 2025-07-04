@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.insumeal.ui.theme.Turquoise500
+import com.insumeal.ui.theme.Turquoise600
 import com.insumeal.ui.viewmodel.MealPlateViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -268,21 +270,53 @@ fun UploadPhotoScreen(
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            // Header con gradiente igual al HomeScreen
+            // Header con forma ondulada elegante
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFFFF6B35),
-                                Color.White  // Cambiar a blanco puro
+                    .background(Color.Transparent)
+            ) {
+                // Forma geométrica ondulada de fondo
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(
+                            androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                val width = size.width
+                                val height = size.height
+
+                                // Crear una forma con ondas suaves en la parte inferior
+                                moveTo(0f, 0f)
+                                lineTo(width, 0f)
+                                lineTo(width, height * 0.75f)
+
+                                // Crear ondas más pronunciadas y elegantes
+                                cubicTo(
+                                    width * 0.85f, height * 0.95f,
+                                    width * 0.65f, height * 0.95f,
+                                    width * 0.5f, height * 0.85f
+                                )
+                                cubicTo(
+                                    width * 0.35f, height * 0.75f,
+                                    width * 0.15f, height * 0.75f,
+                                    0f, height * 0.85f
+                                )
+                                close()
+                            }
+                        )
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Turquoise500,
+                                    Turquoise600
+                                )
                             )
                         )
-                    )
-            ) {
+                )
+
                 Column {
-                    // Top bar integrado en el header igual al HomeScreen
+                    // Top bar integrado en el header
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -290,6 +324,7 @@ fun UploadPhotoScreen(
                             .statusBarsPadding(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Botón de volver atrás
                         IconButton(
                             onClick = { navController.navigateUp() },
                             modifier = Modifier
@@ -305,19 +340,25 @@ fun UploadPhotoScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Text(
-                            text = "Analizar Comida",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp
-                            ),
-                            color = Color.Black
-                        )
+                        // Título centrado a la misma altura que el botón
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .offset(x = (-22).dp), // Compensar el ancho del botón para centrar realmente
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Analizar Comida",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 28.sp
+                                ),
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
-                    // Removemos el mensaje descriptivo del header
                     Spacer(modifier = Modifier.height(32.dp))
                 }
             }
@@ -408,7 +449,7 @@ fun UploadPhotoScreen(
                                             imageVector = icons[displayedIndex],
                                             contentDescription = iconDescriptions[displayedIndex],
                                             modifier = Modifier.size(80.dp),
-                                            tint = Color(0xFFFF6B35).copy(alpha = 0.3f)
+                                            tint = Turquoise500.copy(alpha = 0.3f) // Cambiado de naranja a turquesa
                                         )
                                     }
                                 }
@@ -460,7 +501,7 @@ fun UploadPhotoScreen(
                                     Icons.Default.CameraAlt,
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
-                                    tint = Color(0xFFFF6B35)
+                                    tint = Turquoise600 // Cambiado de naranja a turquesa
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
@@ -499,7 +540,7 @@ fun UploadPhotoScreen(
                                     Icons.Default.PhotoLibrary,
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
-                                    tint = Color(0xFFFF6B35)
+                                    tint = Turquoise600 // Cambiado de naranja a turquesa
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(

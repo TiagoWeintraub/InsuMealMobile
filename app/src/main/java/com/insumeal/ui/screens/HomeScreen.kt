@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.insumeal.ui.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.launch
 import com.insumeal.R
+import com.insumeal.ui.theme.*
 
 // Data class para los ítems del Navigation Drawer
 data class DrawerItem(
@@ -104,7 +105,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                 // Header del drawer moderno
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Avatar del usuario
                     Box(
@@ -113,7 +114,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             .clip(CircleShape)
                             .background(
                                 brush = Brush.radialGradient(
-                                    colors = listOf(Color(0xFFFF6B35), Color(0xFFFF8E53))
+                                    colors = listOf(Color(0xFFE91E63), Color(0xFFC2185B))
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -231,25 +232,57 @@ fun HomeScreen(navController: NavController, context: Context) {
     ) {
         Scaffold(
             containerColor = Color.White // Cambiar a blanco puro
-        ) { innerPadding ->
+        ) { _ -> // Cambiar innerPadding por _ para indicar que no se usa
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White) // Cambiar a blanco puro
             ) {
-                // Header principal unificado con gradiente
+                // Header principal con forma ondulada
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFFFF6B35),
-                                    Color.White // Cambiar a blanco puro
+                        .background(Color.Transparent)
+                ) {
+                    // Forma geométrica ondulada de fondo
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(
+                                androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                    val width = size.width
+                                    val height = size.height
+
+                                    // Crear una forma con ondas suaves en la parte inferior
+                                    moveTo(0f, 0f)
+                                    lineTo(width, 0f)
+                                    lineTo(width, height * 0.75f)
+
+                                    // Crear ondas más pronunciadas y elegantes
+                                    cubicTo(
+                                        width * 0.85f, height * 0.95f,
+                                        width * 0.65f, height * 0.95f,
+                                        width * 0.5f, height * 0.85f
+                                    )
+                                    cubicTo(
+                                        width * 0.35f, height * 0.75f,
+                                        width * 0.15f, height * 0.75f,
+                                        0f, height * 0.85f
+                                    )
+                                    close()
+                                }
+                            )
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Turquoise500,
+                                        Turquoise600
+                                    )
                                 )
                             )
-                        )
-                ) {
+                    )
+
                     Column {
                         // Top bar integrado en el header
                         Row(
@@ -281,13 +314,13 @@ fun HomeScreen(navController: NavController, context: Context) {
                             }
                         }
 
-                        // Solo el logo dentro del gradiente
+                        // Logo centrado dentro del área ondulada
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
-                                .padding(bottom = 16.dp)
+                                .padding(bottom = 32.dp)
                         ) {
                             // Logo de la app
                             Image(
@@ -356,8 +389,8 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Analizar Plato de Comida",
                             description = "Conocé los carbohidratos e insulina sugerida con una foto de tu comida",
                             icon = Icons.Filled.PhotoCamera,
-                            MaterialTheme.colorScheme.primaryContainer,
-                            iconColor = Color(0xFF38A169),
+                            backgroundColor = Color.White, // Turquoise50
+                            iconColor = Turquoise600,
                             onClick = { navController.navigate("uploadPhoto") }
                         )
 
@@ -365,7 +398,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Ver Historial",
                             description = "Consulta tus platos anteriores",
                             icon = Icons.Filled.History,
-                            backgroundColor = Color(0xFFF7FAFF),
+                            backgroundColor = Color.White,
                             iconColor = Color(0xFF4299E1),
                             onClick = { navController.navigate("foodHistory") }
                         )
@@ -374,7 +407,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Información Clínica",
                             description = "Consulta o modifica tus datos médicos",
                             icon = Icons.Filled.Info,
-                            backgroundColor = Color(0xFFFFFAF0),
+                            backgroundColor = Color.White,
                             iconColor = Color(0xFFED8936),
                             onClick = {
                                 val userId = tokenManager.getUserId()

@@ -13,9 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Orange300,
-    secondary = Orange200,
-    tertiary = SoftOrange,
+    primary = Turquoise300,
+    secondary = Turquoise200,
+    tertiary = SoftTurquoise,
     background = Gray900,
     surface = Gray800,
     onPrimary = Gray900,
@@ -26,18 +26,18 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Orange500, // Naranja principal
-    secondary = Orange600, // Naranja complementario
-    tertiary = SoftOrange, // Naranja suave para acentos
+    primary = Turquoise500, // Turquesa principal
+    secondary = Turquoise600, // Turquesa complementario
+    tertiary = SoftTurquoise, // Turquesa suave para acentos
     primaryContainer = Color.White, // Contenedor blanco puro
     secondaryContainer = Color.White, // Contenedor blanco puro
     tertiaryContainer = Color.White, // Contenedor blanco puro
     surface = Color.White, // Superficie blanca pura
     surfaceVariant = Color.White, // Variante de superficie blanca
     background = Color.White, // Fondo blanco puro
-    onPrimary = Color.White, // Texto sobre naranja
-    onSecondary = Color.White, // Texto sobre naranja secundario
-    onTertiary = Gray900, // Texto sobre naranja suave
+    onPrimary = Color.White, // Texto sobre turquesa
+    onSecondary = Color.White, // Texto sobre turquesa secundario
+    onTertiary = Gray900, // Texto sobre turquesa suave
     onPrimaryContainer = Gray900, // Texto sobre contenedor blanco
     onSecondaryContainer = Gray900, // Texto sobre contenedor blanco
     onTertiaryContainer = Gray900, // Texto sobre contenedor blanco

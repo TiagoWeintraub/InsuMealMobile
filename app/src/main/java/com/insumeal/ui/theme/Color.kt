@@ -2,21 +2,21 @@ package com.insumeal.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Paleta de naranja más intensa y vibrante con toque rojizo para el diseño aspiracional
-val Orange50 = Color(0xFFFFF3EA)
-val Orange100 = Color(0xFFFFE0C4)
-val Orange200 = Color(0xFFFFBE90)
-val Orange300 = Color(0xFFFF9654)
-val Orange400 = Color(0xFFFF7F2B)
-val Orange500 = Color(0xFFFF6D2E) // Naranja principal rojizo ligeramente menos intenso
-val Orange600 = Color(0xFFF45A28)
-val Orange700 = Color(0xFFE64E1B)
-val Orange800 = Color(0xFFD84920)
-val Orange900 = Color(0xFFBF4015)
+// Paleta de turquesa moderna y vibrante
+val Turquoise50 = Color(0xFFE6FFFA)
+val Turquoise100 = Color(0xFFB2F5EA)
+val Turquoise200 = Color(0xFF81E6D9)
+val Turquoise300 = Color(0xFF4FD1C7)
+val Turquoise400 = Color(0xFF38B2AC)
+val Turquoise500 = Color(0xFF319795) // Turquesa principal
+val Turquoise600 = Color(0xFF2C7A7B)
+val Turquoise700 = Color(0xFF285E61)
+val Turquoise800 = Color(0xFF234E52)
+val Turquoise900 = Color(0xFF1D4044)
 
-// Tonos complementarios rojizos ligeramente menos intensos
-val DeepOrange = Color(0xFFD14038)
-val SoftOrange = Color(0xFFFF7652)
+// Tonos complementarios turquesa
+val DeepTurquoise = Color(0xFF0D9488)
+val SoftTurquoise = Color(0xFF5EEAD4)
 
 // Grises modernos para balance
 val Gray50 = Color(0xFFFAFAFA)
@@ -51,12 +51,12 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-val Celeste = Orange500 // Reemplazado por naranja intenso rojizo principal
+val Celeste = Turquoise500 // Reemplazado por turquesa principal
 val FondoBlanco = Surface
 
-// Actualizando colores verdes a tonos naranjas más intensos y rojizos
-val Verde40 = Orange700 // Naranja intenso rojizo medio
-val Verde80 = Orange300 // Naranja intenso rojizo suave
+// Actualizando colores verdes a tonos turquesa
+val Verde40 = Turquoise700 // Turquesa oscuro
+val Verde80 = Turquoise300 // Turquesa claro
 
 // Color gris moderno para contenedores
 val GrisClaro = Gray50

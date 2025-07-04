@@ -7,7 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.insumeal.api.RetrofitClient
 import com.insumeal.auth.LoginRequest
 import com.insumeal.api.LoginService
+import com.insumeal.auth.LoginResponse
 import com.insumeal.utils.TokenManager
 import com.insumeal.ui.viewmodel.UserProfileViewModel
 import com.insumeal.api.ProfileService
@@ -60,7 +63,7 @@ fun LoginScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Orange50,
+                        Turquoise50,
                         Color.White,
                         Gray50
                     ),
@@ -99,52 +102,41 @@ fun LoginScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 42.sp
                     ),
-                    color = Orange600,
+                    color = Color.Black,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
+                // Subtítulo
                 Text(
-                    text = "Bienvenido de vuelta",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    text = "Gestioná tu diabetes de forma inteligente",
+                    style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
-                        fontSize = 22.sp
+                        fontSize = 16.sp
                     ),
-                    color = Gray700,
+                    color = Turquoise500,
                     textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "Gestiona tu diabetes de forma inteligente",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Gray500,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
-            // Formulario de login moderno
+            // Tarjeta de login modernizada
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(28.dp),
-                        ambientColor = Orange500.copy(alpha = 0.1f)
+                        elevation = 20.dp,
+                        shape = RoundedCornerShape(28.dp)
                     ),
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
+                        .padding(40.dp), // Aumentado de 32.dp a 40.dp
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp) // Reducido de 24.dp a 16.dp
+                    verticalArrangement = Arrangement.spacedBy(20.dp) // Espaciado uniforme entre elementos
                 ) {
                     Text(
                         text = "Iniciar Sesión",
@@ -154,6 +146,8 @@ fun LoginScreen(
                         color = Gray800,
                         textAlign = TextAlign.Center
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp)) // Espaciado adicional después del título
 
                     // Campo de email moderno
                     ModernLoginTextField(
@@ -207,103 +201,83 @@ fun LoginScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp)) // Reducido de 8.dp a 4.dp
+                    Spacer(modifier = Modifier.height(8.dp)) // Espaciado antes del botón
 
-                    // Botón de iniciar sesión moderno
+                    // Botón de login con gradiente
                     Button(
                         onClick = {
-                            errorMessage = null
                             isLoading = true
+                            errorMessage = null
+
+                            val loginRequest = LoginRequest(email, password)
+
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
-                                    val service = RetrofitClient.retrofit.create(LoginService::class.java)
-                                    val response = service.login(LoginRequest(email.trim(), password))
-                                    withContext(Dispatchers.Main) {
-                                        TokenManager(context).saveToken(response.accessToken)
-                                        TokenManager(context).saveUserId(response.userId)
+                                    val loginResponse = RetrofitClient.retrofit.create(LoginService::class.java).login(loginRequest)
+
+                                    // Como la función login devuelve LoginResponse directamente, no necesitamos .isSuccessful
+                                    val tokenManager = TokenManager(context)
+                                    tokenManager.saveToken(loginResponse.accessToken) // Usar accessToken
+                                    tokenManager.saveUserId(loginResponse.userId) // userId ya es String, no convertir a Int
+
+                                    // Cargar perfil del usuario
+                                    try {
+                                        val authHeader = "Bearer ${loginResponse.accessToken}" // Usar accessToken
+                                        val profileResponse = RetrofitClient.retrofit.create(ProfileService::class.java).getUserProfile(authHeader, loginResponse.userId.toInt()) // Convertir a Int solo para la llamada API
+
+                                        // Convertir UserProfileSchema a UserProfile usando toModel()
+                                        userProfileViewModel.setUserProfile(profileResponse.toModel())
+                                    } catch (e: Exception) {
+                                        Log.e("LoginScreen", "Error cargando perfil: ${e.message}")
                                     }
 
-                                    // Obtener perfil usando el token
-                                    val profileService = RetrofitClient.retrofit.create(ProfileService::class.java)
-                                    val token = response.accessToken
-                                    val userIdStr = response.userId
-                                    val authHeader = "Bearer $token"
-                                    val userProfile = profileService.getUserProfile(authHeader, userIdStr.toInt())
-                                    withContext(Dispatchers.Main) {
-                                        userProfileViewModel.setUserProfile(userProfile.toModel())
-                                    }
                                     withContext(Dispatchers.Main) {
                                         isLoading = false
                                         onLoginSuccess()
                                     }
-                                } catch (e: retrofit2.HttpException) {
-                                    isLoading = false
-                                    val errorBody = e.response()?.errorBody()?.string()
-                                    val statusCode = e.code()
-                                    Log.e("LoginScreen", "HttpException: $statusCode - $errorBody", e)
-                                    val userMessage = when (statusCode) {
-                                        400 -> "Solicitud incorrecta. Revisa los datos."
-                                        401 -> "Credenciales incorrectas. Verifica tu email y contraseña."
-                                        404 -> "Endpoint no encontrado."
-                                        500 -> "Error interno del servidor. Inténtalo más tarde."
-                                        else -> "Error ${statusCode}: ${errorBody ?: "Error al conectar con el servidor."}"
-                                    }
-                                    withContext(Dispatchers.Main) {
-                                        errorMessage = userMessage
-                                    }
-                                } catch (e: java.io.IOException) {
-                                    isLoading = false
-                                    Log.e("LoginScreen", "IOException: ${e.message}", e)
-                                    withContext(Dispatchers.Main) {
-                                        errorMessage = "Error de red: No se pudo conectar al servidor. Verifica tu conexión."
-                                    }
                                 } catch (e: Exception) {
-                                    isLoading = false
-                                    Log.e("LoginScreen", "Generic Exception: ${e.message}", e)
                                     withContext(Dispatchers.Main) {
-                                        errorMessage = "Error inesperado: ${e.message ?: "Ocurrió un problema."}"
+                                        isLoading = false
+                                        errorMessage = "Error de conexión: ${e.message}"
                                     }
                                 }
                             }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(64.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        enabled = !isLoading,
+                            .height(56.dp),
+                        enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Orange600,
-                            disabledContainerColor = Orange600.copy(alpha = 0.6f)
+                            containerColor = Turquoise500,
+                            contentColor = Color.White,
+                            disabledContainerColor = Turquoise600.copy(alpha = 0.6f),
+                            disabledContentColor = Color.White.copy(alpha = 0.7f)
                         ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 6.dp,
-                            pressedElevation = 2.dp
-                        )
+                        shape = RoundedCornerShape(14.dp)
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
                                 color = Color.White,
-                                modifier = Modifier.size(26.dp),
-                                strokeWidth = 2.5.dp
+                                strokeWidth = 2.dp
                             )
                         } else {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Login,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    "Iniciar Sesión",
-                                    style = MaterialTheme.typography.titleMedium.copy(
+                                    text = "Iniciar Sesión",
+                                    style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
-                                    ),
-                                    color = Color.White
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -311,56 +285,29 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Sección de registro moderna
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Gray50.copy(alpha = 0.7f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            // Botón de registro
+            Row(
+                modifier = Modifier.padding(top = 32.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Text(
+                    text = "¿No tienes cuenta? ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Gray700
+                )
+                TextButton(
+                    onClick = onNavigateToRegister,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Turquoise500
+                    )
                 ) {
                     Text(
-                        text = "¿No tienes cuenta?",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Gray600,
-                        textAlign = TextAlign.Center
+                        text = "Regístrate",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    TextButton(
-                        onClick = onNavigateToRegister,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "Crear cuenta nueva",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = Orange600
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Default.ArrowForward,
-                                contentDescription = null,
-                                tint = Orange600,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -400,19 +347,19 @@ private fun ModernLoginTextField(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = Orange500,
+                tint = Turquoise500,
                 modifier = Modifier.size(22.dp)
             )
         },
         shape = RoundedCornerShape(18.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Orange500,
+            focusedBorderColor = Turquoise500,
             unfocusedBorderColor = Gray300,
-            focusedLabelColor = Orange600,
+            focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
-            cursorColor = Orange600,
-            focusedContainerColor = Orange50.copy(alpha = 0.3f)
+            cursorColor = Turquoise600,
+            focusedContainerColor = Turquoise50.copy(alpha = 0.3f)
         )
     )
 }
@@ -450,7 +397,7 @@ private fun ModernLoginPasswordField(
             Icon(
                 imageVector = Icons.Default.Lock,
                 contentDescription = null,
-                tint = Orange500,
+                tint = Turquoise500,
                 modifier = Modifier.size(22.dp)
             )
         },
@@ -460,7 +407,7 @@ private fun ModernLoginPasswordField(
                 Icon(
                     imageVector = if (isVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                     contentDescription = if (isVisible) "Ocultar contraseña" else "Mostrar contraseña",
-                    tint = Orange500,
+                    tint = Turquoise500,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -468,12 +415,12 @@ private fun ModernLoginPasswordField(
         shape = RoundedCornerShape(18.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Orange500,
+            focusedBorderColor = Turquoise500,
             unfocusedBorderColor = Gray300,
-            focusedLabelColor = Orange600,
+            focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
-            cursorColor = Orange600,
-            focusedContainerColor = Orange50.copy(alpha = 0.3f)
+            cursorColor = Turquoise600,
+            focusedContainerColor = Turquoise50.copy(alpha = 0.3f)
         )
     )
 }
