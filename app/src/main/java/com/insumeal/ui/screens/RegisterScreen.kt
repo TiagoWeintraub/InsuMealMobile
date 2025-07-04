@@ -80,16 +80,16 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
             // Header moderno y elegante
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 40.dp) // Aumentado de 32.dp a 40.dp
             ) {
                 // Logo de la app - más grande y sin card
                 Image(
                     painter = painterResource(id = R.drawable.logo_insumeal),
                     contentDescription = "Logo de InsuMeal",
                     modifier = Modifier
-                        .size(120.dp) // Tamaño mucho más grande
-                        .padding(bottom = 0.dp), // Padding solo en la parte inferior
-                    contentScale = ContentScale.Fit // Mantener proporciones
+                        .size(120.dp)
+                        .padding(bottom = 16.dp), // Aumentado de 0.dp a 16.dp para dar más espacio
+                    contentScale = ContentScale.Fit
                 )
 
                 // Logo/Título principal
@@ -100,7 +100,8 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         fontSize = 36.sp
                     ),
                     color = Turquoise600,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 8.dp) // Añadido padding inferior
                 )
 
                 // Subtítulo
@@ -396,25 +397,49 @@ private fun SectionHeader(
     title: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp) // Aumentado espaciado vertical
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Turquoise600,
-            modifier = Modifier.size(24.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Turquoise600,
+                modifier = Modifier.size(28.dp) // Aumentado tamaño del icono
+            )
+            Spacer(modifier = Modifier.width(12.dp)) // Aumentado espaciado horizontal
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy( // Cambiado de titleMedium a titleLarge
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp // Aumentado tamaño de fuente
+                ),
+                color = Gray800
+            )
+        }
+
+        // Línea divisoria decorativa
+        Spacer(modifier = Modifier.height(12.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Turquoise500.copy(alpha = 0.8f),
+                            Turquoise300.copy(alpha = 0.3f),
+                            Color.Transparent
+                        )
+                    )
+                )
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            ),
-            color = Gray800
-        )
+        Spacer(modifier = Modifier.height(16.dp)) // Espaciado después de la línea
     }
 }
 

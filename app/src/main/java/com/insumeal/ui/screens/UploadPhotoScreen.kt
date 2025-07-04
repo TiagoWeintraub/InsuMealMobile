@@ -131,7 +131,7 @@ fun UploadPhotoScreen(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(56.dp),
-                        color = Color(0xFFFF6B35),
+                        color = Turquoise600,
                         strokeWidth = 4.dp
                     )
                     Text(
@@ -180,7 +180,7 @@ fun UploadPhotoScreen(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6B35)
+                        containerColor = Turquoise600
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -201,7 +201,7 @@ fun UploadPhotoScreen(
                     modifier = Modifier
                         .size(64.dp)
                         .background(
-                            Color(0xFFFF6B35).copy(alpha = 0.1f),
+                            Turquoise500.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(32.dp)
                         ),
                     contentAlignment = Alignment.Center
@@ -209,7 +209,7 @@ fun UploadPhotoScreen(
                     Icon(
                         imageVector = Icons.Default.Restaurant,
                         contentDescription = null,
-                        tint = Color(0xFFFF6B35),
+                        tint = Turquoise600,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -250,7 +250,7 @@ fun UploadPhotoScreen(
                 Button(
                     onClick = { showNoFoodDetectedDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6B35)
+                        containerColor = Turquoise600
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -489,7 +489,7 @@ fun UploadPhotoScreen(
                             modifier = Modifier.fillMaxSize(),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent
+                                containerColor = Color.White // Cambiado a blanco
                             ),
                             elevation = null
                         ) {
@@ -501,7 +501,7 @@ fun UploadPhotoScreen(
                                     Icons.Default.CameraAlt,
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
-                                    tint = Turquoise600 // Cambiado de naranja a turquesa
+                                    tint = Turquoise600 // Mantener icono turquesa
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
@@ -528,7 +528,7 @@ fun UploadPhotoScreen(
                             modifier = Modifier.fillMaxSize(),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent
+                                containerColor = Color.White // Cambiado a blanco
                             ),
                             elevation = null
                         ) {
@@ -540,7 +540,7 @@ fun UploadPhotoScreen(
                                     Icons.Default.PhotoLibrary,
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
-                                    tint = Turquoise600 // Cambiado de naranja a turquesa
+                                    tint = Turquoise600 // Mantener icono turquesa
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
@@ -577,7 +577,7 @@ fun UploadPhotoScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if ((bitmap != null || imageUri != null) && !isLoading)
-                            Color(0xFFFF6B35) else Color(0xFFE2E8F0)
+                            Turquoise600 else Color(0xFFE2E8F0)
                     )
                 ) {
                     Button(

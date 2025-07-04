@@ -523,7 +523,7 @@ fun ModernActionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp),
+            .height(100.dp), // Reducido de 120.dp a 100.dp
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(
@@ -534,14 +534,14 @@ fun ModernActionCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(16.dp), // Reducido de 20.dp a 16.dp
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icono con fondo colorido
             Box(
                 modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .size(50.dp) // Reducido de 60.dp a 50.dp
+                    .clip(RoundedCornerShape(14.dp)) // Reducido de 16.dp a 14.dp
                     .background(backgroundColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -549,11 +549,11 @@ fun ModernActionCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconColor,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(24.dp) // Reducido de 28.dp a 24.dp
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp)) // Reducido de 16.dp a 14.dp
 
             // Contenido de texto
             Column(
@@ -563,17 +563,17 @@ fun ModernActionCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 15.sp // Reducido de 16.sp a 15.sp
                     ),
                     color = Color(0xFF2D3748)
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(3.dp)) // Reducido de 4.dp a 3.dp
 
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp
+                        fontSize = 13.sp // Reducido de 14.sp a 13.sp
                     ),
                     color = Color(0xFF718096),
                     maxLines = 2
@@ -585,7 +585,7 @@ fun ModernActionCard(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
                 tint = Color(0xFFCBD5E0),
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp) // Reducido de 20.dp a 18.dp
             )
         }
     }
