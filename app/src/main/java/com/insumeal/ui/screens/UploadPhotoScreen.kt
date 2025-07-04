@@ -631,7 +631,7 @@ fun UploadPhotoScreen(
                                     fontSize = 18.sp
                                 ),
                                 color = if ((bitmap != null || imageUri != null))
-                                    Color.White else Color(0xFF2D3748)
+                                    Color.White else Turquoise600
                             )
                         }
                     }

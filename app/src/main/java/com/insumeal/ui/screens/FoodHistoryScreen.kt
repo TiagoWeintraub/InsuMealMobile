@@ -3,6 +3,7 @@ package com.insumeal.ui.screens
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,8 +29,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.ConfigurationCompat
 import com.insumeal.ui.theme.Turquoise300
 import com.insumeal.ui.theme.Turquoise500
@@ -438,6 +438,8 @@ fun FoodHistoryScreen(
                                     iconColor = Color(0xFF4299E1),
                                     onCalendarClick = { showCalendarModal = true },
                                     hasFilter = selectedDate != null,
+                                    selectedDate = selectedDate,
+                                    onClearFilter = { selectedDate = null },
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -535,7 +537,7 @@ fun FoodHistoryScreen(
     if (showCalendarModal) {
         DatePickerModal(
             selectedDate = selectedDate,
-            historyList = historyList, // Pasar la lista de historial
+            historyList = historyList,
             onDateSelected = { date ->
                 selectedDate = date
                 showCalendarModal = false
@@ -553,54 +555,41 @@ fun FoodHistoryScreen(
 @Composable
 fun DatePickerModal(
     selectedDate: Date?,
-    historyList: List<com.insumeal.models.MealPlateHistory>, // Recibir la lista de historial
+    historyList: List<com.insumeal.models.MealPlateHistory>,
     onDateSelected: (Date?) -> Unit,
     onDismiss: () -> Unit,
     onClearFilter: () -> Unit
 ) {
-    // Configurar localización en español
     val spanishLocale = Locale("es", "ES")
 
-    // Crear un conjunto de fechas disponibles
     val availableDates = remember(historyList) {
-        // Formato correcto para las fechas de tu API: "dd/MM/yyyy - HH:mm"
-        val apiDateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", spanishLocale)
         val calendarDateFormat = SimpleDateFormat("dd/MM/yyyy", spanishLocale)
-
-        // Crear un conjunto de fechas únicas (solo fecha, sin hora)
         val uniqueDates = mutableSetOf<String>()
 
         historyList.forEach { item ->
             try {
-                // Extraer solo la parte de la fecha (antes del " - ")
                 val dateOnly = item.date.split(" - ")[0]
                 uniqueDates.add(dateOnly)
-                android.util.Log.d("DatePicker", "Fecha única agregada: $dateOnly")
             } catch (e: Exception) {
                 android.util.Log.e("DatePicker", "Error procesando fecha: ${item.date}", e)
             }
         }
 
-        // Convertir las fechas string a timestamps
         uniqueDates.mapNotNull { dateStr ->
             try {
                 val date = calendarDateFormat.parse(dateStr)
-                android.util.Log.d("DatePicker", "Fecha convertida: $dateStr -> ${date?.time}")
                 date?.time
             } catch (e: Exception) {
-                android.util.Log.e("DatePicker", "Error parseando fecha única: $dateStr", e)
                 null
             }
-        }.toSet().also { dates ->
-            android.util.Log.d("DatePicker", "Total fechas disponibles: ${dates.size}")
-        }
+        }.toSet()
     }
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate?.time ?: System.currentTimeMillis(),
+        yearRange = IntRange(2020, 2030), // Rango específico de años
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                // Normalizar la fecha a medianoche para comparar solo el día
                 val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
                 calendar.timeInMillis = utcTimeMillis
                 calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -616,29 +605,42 @@ fun DatePickerModal(
                     availableCalendar.set(Calendar.MINUTE, 0)
                     availableCalendar.set(Calendar.SECOND, 0)
                     availableCalendar.set(Calendar.MILLISECOND, 0)
-
                     availableCalendar.timeInMillis == normalizedMillis
                 }
             }
         }
     )
 
-    // Envolver el DatePicker con configuración de localización
+    val modalContext = LocalContext.current
+
+    val spanishContext = remember {
+        val config = android.content.res.Configuration(modalContext.resources.configuration).apply {
+            setLocale(spanishLocale)
+            setLocales(android.os.LocaleList(spanishLocale))
+        }
+        modalContext.createConfigurationContext(config)
+    }
+
+    // Usar Box overlay de pantalla completa en lugar de Dialog
     CompositionLocalProvider(
-        LocalContext provides LocalContext.current.createConfigurationContext(
-            android.content.res.Configuration(LocalContext.current.resources.configuration).apply {
-                setLocale(spanishLocale)
-            }
-        )
+        LocalContext provides spanishContext,
+        LocalConfiguration provides spanishContext.resources.configuration
     ) {
-        Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)) // Fondo semi-transparente
+                .clickable { onDismiss() }, // Cerrar al tocar fuera
+            contentAlignment = Alignment.Center
+        ) {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.92f) // 92% del ancho real de la pantalla
                     .wrapContentHeight()
-                    .padding(8.dp), // Padding muy pequeño para usar casi toda la pantalla
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .clickable { }, // Prevenir cierre al tocar el modal
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 20.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
                 )
@@ -646,129 +648,144 @@ fun DatePickerModal(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp) // Padding interno muy reducido
+                        .padding(20.dp)
                 ) {
-                    // Header del modal compacto
+                    // Header del modal
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Seleccionar fecha",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp // Tamaño más pequeño
-                            ),
-                            color = Color(0xFF2D3748),
-                            modifier = Modifier.weight(1f)
-                        )
 
                         IconButton(
                             onClick = onDismiss,
                             modifier = Modifier
-                                .size(28.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(Color(0xFFF7FAFF))
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cerrar",
                                 tint = Color(0xFF4299E1),
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // DatePicker ocupando todo el ancho disponible
-                    DatePicker(
-                        state = datePickerState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(380.dp), // Altura fija más compacta
-                        colors = DatePickerDefaults.colors(
-                            containerColor = Color.White,
-                            titleContentColor = Color(0xFF2D3748),
-                            headlineContentColor = Color(0xFF2D3748),
-                            weekdayContentColor = Color(0xFF4A5568),
-                            subheadContentColor = Color(0xFF4A5568),
-                            navigationContentColor = Turquoise600,
-                            yearContentColor = Color(0xFF2D3748),
-                            disabledYearContentColor = Color(0xFF9CA3AF),
-                            currentYearContentColor = Turquoise600,
-                            selectedYearContentColor = Color.White,
-                            disabledSelectedYearContentColor = Color(0xFF9CA3AF),
-                            selectedYearContainerColor = Turquoise600,
-                            disabledSelectedYearContainerColor = Color(0xFFE5E7EB),
-                            dayContentColor = Color(0xFF2D3748),
-                            disabledDayContentColor = Color(0xFF9CA3AF),
-                            selectedDayContentColor = Color.White,
-                            disabledSelectedDayContentColor = Color(0xFF9CA3AF),
-                            selectedDayContainerColor = Turquoise600,
-                            disabledSelectedDayContainerColor = Color(0xFFE5E7EB),
-                            todayContentColor = Turquoise600,
-                            todayDateBorderColor = Turquoise600
+                    MaterialTheme(
+                        typography = MaterialTheme.typography.copy(
+                            bodyMedium = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            bodyLarge = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
                         )
-                    )
+                    ) {
+                        CompositionLocalProvider(
+                            LocalTextStyle provides LocalTextStyle.current.copy(
+                                lineHeight = 24.sp, // Más espaciado entre líneas
+                                fontWeight = FontWeight.Bold // Hacer todas las fechas en negrita
+                            )
+                        ) {
+                            DatePicker(
+                                state = datePickerState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(480.dp), // Aumentar aún más la altura
+                                dateFormatter = DatePickerDefaults.dateFormatter(
+                                    selectedDateSkeleton = "ddMMyyyy"
+                                ),
+                                showModeToggle = false, // Deshabilitar el toggle entre modo calendario y entrada de texto
+                                colors = DatePickerDefaults.colors(
+                                    containerColor = Color.White,
+                                    titleContentColor = Color(0xFF2D3748),
+                                    headlineContentColor = Color(0xFF2D3748),
+                                    weekdayContentColor = Color(0xFF1A202C), // Más oscuro para mejor contraste
+                                    subheadContentColor = Color(0xFF4A5568),
+                                    navigationContentColor = Turquoise600,
+                                    yearContentColor = Color(0xFF2D3748),
+                                    disabledYearContentColor = Color(0xFF9CA3AF),
+                                    currentYearContentColor = Turquoise600,
+                                    selectedYearContentColor = Color.White,
+                                    disabledSelectedYearContentColor = Color(0xFF9CA3AF),
+                                    selectedYearContainerColor = Turquoise600,
+                                    disabledSelectedYearContainerColor = Color(0xFFE5E7EB),
+                                    // Fechas disponibles en negrita y color más oscuro
+                                    dayContentColor = Color(0xFF1A202C), // Más oscuro para fechas disponibles
+                                    disabledDayContentColor = Color(0xFFCBD5E0), // Más claro para fechas no disponibles
+                                    selectedDayContentColor = Color.White,
+                                    disabledSelectedDayContentColor = Color(0xFF9CA3AF),
+                                    selectedDayContainerColor = Turquoise600,
+                                    disabledSelectedDayContainerColor = Color(0xFFE5E7EB),
+                                    // Fecha actual en turquesa y negrita
+                                    todayContentColor = Turquoise600,
+                                    todayDateBorderColor = Turquoise600.copy(alpha = 0.7f)
+                                )
+                            )
+                        }
+                    }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // Indicador de fechas disponibles más compacto
+                    // Indicador de fechas disponibles
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
                             text = "${availableDates.size} fechas disponibles",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
                             color = Color(0xFF4A5568),
                             modifier = Modifier
                                 .background(
                                     Color(0xFFF7FAFF),
-                                    RoundedCornerShape(8.dp)
+                                    RoundedCornerShape(12.dp)
                                 )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    // Botones de acción más compactos
+                    // Botones de acción
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Botón limpiar filtro
                         if (selectedDate != null) {
                             OutlinedButton(
                                 onClick = onClearFilter,
                                 modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 border = BorderStroke(1.dp, Turquoise600),
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     contentColor = Turquoise600
                                 ),
-                                contentPadding = PaddingValues(vertical = 8.dp)
+                                contentPadding = PaddingValues(vertical = 12.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Clear,
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "Limpiar",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
+                                        fontSize = 16.sp
                                     )
                                 )
                             }
                         }
 
-                        // Botón aplicar filtro
                         Button(
                             onClick = {
                                 val selectedMillis = datePickerState.selectedDateMillis
@@ -777,86 +794,29 @@ fun DatePickerModal(
                                 }
                             },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Turquoise600
                             ),
                             enabled = datePickerState.selectedDateMillis != null,
-                            contentPadding = PaddingValues(vertical = 8.dp)
+                            contentPadding = PaddingValues(vertical = 12.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 "Aplicar",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
+                                    fontSize = 16.sp
                                 )
                             )
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun StatCard(
-    label: String,
-    value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    backgroundColor: Color,
-    iconColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.padding(end = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(backgroundColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    ),
-                    color = Color(0xFF2D3748)
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF4A5568)
-                )
             }
         }
     }
@@ -871,6 +831,8 @@ fun StatCardWithCalendar(
     iconColor: Color,
     onCalendarClick: () -> Unit,
     hasFilter: Boolean,
+    selectedDate: Date?,
+    onClearFilter: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -918,17 +880,67 @@ fun StatCardWithCalendar(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF4A5568)
                 )
+
+                // Mostrar la fecha filtrada cuando hay un filtro activo
+                if (hasFilter && selectedDate != null) {
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    val formattedDate = dateFormat.format(selectedDate)
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Turquoise600.copy(alpha = 0.1f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.DateRange,
+                            contentDescription = null,
+                            tint = Turquoise600,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = formattedDate,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp
+                            ),
+                            color = Turquoise600
+                        )
+                    }
+                }
             }
 
-            // Botón de calendario - siempre visible
+            // Mostrar botón de limpiar si hay filtro activo
+            if (hasFilter) {
+                IconButton(
+                    onClick = onClearFilter,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFFFF5F5))
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Limpiar filtro",
+                        tint = Color(0xFFE53E3E),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
             IconButton(
                 onClick = onCalendarClick,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (hasFilter) Color(0xFFE6F7FF) // Fondo más destacado si hay filtro
-                        else Color(0xFFF7FAFF) // Fondo normal
+                        if (hasFilter) Color(0xFFE6F7FF) else Color(0xFFF7FAFF)
                     )
             ) {
                 Icon(
@@ -961,7 +973,6 @@ fun ModernMealPlateHistoryCard(
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-            // Header con título y fecha
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -983,7 +994,6 @@ fun ModernMealPlateHistoryCard(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Fecha destacada con fondo y icono
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -1012,7 +1022,6 @@ fun ModernMealPlateHistoryCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Botón ver detalles
                     IconButton(
                         onClick = { onViewDetails(historyItem.id) },
                         modifier = Modifier
@@ -1028,7 +1037,6 @@ fun ModernMealPlateHistoryCard(
                         )
                     }
                     
-                    // Botón eliminar
                     IconButton(
                         onClick = { showDeleteDialog = true },
                         modifier = Modifier
@@ -1048,7 +1056,6 @@ fun ModernMealPlateHistoryCard(
             
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tres globos circulares con información nutricional (igual que DosisScreen)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1058,7 +1065,7 @@ fun ModernMealPlateHistoryCard(
                 CircularInfoCard(
                     label = "Carbohidratos",
                     value = "${String.format("%.1f", historyItem.totalCarbs)} g",
-                    backgroundColor = Color(0xFFFF9800), // Naranja elegante
+                    backgroundColor = Color(0xFFFF9800),
                     icon = Icons.Default.Restaurant,
                     modifier = Modifier.weight(1f)
                 )
@@ -1066,7 +1073,7 @@ fun ModernMealPlateHistoryCard(
                 CircularInfoCard(
                     label = "Glucemia",
                     value = "${String.format("%.0f", historyItem.glycemia)} mg/dL",
-                    backgroundColor = Color(0xFFE91E63), // Rosa elegante
+                    backgroundColor = Color(0xFFE91E63),
                     icon = Icons.Default.Bloodtype,
                     modifier = Modifier.weight(1f)
                 )
@@ -1074,7 +1081,7 @@ fun ModernMealPlateHistoryCard(
                 CircularInfoCard(
                     label = "Dosis Total",
                     value = "${String.format("%.1f", historyItem.dosis)} U",
-                    backgroundColor = Color(0xFF2196F3), // Azul elegante
+                    backgroundColor = Color(0xFF2196F3),
                     icon = Icons.Default.MedicalServices,
                     modifier = Modifier.weight(1f)
                 )
@@ -1082,7 +1089,6 @@ fun ModernMealPlateHistoryCard(
         }
     }
     
-    // Diálogo de confirmación para eliminar
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -1126,12 +1132,11 @@ fun CircularInfoCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Globo circular con color de fondo sutil del icono
         Box(
             modifier = Modifier
-                .size(55.dp) // Reducido de 75.dp a 65.dp
+                .size(55.dp)
                 .background(
-                    color = backgroundColor.copy(alpha = 0.1f), // Color de fondo sutil del icono
+                    color = backgroundColor.copy(alpha = 0.1f),
                     shape = androidx.compose.foundation.shape.CircleShape
                 )
                 .clip(androidx.compose.foundation.shape.CircleShape),
@@ -1141,13 +1146,12 @@ fun CircularInfoCard(
                 imageVector = icon,
                 contentDescription = null,
                 tint = backgroundColor,
-                modifier = Modifier.size(30.dp) // Reducido de 36.dp a 30.dp
+                modifier = Modifier.size(30.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Información debajo del globo con mejor tipografía
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
