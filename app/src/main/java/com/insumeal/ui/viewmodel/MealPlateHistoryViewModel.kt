@@ -16,7 +16,7 @@ class MealPlateHistoryViewModel : ViewModel() {
     private val _historyList = MutableStateFlow<List<MealPlateHistory>>(emptyList())
     val historyList: StateFlow<List<MealPlateHistory>> = _historyList
     
-    private val _isLoading = MutableStateFlow(true) // Iniciar con true para mostrar carga inmediatamente
+    private val _isLoading = MutableStateFlow(false) // Cambiar a false inicialmente
     val isLoading: StateFlow<Boolean> = _isLoading
     
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -28,12 +28,13 @@ class MealPlateHistoryViewModel : ViewModel() {
     @SuppressLint("SuspiciousIndentation")
     fun loadHistory(context: Context) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _isLoading.value = true // Activar loading al inicio de la función
             _errorMessage.value = null
-            
+            _historyList.value = emptyList() // Limpiar lista anterior
+
             try {
                 val result = apiClient.getMealPlateHistory(context)
-                  result.onSuccess { history ->
+                result.onSuccess { history ->
                     // Traducir el historial automáticamente a español
                     viewModelScope.launch {
                         try {
@@ -43,6 +44,8 @@ class MealPlateHistoryViewModel : ViewModel() {
                             android.util.Log.e("MealPlateHistoryViewModel", "Error en traducción: ${e.message}", e)
                             // Si falla la traducción, usar el historial original
                             _historyList.value = history
+                        } finally {
+                            _isLoading.value = false // Desactivar loading después de la traducción
                         }
                     }
                 }.onFailure { error ->
@@ -59,11 +62,11 @@ class MealPlateHistoryViewModel : ViewModel() {
                             "No se puede conectar al servidor. Verifica tu conexión a internet."
                         else -> "Error al cargar el historial: ${error.message}"
                     }
+                    _isLoading.value = false // Desactivar loading en caso de error
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error inesperado: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                _isLoading.value = false // Desactivar loading en caso de excepción
             }
         }
     }      fun clearError() {
