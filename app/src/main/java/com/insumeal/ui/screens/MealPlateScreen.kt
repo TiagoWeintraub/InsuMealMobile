@@ -1139,9 +1139,10 @@ fun MealPlateScreen(
                                 Text(
                                     text = "Ingredientes detectados",
                                     style = MaterialTheme.typography.titleLarge.copy(
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp // Tamaño más pequeño
                                     ),
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = Color.Black,
                                     modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
@@ -1300,9 +1301,10 @@ fun MealPlateScreen(
                                                 Text(
                                                     text = "Glucosa en Sangre",
                                                     style = MaterialTheme.typography.titleLarge.copy(
-                                                        fontWeight = FontWeight.Bold
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp // Tamaño más pequeño
                                                     ),
-                                                    color = MaterialTheme.colorScheme.primary
+                                                    color = Color.Black,
                                                 )
                                                 Text(
                                                     text = "Ingresa tu glucemia actual para un cálculo preciso en la dosis",

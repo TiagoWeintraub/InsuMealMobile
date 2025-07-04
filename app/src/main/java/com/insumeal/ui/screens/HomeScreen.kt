@@ -58,6 +58,14 @@ fun HomeScreen(navController: NavController, context: Context) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // Optimización: Evitar recrear estas variables en cada recomposición
+    val drawerItems = remember {
+        listOf(
+            DrawerItem("profile", "Perfil", Icons.Filled.AccountCircle),
+            // Puedes añadir más items aquí
+        )
+    }
+
     // Redirigir a login si no hay token
     LaunchedEffect(token) { // Observar cambios en el token también
         if (token == null) {
@@ -86,12 +94,6 @@ fun HomeScreen(navController: NavController, context: Context) {
             }
         }
     }
-
-    // Lista de ítems para el Navigation Drawer
-    val drawerItems = listOf(
-        DrawerItem("profile", "Perfil", Icons.Filled.AccountCircle),
-        // Puedes añadir más items aquí
-    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -367,7 +369,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             )
                     )
 
-                    // Contenido encima de las ondas
+                    // Solo el botón de menú dentro de las ondas
                     Column {
                         // Top bar integrado en el header
                         Row(
@@ -398,39 +400,39 @@ fun HomeScreen(navController: NavController, context: Context) {
                                 )
                             }
                         }
-
-                        // Logo centrado dentro del área ondulada
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
-                                .padding(bottom = 32.dp)
-                        ) {
-                            // Logo de la app
-                            Image(
-                                painter = painterResource(id = R.drawable.logo_insumeal),
-                                contentDescription = "Logo de Insumeal",
-                                modifier = Modifier
-                                    .size(120.dp),
-                                contentScale = ContentScale.Fit
-                            )
-                        }
                     }
                 }
 
-                // Contenido principal (ahora incluye los mensajes fuera del gradiente)
+                // Logo posicionado fuera de las ondas para que aparezca delante
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = (-115).dp), // Mover el logo más arriba
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Logo de la app - más grande y posicionado encima de las ondas
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_insumeal),
+                        contentDescription = "Logo de Insumeal",
+                        modifier = Modifier
+                            .size(160.dp), // Aumentado de 120.dp a 160.dp
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                // Contenido principal con offset negativo para subirlo
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp)
+                        .offset(y = (-65).dp) // Subir el contenido principal
+                        .padding(horizontal = 20.dp)
                 ) {
                     // Mensajes movidos fuera del gradiente
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 24.dp)
+                            .padding(bottom = 18.dp)
                     ) {
                         Text(
                             text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido!",

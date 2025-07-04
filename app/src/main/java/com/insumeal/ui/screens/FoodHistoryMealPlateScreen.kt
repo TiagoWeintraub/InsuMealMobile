@@ -323,11 +323,11 @@ fun FoodHistoryMealPlateScreen(
                                                     Spacer(modifier = Modifier.width(8.dp))
                                                     Text(
                                                         text = "Desglose del cálculo",
-                                                        style = MaterialTheme.typography.titleMedium.copy(
-                                                            fontWeight = FontWeight.Bold
+                                                        style = MaterialTheme.typography.titleLarge.copy(
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp // Tamaño más pequeño
                                                         ),
-                                                        color = MaterialTheme.colorScheme.onSurface
-                                                    )
+                                                        color = Color.Black                                                )
                                                 }
 
                                                 Icon(
@@ -465,10 +465,11 @@ fun FoodHistoryMealPlateScreen(
                                                     Spacer(modifier = Modifier.width(8.dp))
                                                     Text(
                                                         text = "Ingredientes Detectados",
-                                                        style = MaterialTheme.typography.titleMedium.copy(
-                                                            fontWeight = FontWeight.Bold
+                                                        style = MaterialTheme.typography.titleLarge.copy(
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp // Tamaño más pequeño
                                                         ),
-                                                        color = Color.Black
+                                                        color = Color.Black,
                                                     )
                                                 }
 

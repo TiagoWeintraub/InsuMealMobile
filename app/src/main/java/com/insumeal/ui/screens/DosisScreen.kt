@@ -324,10 +324,11 @@ fun DosisScreen(
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Text(
                                                     text = "Desglose del cálculo",
-                                                    style = MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.Bold
+                                                    style = MaterialTheme.typography.titleLarge.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp // Tamaño más pequeño
                                                     ),
-                                                    color = MaterialTheme.colorScheme.onSurface
+                                                    color = Color.Black,
                                                 )
                                             }
 
@@ -465,10 +466,11 @@ fun DosisScreen(
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Text(
                                                     text = "Ingredientes Detectados",
-                                                    style = MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.Bold
+                                                    style = MaterialTheme.typography.titleLarge.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp // Tamaño más pequeño
                                                     ),
-                                                    color = Color.Black
+                                                    color = Color.Black,
                                                 )
                                             }
 
@@ -746,7 +748,7 @@ fun DosisScreen(
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color.Red,
                     modifier = Modifier.size(32.dp)
                 )
             },
@@ -772,7 +774,7 @@ fun DosisScreen(
                     onClick = { showDisclaimerDialog = false },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = Color.Red
                     )
                 ) {
                     Text(
