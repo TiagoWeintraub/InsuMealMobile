@@ -38,6 +38,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.insumeal.models.Ingredient
+import com.insumeal.ui.theme.Gray400
 import com.insumeal.ui.viewmodel.MealPlateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -591,7 +592,13 @@ fun IngredientEditableCard(
                             focusedBorderColor = Color(0xFF6B9DC3),
                             focusedLabelColor = Color(0xFF6B9DC3),
                             unfocusedBorderColor = Color(0xFF6B9DC3).copy(alpha = 0.6f),
-                            cursorColor = Color(0xFF6B9DC3)
+                            cursorColor = Color(0xFF6B9DC3),
+                            focusedContainerColor = Color.White, // Fondo blanco
+                            unfocusedContainerColor = Color.White, // Fondo blanco
+                            focusedTextColor = Color.Black, // Texto negro
+                            unfocusedTextColor = Color.Black, // Texto negro
+                            focusedPlaceholderColor = Gray400,
+                            unfocusedPlaceholderColor = Gray400
                         ),
                         shape = RoundedCornerShape(16.dp),
                         leadingIcon = {
@@ -1125,7 +1132,7 @@ fun MealPlateScreen(
                             bottomEnd = 0.dp
                         ),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
+                            containerColor = Color(0xFFFFFFFF) // Blanco puro
                         )
                     ) {
                         LazyColumn(
@@ -1267,7 +1274,7 @@ fun MealPlateScreen(
                                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                                     shape = RoundedCornerShape(16.dp),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = Color.White
+                                        containerColor = Color(0xFFFFFFFF) // Blanco puro
                                     )
                                 ) {
                                     Column(
@@ -1567,7 +1574,13 @@ fun MealPlateScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                                focusedLabelColor = MaterialTheme.colorScheme.secondary
+                                focusedLabelColor = MaterialTheme.colorScheme.secondary,
+                                focusedContainerColor = Color.White, // Fondo blanco
+                                unfocusedContainerColor = Color.White, // Fondo blanco
+                                focusedTextColor = Color.Black, // Texto negro
+                                unfocusedTextColor = Color.Black, // Texto negro
+                                focusedPlaceholderColor = Gray400,
+                                unfocusedPlaceholderColor = Gray400
                             ),
                             leadingIcon = {
                                 Icon(

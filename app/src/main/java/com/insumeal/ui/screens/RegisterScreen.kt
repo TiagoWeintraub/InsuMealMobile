@@ -477,7 +477,13 @@ private fun ModernTextField(
             unfocusedBorderColor = Gray300,
             focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
-            cursorColor = Turquoise600
+            cursorColor = Turquoise600,
+            focusedContainerColor = Color.White, // Fondo blanco
+            unfocusedContainerColor = Color.White, // Fondo blanco
+            focusedTextColor = Color.Black, // Texto negro
+            unfocusedTextColor = Color.Black, // Texto negro
+            focusedPlaceholderColor = Gray400,
+            unfocusedPlaceholderColor = Gray400
         )
     )
 }
@@ -527,7 +533,13 @@ private fun ModernPasswordField(
             unfocusedBorderColor = Gray300,
             focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
-            cursorColor = Turquoise600
+            cursorColor = Turquoise600,
+            focusedContainerColor = Color.White, // Fondo blanco
+            unfocusedContainerColor = Color.White, // Fondo blanco
+            focusedTextColor = Color.Black, // Texto negro
+            unfocusedTextColor = Color.Black, // Texto negro
+            focusedPlaceholderColor = Gray400,
+            unfocusedPlaceholderColor = Gray400
         )
     )
 }
@@ -545,7 +557,7 @@ private fun ModernSliderCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Gray50
+            containerColor = Color.White // Cambiar de Gray50 a blanco puro
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {

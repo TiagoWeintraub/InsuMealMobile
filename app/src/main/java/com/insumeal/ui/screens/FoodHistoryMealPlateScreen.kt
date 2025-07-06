@@ -220,7 +220,7 @@ fun FoodHistoryMealPlateScreen(
                                 bottomEnd = 0.dp
                             ),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
+                                containerColor = Color(0xFFFFFFFF) // Blanco puro
                             )
                         ) {
                             LazyColumn(
@@ -297,7 +297,7 @@ fun FoodHistoryMealPlateScreen(
                                             .clickable { isDosisExpanded = !isDosisExpanded },
                                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = Color.White
+                                            containerColor = Color(0xFFFFFFFF) // Blanco puro
                                         ),
                                         shape = RoundedCornerShape(16.dp)
                                     ) {
@@ -439,7 +439,7 @@ fun FoodHistoryMealPlateScreen(
                                             .clickable { isIngredientsExpanded = !isIngredientsExpanded },
                                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = Color.White
+                                            containerColor = Color(0xFFFFFFFF) // Blanco puro
                                         ),
                                         shape = RoundedCornerShape(16.dp)
                                     ) {

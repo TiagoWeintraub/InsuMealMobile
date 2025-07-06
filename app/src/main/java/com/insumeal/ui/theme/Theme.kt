@@ -29,12 +29,18 @@ private val LightColorScheme = lightColorScheme(
     primary = Turquoise500, // Turquesa principal
     secondary = Turquoise600, // Turquesa complementario
     tertiary = SoftTurquoise, // Turquesa suave para acentos
-    primaryContainer = Color.White, // Contenedor blanco puro
-    secondaryContainer = Color.White, // Contenedor blanco puro
-    tertiaryContainer = Color.White, // Contenedor blanco puro
-    surface = Color.White, // Superficie blanca pura
-    surfaceVariant = Color.White, // Variante de superficie blanca
-    background = Color.White, // Fondo blanco puro
+    primaryContainer = Color(0xFFFFFFFF), // Contenedor blanco puro con hex
+    secondaryContainer = Color(0xFFFFFFFF), // Contenedor blanco puro con hex
+    tertiaryContainer = Color(0xFFFFFFFF), // Contenedor blanco puro con hex
+    surface = Color(0xFFFFFFFF), // Superficie blanca pura con hex
+    surfaceVariant = Color(0xFFFFFFFF), // Variante de superficie blanca con hex
+    surfaceContainer = Color(0xFFFFFFFF), // Contenedor de superficie blanco puro
+    surfaceContainerHigh = Color(0xFFFFFFFF), // Contenedor alto blanco puro
+    surfaceContainerHighest = Color(0xFFFFFFFF), // Contenedor más alto blanco puro
+    surfaceContainerLow = Color(0xFFFFFFFF), // Contenedor bajo blanco puro
+    surfaceContainerLowest = Color(0xFFFFFFFF), // Contenedor más bajo blanco puro
+    surfaceTint = Color(0xFFFFFFFF), // Tinte de superficie blanco puro - CLAVE!
+    background = Color(0xFFFFFFFF), // Fondo blanco puro con hex
     onPrimary = Color.White, // Texto sobre turquesa
     onSecondary = Color.White, // Texto sobre turquesa secundario
     onTertiary = Gray900, // Texto sobre turquesa suave
@@ -52,17 +58,11 @@ private val LightColorScheme = lightColorScheme(
 fun InsuMealTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color está disponible en Android 12+
-    dynamicColor: Boolean = false, // Cambiar a false para forzar el uso de nuestros colores
+    dynamicColor: Boolean = false, // Siempre false para usar nuestros colores
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    // Forzar siempre el uso de nuestros colores personalizados - siempre modo claro
+    val colorScheme = LightColorScheme // Siempre usar esquema claro
 
     MaterialTheme(
         colorScheme = colorScheme,

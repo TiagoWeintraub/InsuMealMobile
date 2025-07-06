@@ -370,16 +370,7 @@ fun UploadPhotoScreen(
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Mensaje descriptivo movido aquí, fuera del gradiente naranja
-                Text(
-                    text = "Captura una foto de tu plato o selecciona una imagen desde la galería",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 16.sp
-                    ),
-                    color = Color(0xFF4A5568),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+
 
                 // Card principal de imagen siguiendo el estilo de HomeScreen
                 Card(

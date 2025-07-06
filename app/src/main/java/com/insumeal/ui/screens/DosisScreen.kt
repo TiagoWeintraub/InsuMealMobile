@@ -184,7 +184,7 @@ fun DosisScreen(
                         bottomEnd = 0.dp
                     ),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = Color(0xFFFFFFFF) // Blanco puro
                     )
                 ) {
                     LazyColumn(
@@ -260,7 +260,7 @@ fun DosisScreen(
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = Color.White
+                                            containerColor = Color(0xFFFFFFFF) // Blanco puro
                                         ),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                                         shape = RoundedCornerShape(16.dp)
@@ -298,7 +298,7 @@ fun DosisScreen(
                                         .clickable { isDosisExpanded = !isDosisExpanded },
                                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = Color.White
+                                        containerColor = Color(0xFFFFFFFF) // Blanco puro
                                     ),
                                     shape = RoundedCornerShape(16.dp)
                                 ) {
@@ -440,7 +440,7 @@ fun DosisScreen(
                                         .clickable { isCarbsDetailExpanded = !isCarbsDetailExpanded },
                                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = Color.White
+                                        containerColor = Color(0xFFFFFFFF) // Blanco puro
                                     ),
                                     shape = RoundedCornerShape(16.dp)
                                 ) {

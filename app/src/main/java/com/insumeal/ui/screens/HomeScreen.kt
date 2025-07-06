@@ -126,7 +126,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             style = MaterialTheme.typography.headlineSmall.copy(
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = Color.White
+                            color = Color(0xFFFFFFFF)
                         )
                     }
 
@@ -233,12 +233,12 @@ fun HomeScreen(navController: NavController, context: Context) {
         }
     ) {
         Scaffold(
-            containerColor = Color.White // Cambiar a blanco puro
+            containerColor = Color(0xFFFFFFFF) // Cambiar a blanco puro
         ) { _ -> // Cambiar innerPadding por _ para indicar que no se usa
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White) // Cambiar a blanco puro
+                    .background(Color(0xFFFFFFFF)) // Cambiar a blanco puro
             ) {
                 // Header principal con forma ondulada
                 Box(
@@ -390,12 +390,12 @@ fun HomeScreen(navController: NavController, context: Context) {
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .background(Color(0xFFFFFFFF).copy(alpha = 0.2f))
                             ) {
                                 Icon(
                                     Icons.Filled.Menu,
                                     contentDescription = "Abrir menú",
-                                    tint = Color.White,
+                                    tint = Color(0xFFFFFFFF),
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -407,7 +407,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-115).dp), // Mover el logo más arriba
+                        .offset(y = (-130).dp), // Subir más el logo (era -115)
                     contentAlignment = Alignment.Center
                 ) {
                     // Logo de la app - más grande y posicionado encima de las ondas
@@ -415,7 +415,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                         painter = painterResource(id = R.drawable.logo_insumeal),
                         contentDescription = "Logo de Insumeal",
                         modifier = Modifier
-                            .size(160.dp), // Aumentado de 120.dp a 160.dp
+                            .size(140.dp), // Reducir un poco el tamaño para mejor proporción
                         contentScale = ContentScale.Fit
                     )
                 }
@@ -424,7 +424,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-65).dp) // Subir el contenido principal
+                        .offset(y = (-85).dp) // Subir más el contenido principal (era -65)
                         .padding(horizontal = 20.dp)
                 ) {
                     // Mensajes movidos fuera del gradiente
@@ -432,24 +432,24 @@ fun HomeScreen(navController: NavController, context: Context) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 18.dp)
+                            .padding(bottom = 12.dp) // Reducir padding inferior (era 18dp)
                     ) {
                         Text(
                             text = if (userProfile != null) "¡Hola ${userProfile!!.username}!" else "¡Bienvenido!",
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 26.sp
+                                fontSize = 24.sp // Reducir un poco el tamaño (era 26sp)
                             ),
                             color = Color(0xFF2D3748),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp)) // Reducir espacio (era 8dp)
 
                         Text(
                             text = "¿Qué vas a comer hoy?",
                             style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 16.sp,
+                                fontSize = 15.sp, // Reducir un poco (era 16sp)
                                 fontWeight = FontWeight.Medium
                             ),
                             color = Color(0xFF4A5568),
@@ -462,10 +462,10 @@ fun HomeScreen(navController: NavController, context: Context) {
                         text = "Acciones Rápidas",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
+                            fontSize = 20.sp // Reducir un poco (era 22sp)
                         ),
                         color = Color(0xFF2D3748),
-                        modifier = Modifier.padding(bottom = 20.dp)
+                        modifier = Modifier.padding(bottom = 16.dp) // Reducir padding (era 20dp)
                     )
 
                     // Grid de tarjetas modernas
@@ -476,7 +476,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Analizar Plato de Comida",
                             description = "Conocé los carbohidratos e insulina sugerida con una foto de tu comida",
                             icon = Icons.Filled.PhotoCamera,
-                            backgroundColor = Color.White, // Turquoise50
+                            backgroundColor = Color(0xFFFFFFFF), // Turquoise50
                             iconColor = Turquoise600,
                             onClick = { navController.navigate("uploadPhoto") }
                         )
@@ -485,7 +485,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Ver Historial",
                             description = "Consulta tus platos anteriores",
                             icon = Icons.Filled.History,
-                            backgroundColor = Color.White,
+                            backgroundColor = Color(0xFFFFFFFF),
                             iconColor = Color(0xFF4299E1),
                             onClick = { navController.navigate("foodHistory") }
                         )
@@ -494,7 +494,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                             title = "Información Clínica",
                             description = "Consulta o modifica tus datos médicos",
                             icon = Icons.Filled.Info,
-                            backgroundColor = Color.White,
+                            backgroundColor = Color(0xFFFFFFFF),
                             iconColor = Color(0xFFED8936),
                             onClick = {
                                 val userId = tokenManager.getUserId()
@@ -516,77 +516,102 @@ fun ModernActionCard(
     title: String,
     description: String,
     icon: ImageVector,
-    backgroundColor: Color,
+    backgroundColor: Color, // Mantenemos el parámetro por compatibilidad pero no lo usamos
     iconColor: Color,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp), // Reducido de 120.dp a 100.dp
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            .height(85.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = Color(0xFFFFFFFF) // Forzar blanco puro con hex
         ),
         onClick = onClick
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp), // Reducido de 20.dp a 16.dp
-            verticalAlignment = Alignment.CenterVertically
+                .background(Color(0xFFFFFFFF)) // Forzar background blanco puro
         ) {
-            // Icono con fondo colorido
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(50.dp) // Reducido de 60.dp a 50.dp
-                    .clip(RoundedCornerShape(14.dp)) // Reducido de 16.dp a 14.dp
-                    .background(backgroundColor),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.size(24.dp) // Reducido de 28.dp a 24.dp
-                )
+                // Icono con fondo colorido - tamaño más compacto
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    iconColor.copy(alpha = 0.1f),
+                                    iconColor.copy(alpha = 0.05f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Contenido de texto más compacto
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = Color(0xFF2D3748), // Color fijo
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 13.sp,
+                            lineHeight = 16.sp
+                        ),
+                        color = Color(0xFF718096), // Color fijo
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                }
+
+                // Flecha más pequeña
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFF7FAFC)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.width(14.dp)) // Reducido de 16.dp a 14.dp
-
-            // Contenido de texto
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp // Reducido de 16.sp a 15.sp
-                    ),
-                    color = Color(0xFF2D3748)
-                )
-
-                Spacer(modifier = Modifier.height(3.dp)) // Reducido de 4.dp a 3.dp
-
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 13.sp // Reducido de 14.sp a 13.sp
-                    ),
-                    color = Color(0xFF718096),
-                    maxLines = 2
-                )
-            }
-
-            // Flecha
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = Color(0xFFCBD5E0),
-                modifier = Modifier.size(18.dp) // Reducido de 20.dp a 18.dp
-            )
         }
     }
 }

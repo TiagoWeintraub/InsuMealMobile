@@ -272,7 +272,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CircularProgressIndicator(
-                            color = Color(0xFFFF6B35),
+                            color = Turquoise500,
                             modifier = Modifier.size(48.dp),
                             strokeWidth = 4.dp
                         )

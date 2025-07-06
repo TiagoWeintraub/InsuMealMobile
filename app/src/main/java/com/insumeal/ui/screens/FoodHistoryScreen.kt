@@ -180,7 +180,7 @@ fun FoodHistoryScreen(
                                 text = "Historial de Comidas",
                                 style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 24.sp
+                                    fontSize = 18.sp
                                 ),
                                 color = Color.White,
                                 textAlign = TextAlign.Center

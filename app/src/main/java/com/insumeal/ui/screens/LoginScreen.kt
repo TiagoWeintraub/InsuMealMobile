@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -73,241 +74,242 @@ fun LoginScreen(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Column(
+        // Hacer toda la pantalla scrollable para evitar que el botón se salga
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo y header moderno
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 45.dp)
-            ) {
-                // Logo de la app - más grande y sin card
-                Image(
-                    painter = painterResource(id = R.drawable.logo_insumeal),
-                    contentDescription = "Logo de InsuMeal",
-                    modifier = Modifier
-                        .size(150.dp) // Tamaño mucho más grande
-                        .padding(bottom = 0.dp), // Padding solo en la parte inferior
-                    contentScale = ContentScale.Fit // Mantener proporciones
-                )
-
-                // Título principal
-                Text(
-                    text = "InsuMeal",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 42.sp
-                    ),
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
-                )
-
-                // Subtítulo
-                Text(
-                    text = "Gestioná tu diabetes de forma inteligente",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    ),
-                    color = Turquoise500,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            // Tarjeta de login modernizada
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(
-                        elevation = 20.dp,
-                        shape = RoundedCornerShape(28.dp)
-                    ),
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-            ) {
+            item {
+                // Logo y header moderno
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(40.dp), // Aumentado de 32.dp a 40.dp
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(20.dp) // Espaciado uniforme entre elementos
+                    modifier = Modifier.padding(bottom = 32.dp) // Reducir padding (era 45dp)
                 ) {
+                    // Logo de la app - más compacto
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_insumeal),
+                        contentDescription = "Logo de InsuMeal",
+                        modifier = Modifier
+                            .size(120.dp) // Reducir tamaño (era 150dp)
+                            .padding(bottom = 0.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    // Título principal
                     Text(
-                        text = "Iniciar Sesión",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold
+                        text = "InsuMeal",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 36.sp // Reducir tamaño (era 42sp)
                         ),
-                        color = Gray800,
+                        color = Color.Black,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp)) // Espaciado adicional después del título
-
-                    // Campo de email moderno
-                    ModernLoginTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = "Correo electrónico",
-                        leadingIcon = Icons.Default.Email,
-                        placeholder = "ejemplo@correo.com"
+                    // Subtítulo
+                    Text(
+                        text = "Gestioná tu diabetes de forma inteligente",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 15.sp // Reducir un poco (era 16sp)
+                        ),
+                        color = Turquoise500,
+                        textAlign = TextAlign.Center
                     )
+                }
+            }
 
-                    // Campo de contraseña moderno
-                    ModernLoginPasswordField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = "Contraseña",
-                        isVisible = passwordVisible,
-                        onVisibilityToggle = { passwordVisible = !passwordVisible },
-                        placeholder = "Ingresa tu contraseña"
+            item {
+                // Tarjeta de login modernizada
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 20.dp,
+                            shape = RoundedCornerShape(28.dp)
+                        ),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
                     )
-
-                    // Mensaje de error moderno
-                    if (errorMessage != null) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Error.copy(alpha = 0.08f)
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = null,
-                                    tint = Error,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = errorMessage!!,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = Error
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp)) // Espaciado antes del botón
-
-                    // Botón de login con gradiente
-                    Button(
-                        onClick = {
-                            isLoading = true
-                            errorMessage = null
-
-                            val loginRequest = LoginRequest(email, password)
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    val loginResponse = RetrofitClient.retrofit.create(LoginService::class.java).login(loginRequest)
-
-                                    // Como la función login devuelve LoginResponse directamente, no necesitamos .isSuccessful
-                                    val tokenManager = TokenManager(context)
-                                    tokenManager.saveToken(loginResponse.accessToken) // Usar accessToken
-                                    tokenManager.saveUserId(loginResponse.userId) // userId ya es String, no convertir a Int
-
-                                    // Cargar perfil del usuario
-                                    try {
-                                        val authHeader = "Bearer ${loginResponse.accessToken}" // Usar accessToken
-                                        val profileResponse = RetrofitClient.retrofit.create(ProfileService::class.java).getUserProfile(authHeader, loginResponse.userId.toInt()) // Convertir a Int solo para la llamada API
-
-                                        // Convertir UserProfileSchema a UserProfile usando toModel()
-                                        userProfileViewModel.setUserProfile(profileResponse.toModel())
-                                    } catch (e: Exception) {
-                                        Log.e("LoginScreen", "Error cargando perfil: ${e.message}")
-                                    }
-
-                                    withContext(Dispatchers.Main) {
-                                        isLoading = false
-                                        onLoginSuccess()
-                                    }
-                                } catch (e: Exception) {
-                                    withContext(Dispatchers.Main) {
-                                        isLoading = false
-                                        errorMessage = "Error de conexión: ${e.message}"
-                                    }
-                                }
-                            }
-                        },
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Turquoise500,
-                            contentColor = Color.White,
-                            disabledContainerColor = Turquoise600.copy(alpha = 0.6f),
-                            disabledContentColor = Color.White.copy(alpha = 0.7f)
-                        ),
-                        shape = RoundedCornerShape(14.dp)
+                            .padding(32.dp), // Reducir padding (era 40dp)
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp) // Reducir espaciado (era 20dp)
                     ) {
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
+                        Text(
+                            text = "Iniciar Sesión",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Gray800,
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Campo de email moderno
+                        ModernLoginTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = "Correo electrónico",
+                            leadingIcon = Icons.Default.Email,
+                            placeholder = "ejemplo@correo.com"
+                        )
+
+                        // Campo de contraseña moderno
+                        ModernLoginPasswordField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = "Contraseña",
+                            isVisible = passwordVisible,
+                            onVisibilityToggle = { passwordVisible = !passwordVisible },
+                            placeholder = "Ingresa tu contraseña"
+                        )
+
+                        // Mensaje de error más compacto
+                        if (errorMessage != null) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Error.copy(alpha = 0.08f)
+                                ),
+                                shape = RoundedCornerShape(12.dp) // Reducir radio (era 16dp)
                             ) {
-                                Text(
-                                    text = "Iniciar Sesión",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp), // Reducir padding (era 16dp)
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = Error,
+                                        modifier = Modifier.size(16.dp) // Reducir tamaño (era 20dp)
                                     )
+                                    Spacer(modifier = Modifier.width(8.dp)) // Reducir espacio (era 12dp)
+                                    Text(
+                                        text = errorMessage!!,
+                                        style = MaterialTheme.typography.bodySmall.copy( // Cambiar a bodySmall
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = Error,
+                                        maxLines = 2, // Limitar líneas
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+
+                        // Botón de login con gradiente
+                        Button(
+                            onClick = {
+                                isLoading = true
+                                errorMessage = null
+
+                                val loginRequest = LoginRequest(email, password)
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        val loginResponse = RetrofitClient.retrofit.create(LoginService::class.java).login(loginRequest)
+
+                                        val tokenManager = TokenManager(context)
+                                        tokenManager.saveToken(loginResponse.accessToken)
+                                        tokenManager.saveUserId(loginResponse.userId)
+
+                                        try {
+                                            val authHeader = "Bearer ${loginResponse.accessToken}"
+                                            val profileResponse = RetrofitClient.retrofit.create(ProfileService::class.java).getUserProfile(authHeader, loginResponse.userId.toInt())
+                                            userProfileViewModel.setUserProfile(profileResponse.toModel())
+                                        } catch (e: Exception) {
+                                            Log.e("LoginScreen", "Error cargando perfil: ${e.message}")
+                                        }
+
+                                        withContext(Dispatchers.Main) {
+                                            isLoading = false
+                                            onLoginSuccess()
+                                        }
+                                    } catch (e: Exception) {
+                                        withContext(Dispatchers.Main) {
+                                            isLoading = false
+                                            errorMessage = "Error de conexión: ${e.message}"
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp), // Reducir altura (era 56dp)
+                            enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Turquoise500,
+                                contentColor = Color.White,
+                                disabledContainerColor = Turquoise600.copy(alpha = 0.6f),
+                                disabledContentColor = Color.White.copy(alpha = 0.7f)
+                            ),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp), // Reducir tamaño (era 24dp)
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "Iniciar Sesión",
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp // Reducir un poco (era 16sp)
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp)) // Reducir espacio (era 8dp)
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp) // Reducir tamaño (era 20dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
 
-            // Botón de registro
-            Row(
-                modifier = Modifier.padding(top = 32.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "¿No tienes cuenta? ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Gray700
-                )
-                TextButton(
-                    onClick = onNavigateToRegister,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Turquoise500
-                    )
+            item {
+                // Botón de registro
+                Row(
+                    modifier = Modifier.padding(top = 24.dp), // Reducir padding (era 32dp)
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Regístrate",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        )
+                        text = "¿No tienes cuenta? ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Gray700
                     )
+                    TextButton(
+                        onClick = onNavigateToRegister,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = Turquoise500
+                        )
+                    ) {
+                        Text(
+                            text = "Regístrate",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -359,7 +361,12 @@ private fun ModernLoginTextField(
             focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
             cursorColor = Turquoise600,
-            focusedContainerColor = Turquoise50.copy(alpha = 0.3f)
+            focusedContainerColor = Color.White, // Fondo blanco
+            unfocusedContainerColor = Color.White, // Fondo blanco
+            focusedTextColor = Color.Black, // Texto negro
+            unfocusedTextColor = Color.Black, // Texto negro
+            focusedPlaceholderColor = Gray400,
+            unfocusedPlaceholderColor = Gray400
         )
     )
 }
@@ -420,7 +427,12 @@ private fun ModernLoginPasswordField(
             focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
             cursorColor = Turquoise600,
-            focusedContainerColor = Turquoise50.copy(alpha = 0.3f)
+            focusedContainerColor = Color.White, // Fondo blanco
+            unfocusedContainerColor = Color.White, // Fondo blanco
+            focusedTextColor = Color.Black, // Texto negro
+            unfocusedTextColor = Color.Black, // Texto negro
+            focusedPlaceholderColor = Gray400,
+            unfocusedPlaceholderColor = Gray400
         )
     )
 }
