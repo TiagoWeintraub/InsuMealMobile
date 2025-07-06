@@ -155,7 +155,7 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                                 text = "Información Clínica",
                                 style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 24.sp
+                                    fontSize = 17.sp
                                 ),
                                 color = Color.White
                             )
@@ -545,9 +545,9 @@ fun ParameterSection(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "$value $unit",
-                                    style = MaterialTheme.typography.titleLarge.copy(
+                                    style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
+                                        fontSize = 16.sp
                                     ),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )

@@ -458,7 +458,9 @@ private fun ModernTextField(
         label = {
             Text(
                 label,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 14.sp
+                )
             )
         },
         modifier = modifier.fillMaxWidth(),
@@ -467,10 +469,10 @@ private fun ModernTextField(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = Turquoise500,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Turquoise500,
@@ -478,12 +480,15 @@ private fun ModernTextField(
             focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
             cursorColor = Turquoise600,
-            focusedContainerColor = Color.White, // Fondo blanco
-            unfocusedContainerColor = Color.White, // Fondo blanco
-            focusedTextColor = Color.Black, // Texto negro
-            unfocusedTextColor = Color.Black, // Texto negro
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
             focusedPlaceholderColor = Gray400,
             unfocusedPlaceholderColor = Gray400
+        ),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(
+            fontSize = 15.sp
         )
     )
 }
@@ -503,7 +508,9 @@ private fun ModernPasswordField(
         label = {
             Text(
                 label,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 14.sp
+                )
             )
         },
         modifier = Modifier.fillMaxWidth(),
@@ -512,7 +519,7 @@ private fun ModernPasswordField(
                 imageVector = Icons.Default.Lock,
                 contentDescription = null,
                 tint = Turquoise500,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
         },
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -522,11 +529,11 @@ private fun ModernPasswordField(
                     imageVector = if (isVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                     contentDescription = if (isVisible) "Ocultar contraseña" else "Mostrar contraseña",
                     tint = Turquoise500,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Turquoise500,
@@ -534,12 +541,15 @@ private fun ModernPasswordField(
             focusedLabelColor = Turquoise600,
             unfocusedLabelColor = Gray500,
             cursorColor = Turquoise600,
-            focusedContainerColor = Color.White, // Fondo blanco
-            unfocusedContainerColor = Color.White, // Fondo blanco
-            focusedTextColor = Color.Black, // Texto negro
-            unfocusedTextColor = Color.Black, // Texto negro
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
             focusedPlaceholderColor = Gray400,
             unfocusedPlaceholderColor = Gray400
+        ),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(
+            fontSize = 15.sp
         )
     )
 }

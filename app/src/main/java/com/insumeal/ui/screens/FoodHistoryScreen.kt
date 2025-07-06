@@ -29,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.os.ConfigurationCompat
 import com.insumeal.ui.theme.Turquoise300
 import com.insumeal.ui.theme.Turquoise500
@@ -94,285 +95,155 @@ fun FoodHistoryScreen(
     Scaffold(
         containerColor = Color.White
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            // Header moderno con gradiente (igual que HomeScreen)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Transparent)
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                // Forma geométrica ondulada de fondo
+                // Header moderno con gradiente (igual que HomeScreen)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(
-                            androidx.compose.foundation.shape.GenericShape { size, _ ->
-                                val width = size.width
-                                val height = size.height
-
-                                // Crear una forma con ondas suaves en la parte inferior
-                                moveTo(0f, 0f)
-                                lineTo(width, 0f)
-                                lineTo(width, height * 0.75f)
-
-                                // Crear ondas más pronunciadas y elegantes
-                                cubicTo(
-                                    width * 0.85f, height * 0.95f,
-                                    width * 0.65f, height * 0.95f,
-                                    width * 0.5f, height * 0.85f
-                                )
-                                cubicTo(
-                                    width * 0.35f, height * 0.75f,
-                                    width * 0.15f, height * 0.75f,
-                                    0f, height * 0.85f
-                                )
-                                close()
-                            }
-                        )
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Turquoise500,
-                                    Turquoise600
-                                )
-                            )
-                        )
-                )
-
-                Column {
-                    // Top bar integrado en el header
-                    Row(
+                        .background(Color.Transparent)
+                ) {
+                    // Forma geométrica ondulada de fondo
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 16.dp)
-                            .statusBarsPadding(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Botón de volver atrás con el mismo estilo que HomeScreen
-                        IconButton(
-                            onClick = { navController.navigateUp() },
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.White.copy(alpha = 0.2f))
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Volver",
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+                            .height(140.dp)
+                            .clip(
+                                androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                    val width = size.width
+                                    val height = size.height
 
-                        // Título centrado a la misma altura que el botón
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .offset(x = (-22).dp), // Compensar el ancho del botón para centrar realmente
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Historial de Comidas",
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
-                                ),
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
+                                    // Crear una forma con ondas suaves en la parte inferior
+                                    moveTo(0f, 0f)
+                                    lineTo(width, 0f)
+                                    lineTo(width, height * 0.75f)
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            // Contenido principal
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp)
-            ) {
-                when {
-                    isLoading -> {
-                        // Estado de carga moderno
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(32.dp)
-                            ) {
-                                // Círculo de carga con colores del tema
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(64.dp),
-                                    color = Turquoise500,
-                                    strokeWidth = 6.dp
-                                )
-
-                                Spacer(modifier = Modifier.height(32.dp))
-
-                                Text(
-                                    text = "Cargando historial",
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 22.sp
-                                    ),
-                                    color = Color(0xFF2D3748),
-                                    textAlign = TextAlign.Center
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Text(
-                                    text = "Obteniendo tus análisis anteriores...",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontSize = 16.sp
-                                    ),
-                                    color = Color(0xFF4A5568),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-
-                    errorMessage != null -> {
-                        // Estado de error moderno
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                shape = RoundedCornerShape(24.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.White
-                                )
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.padding(32.dp)
-                                ) {
-                                    // Icono de error
-                                    Box(
-                                        modifier = Modifier
-                                            .size(80.dp)
-                                            .clip(CircleShape)
-                                            .background(Turquoise600.copy(alpha = 0.1f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Error,
-                                            contentDescription = null,
-                                            tint = Turquoise600,
-                                            modifier = Modifier.size(40.dp)
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.height(24.dp))
-
-                                    Text(
-                                        text = "Oops! Algo salió mal",
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        color = Color(0xFF2D3748),
-                                        textAlign = TextAlign.Center
+                                    // Crear ondas más pronunciadas y elegantes
+                                    cubicTo(
+                                        width * 0.85f, height * 0.95f,
+                                        width * 0.65f, height * 0.95f,
+                                        width * 0.5f, height * 0.85f
                                     )
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Text(
-                                        text = errorMessage!!,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Turquoise600,
-                                        textAlign = TextAlign.Center
+                                    cubicTo(
+                                        width * 0.35f, height * 0.75f,
+                                        width * 0.15f, height * 0.75f,
+                                        0f, height * 0.85f
                                     )
-
-                                    Spacer(modifier = Modifier.height(24.dp))
-
-                                    Button(
-                                        onClick = {
-                                            historyViewModel.clearError()
-                                            historyViewModel.loadHistory(context)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Turquoise500
-                                        ),
-                                        shape = RoundedCornerShape(16.dp),
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Refresh,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            "Reintentar",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        )
-                                    }
+                                    close()
                                 }
+                            )
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Turquoise500,
+                                        Turquoise600
+                                    )
+                                )
+                            )
+                    )
+
+                    Column {
+                        // Top bar integrado en el header
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 16.dp)
+                                .statusBarsPadding(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Botón de volver atrás con el mismo estilo que HomeScreen
+                            IconButton(
+                                onClick = { navController.navigateUp() },
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.2f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Volver",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            // Título centrado
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Historial de Comidas",
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp
+                                    ),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            // Botón de eliminar todo el historial
+                            if (!isLoading && historyList.isNotEmpty()) {
+                                IconButton(
+                                    onClick = { showDeleteAllDialog = true },
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color.White.copy(alpha = 0.2f))
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "Eliminar todo",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            } else {
+                                // Spacer para mantener el centrado cuando no hay botón
+                                Spacer(modifier = Modifier.size(44.dp))
                             }
                         }
-                    }
 
-                    !isLoading && historyList.isEmpty() -> {
-                        // Estado vacío moderno
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                shape = RoundedCornerShape(24.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.White
-                                )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+                // Contenido principal
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 20.dp) // Reducido el espacio extra
+                ) {
+                    when {
+                        isLoading -> {
+                            // Estado de carga moderno
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.padding(32.dp)
                                 ) {
-                                    // Icono de historial vacío
-                                    Box(
-                                        modifier = Modifier
-                                            .size(100.dp)
-                                            .clip(CircleShape)
-                                            .background(
-                                                brush = Brush.radialGradient(
-                                                    colors = listOf(Color.White,Color.White.copy(alpha = 0.1f) )
-                                                )
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.History,
-                                            contentDescription = null,
-                                            tint = Turquoise300,
-                                            modifier = Modifier.size(48.dp)
-                                        )
-                                    }
+                                    // Círculo de carga con colores del tema
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(64.dp),
+                                        color = Turquoise500,
+                                        strokeWidth = 6.dp
+                                    )
 
-                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(32.dp))
 
                                     Text(
-                                        text = "¡Aún no tienes análisis!",
+                                        text = "Cargando historial",
                                         style = MaterialTheme.typography.titleLarge.copy(
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 22.sp
@@ -384,68 +255,201 @@ fun FoodHistoryScreen(
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     Text(
-                                        text = "Comienza analizando tu primera comida para ver los resultados aquí",
+                                        text = "Obteniendo tus análisis anteriores...",
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontSize = 16.sp
                                         ),
                                         color = Color(0xFF4A5568),
                                         textAlign = TextAlign.Center
                                     )
+                                }
+                            }
+                        }
 
-                                    Spacer(modifier = Modifier.height(24.dp))
-
-                                    Button(
-                                        onClick = { navController.navigate("uploadPhoto") },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Turquoise500
-                                        ),
-                                        shape = RoundedCornerShape(16.dp),
-                                        modifier = Modifier.fillMaxWidth()
+                        errorMessage != null -> {
+                            // Estado de error moderno
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    shape = RoundedCornerShape(24.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color.White
+                                    )
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.padding(32.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.PhotoCamera,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            "Analizar Primera Comida",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold
+                                        // Icono de error
+                                        Box(
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .clip(CircleShape)
+                                                .background(Turquoise600.copy(alpha = 0.1f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Error,
+                                                contentDescription = null,
+                                                tint = Turquoise600,
+                                                modifier = Modifier.size(40.dp)
                                             )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        Text(
+                                            text = "Oops! Algo salió mal",
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = Color(0xFF2D3748),
+                                            textAlign = TextAlign.Center
                                         )
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Text(
+                                            text = errorMessage!!,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = Turquoise600,
+                                            textAlign = TextAlign.Center
+                                        )
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        Button(
+                                            onClick = {
+                                                historyViewModel.clearError()
+                                                historyViewModel.loadHistory(context)
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Turquoise500
+                                            ),
+                                            shape = RoundedCornerShape(16.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Refresh,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                "Reintentar",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    else -> {
-                        // Lista del historial con diseño moderno
-                        Column {
-                            // Estadísticas rápidas con filtro de calendario
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 20.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                        !isLoading && historyList.isEmpty() -> {
+                            // Estado vacío moderno
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                StatCardWithCalendar(
-                                    label = if (selectedDate != null) "Filtrado" else "Total",
-                                    value = "${filteredHistoryList.size}",
-                                    icon = Icons.Filled.RestaurantMenu,
-                                    backgroundColor = Color(0xFFF7FAFF),
-                                    iconColor = Color(0xFF4299E1),
-                                    onCalendarClick = { showCalendarModal = true },
-                                    hasFilter = selectedDate != null,
-                                    selectedDate = selectedDate,
-                                    onClearFilter = { selectedDate = null },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    shape = RoundedCornerShape(24.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color.White
+                                    )
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.padding(32.dp)
+                                    ) {
+                                        // Icono de historial vacío
+                                        Box(
+                                            modifier = Modifier
+                                                .size(100.dp)
+                                                .clip(CircleShape)
+                                                .background(
+                                                    brush = Brush.radialGradient(
+                                                        colors = listOf(Color.White,Color.White.copy(alpha = 0.1f) )
+                                                    )
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.History,
+                                                contentDescription = null,
+                                                tint = Turquoise300,
+                                                modifier = Modifier.size(48.dp)
+                                            )
+                                        }
 
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        Text(
+                                            text = "¡Aún no tienes análisis!",
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 22.sp
+                                            ),
+                                            color = Color(0xFF2D3748),
+                                            textAlign = TextAlign.Center
+                                        )
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Text(
+                                            text = "Comienza analizando tu primera comida para ver los resultados aquí",
+                                            style = MaterialTheme.typography.bodyLarge.copy(
+                                                fontSize = 16.sp
+                                            ),
+                                            color = Color(0xFF4A5568),
+                                            textAlign = TextAlign.Center
+                                        )
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        Button(
+                                            onClick = { navController.navigate("uploadPhoto") },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Turquoise500
+                                            ),
+                                            shape = RoundedCornerShape(16.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.PhotoCamera,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                "Analizar Primera Comida",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        else -> {
+                            // Lista del historial con diseño moderno
                             LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.padding(top = 20.dp),
+                                contentPadding = PaddingValues(bottom = 24.dp) // Agregar padding inferior para evitar que se corten las cards
                             ) {
                                 items(filteredHistoryList) { historyItem ->
                                     ModernMealPlateHistoryCard(
@@ -466,6 +470,30 @@ fun FoodHistoryScreen(
                             }
                         }
                     }
+                }
+            }
+
+            // Card flotante de estadísticas - posicionada sobre la onda
+            if (!isLoading && historyList.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 100.dp), // Posicionar sobre la onda
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    StatCardWithCalendar(
+                        label = if (selectedDate != null) "Total" else "Total",
+                        value = "${filteredHistoryList.size}",
+                        icon = Icons.Filled.RestaurantMenu,
+                        backgroundColor = Color(0xFFF7FAFF),
+                        iconColor = Color(0xFF4299E1),
+                        onCalendarClick = { showCalendarModal = true },
+                        hasFilter = selectedDate != null,
+                        selectedDate = selectedDate,
+                        onClearFilter = { selectedDate = null },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -575,11 +603,22 @@ fun DatePickerModal(
             }
         }
 
+        // Convertir las fechas a timestamps normalizados (sin hora)
         uniqueDates.mapNotNull { dateStr ->
             try {
                 val date = calendarDateFormat.parse(dateStr)
-                date?.time
+                date?.let {
+                    val calendar = Calendar.getInstance().apply {
+                        time = it
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    calendar.timeInMillis
+                }
             } catch (e: Exception) {
+                android.util.Log.e("DatePicker", "Error parseando fecha: $dateStr", e)
                 null
             }
         }.toSet()
@@ -590,23 +629,18 @@ fun DatePickerModal(
         yearRange = IntRange(2020, 2030), // Rango específico de años
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                calendar.timeInMillis = utcTimeMillis
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                calendar.set(Calendar.MILLISECOND, 0)
-                val normalizedMillis = calendar.timeInMillis
-
-                return availableDates.any { availableDate ->
-                    val availableCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                    availableCalendar.timeInMillis = availableDate
-                    availableCalendar.set(Calendar.HOUR_OF_DAY, 0)
-                    availableCalendar.set(Calendar.MINUTE, 0)
-                    availableCalendar.set(Calendar.SECOND, 0)
-                    availableCalendar.set(Calendar.MILLISECOND, 0)
-                    availableCalendar.timeInMillis == normalizedMillis
+                // Normalizar la fecha UTC a medianoche en zona horaria local
+                val localCalendar = Calendar.getInstance().apply {
+                    timeInMillis = utcTimeMillis
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
                 }
+                val normalizedMillis = localCalendar.timeInMillis
+
+                // Verificar si esta fecha está en nuestro conjunto de fechas disponibles
+                return availableDates.contains(normalizedMillis)
             }
         }
     )
@@ -705,7 +739,7 @@ fun DatePickerModal(
                                     containerColor = Color.White,
                                     titleContentColor = Color(0xFF2D3748),
                                     headlineContentColor = Color(0xFF2D3748),
-                                    weekdayContentColor = Color(0xFF1A202C), // Más oscuro para mejor contraste
+                                    weekdayContentColor = Turquoise600, // Más oscuro para mejor contraste
                                     subheadContentColor = Color(0xFF4A5568),
                                     navigationContentColor = Turquoise600,
                                     yearContentColor = Color(0xFF2D3748),
@@ -836,7 +870,7 @@ fun StatCardWithCalendar(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.padding(end = 8.dp),
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
@@ -844,13 +878,13 @@ fun StatCardWithCalendar(
         )
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .background(backgroundColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -858,41 +892,49 @@ fun StatCardWithCalendar(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconColor,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.titleLarge.copy(
+                    style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 16.sp
                     ),
-                    color = Color(0xFF2D3748)
+                    color = Color(0xFF2D3748),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF4A5568)
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp
+                    ),
+                    color = Color(0xFF4A5568),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
-            // Mostrar la fecha filtrada y botón de limpiar cuando hay un filtro activo
+            // Mostrar la fecha filtrada con botón de limpiar integrado cuando hay un filtro activo
             if (hasFilter && selectedDate != null) {
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val formattedDate = dateFormat.format(selectedDate)
 
+                // Fecha filtrada con cruz integrada - clickeable para eliminar filtro
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(Turquoise600.copy(alpha = 0.1f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clickable { onClearFilter() }
+                        .padding(horizontal = 6.dp, vertical = 4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.DateRange,
@@ -905,37 +947,28 @@ fun StatCardWithCalendar(
                         text = formattedDate,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp
+                            fontSize = 11.sp
                         ),
-                        color = Turquoise600
+                        color = Turquoise600,
+                        maxLines = 1
                     )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                IconButton(
-                    onClick = onClearFilter,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFFFF5F5))
-                ) {
+                    Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Limpiar filtro",
-                        tint = Color(0xFFE53E3E),
-                        modifier = Modifier.size(16.dp)
+                        tint = Turquoise600,
+                        modifier = Modifier.size(12.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
             }
 
             IconButton(
                 onClick = onCalendarClick,
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .background(
                         if (hasFilter) Color(0xFFE6F7FF) else Color(0xFFF7FAFF)
                     )
@@ -944,7 +977,7 @@ fun StatCardWithCalendar(
                     imageVector = Icons.Filled.CalendarToday,
                     contentDescription = "Filtrar por fecha",
                     tint = if (hasFilter) Turquoise600 else Color(0xFF4299E1),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -961,14 +994,14 @@ fun ModernMealPlateHistoryCard(
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -982,84 +1015,86 @@ fun ModernMealPlateHistoryCard(
                         text = historyItem.type.replaceFirstChar {
                             if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
                         },
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 16.sp
                         ),
-                        color = Color(0xFF2D3748)
+                        color = Color(0xFF2D3748),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(Color(0xFFF7FAFF))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.CalendarToday,
                             contentDescription = null,
                             tint = Color(0xFF4299E1),
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(12.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = historyItem.date,
-                            style = MaterialTheme.typography.bodyMedium.copy(
+                            style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp
+                                fontSize = 12.sp
                             ),
-                            color = Color(0xFF4299E1)
+                            color = Color(0xFF4299E1),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     IconButton(
                         onClick = { onViewDetails(historyItem.id) },
                         modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFFF7FAFF))
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Visibility,
                             contentDescription = "Ver detalles",
                             tint = Color(0xFF4299E1),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                     
                     IconButton(
                         onClick = { showDeleteDialog = true },
                         modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFFFFF5F5))
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "Eliminar",
                             tint = Color(0xFFE53E3E),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                CircularInfoCard(
+                CompactInfoCard(
                     label = "Carbohidratos",
                     value = "${String.format("%.1f", historyItem.totalCarbs)} g",
                     backgroundColor = Color(0xFFFF9800),
@@ -1067,7 +1102,7 @@ fun ModernMealPlateHistoryCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                CircularInfoCard(
+                CompactInfoCard(
                     label = "Glucemia",
                     value = "${String.format("%.0f", historyItem.glycemia)} mg/dL",
                     backgroundColor = Color(0xFFE91E63),
@@ -1075,7 +1110,7 @@ fun ModernMealPlateHistoryCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                CircularInfoCard(
+                CompactInfoCard(
                     label = "Dosis Total",
                     value = "${String.format("%.1f", historyItem.dosis)} U",
                     backgroundColor = Color(0xFF2196F3),
@@ -1117,7 +1152,7 @@ fun ModernMealPlateHistoryCard(
 }
 
 @Composable
-fun CircularInfoCard(
+fun CompactInfoCard(
     label: String,
     value: String,
     backgroundColor: Color,
@@ -1125,13 +1160,13 @@ fun CircularInfoCard(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.padding(horizontal = 8.dp),
+        modifier = modifier.padding(horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
-                .size(55.dp)
+                .size(40.dp)
                 .background(
                     color = backgroundColor.copy(alpha = 0.1f),
                     shape = androidx.compose.foundation.shape.CircleShape
@@ -1143,35 +1178,39 @@ fun CircularInfoCard(
                 imageVector = icon,
                 contentDescription = null,
                 tint = backgroundColor,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium.copy(
+                style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 10.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

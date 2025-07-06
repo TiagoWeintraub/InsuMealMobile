@@ -284,7 +284,7 @@ fun ProfileScreen(userId: Int = 1, navController: NavController) {
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Medium
                             ),
-                            color = Color(0xFF718096)
+                            color = Turquoise600
                         )
                     }
                 }

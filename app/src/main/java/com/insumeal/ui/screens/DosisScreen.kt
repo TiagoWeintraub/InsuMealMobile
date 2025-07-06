@@ -180,8 +180,8 @@ fun DosisScreen(
                     shape = RoundedCornerShape(
                         topStart = 24.dp,
                         topEnd = 24.dp,
-                        bottomStart = 0.dp,
-                        bottomEnd = 0.dp
+                        bottomStart = if (isDosisExpanded || isCarbsDetailExpanded) 0.dp else 24.dp,
+                        bottomEnd = if (isDosisExpanded || isCarbsDetailExpanded) 0.dp else 24.dp
                     ),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xFFFFFFFF) // Blanco puro
