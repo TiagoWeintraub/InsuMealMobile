@@ -126,10 +126,12 @@ class TranslationService {
         "pie crust" to "masa de tarta",
         "quiche" to "tarta",
         "avocado" to "palta",
+        "avocado toast" to "tostada de palta",
         "pickle" to "pepinillo",
         "beef milanese" to "milanesa de carne",
         "chicken milanese" to "milanesa de pollo",
-        "ketchup" to "ketchup"
+        "ketchup" to "ketchup",
+        "cake" to "torta"
     )
     
     companion object {
