@@ -1568,7 +1568,7 @@ fun MealPlateScreen(
                                 }
                             },
                             label = { Text("Nombre del alimento") },
-                            placeholder = { Text("Ej: galleta de vainilla") },
+                            placeholder = { Text("Ej: ketchup") },
                             singleLine = true,
                             enabled = !isAddingFood,
                             modifier = Modifier.fillMaxWidth(),

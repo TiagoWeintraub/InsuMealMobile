@@ -131,7 +131,8 @@ class TranslationService {
         "beef milanese" to "milanesa de carne",
         "chicken milanese" to "milanesa de pollo",
         "ketchup" to "ketchup",
-        "cake" to "torta"
+        "cake" to "torta",
+        "thousand island dressing" to "aderezo thousand island",
     )
     
     companion object {
