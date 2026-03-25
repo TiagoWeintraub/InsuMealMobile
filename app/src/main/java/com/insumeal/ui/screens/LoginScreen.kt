@@ -4,8 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -26,6 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.insumeal.api.RetrofitClient
 import com.insumeal.auth.LoginRequest
 import com.insumeal.api.LoginService
@@ -56,7 +59,26 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var showBackendDialog by remember { mutableStateOf(false) }
+    var backendIp by remember { mutableStateOf("") }
+    var backendDialogError by remember { mutableStateOf<String?>(null) }
     val userProfileViewModel = remember { UserProfileViewModel() }
+    val ipPortRegex = remember { Regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,5}$") }
+    val backendModeLabel = if (RetrofitClient.getCurrentBaseUrl() == RetrofitClient.DEFAULT_BASE_URL) {
+        "Kubernetes"
+    } else {
+        "Local"
+    }
+
+    LaunchedEffect(Unit) {
+        RetrofitClient.initialize(context)
+    }
+
+    fun invalidateSessionForBackendChange() {
+        TokenManager(context).clearSession()
+        RetrofitClient.initialize(context)
+        errorMessage = "Backend cambiado. Inicia sesión nuevamente."
+    }
 
     Box(
         modifier = Modifier
@@ -216,11 +238,25 @@ fun LoginScreen(
 
                                 CoroutineScope(Dispatchers.IO).launch {
                                     try {
+                                        RetrofitClient.initialize(context)
                                         val loginResponse = RetrofitClient.retrofit.create(LoginService::class.java).login(loginRequest)
 
                                         val tokenManager = TokenManager(context)
-                                        tokenManager.saveToken(loginResponse.accessToken)
-                                        tokenManager.saveUserId(loginResponse.userId)
+                                        tokenManager.clearSession()
+                                        val sessionSaved = tokenManager.saveSession(
+                                            loginResponse.accessToken,
+                                            loginResponse.userId
+                                        )
+
+                                        if (!sessionSaved) {
+                                            withContext(Dispatchers.Main) {
+                                                isLoading = false
+                                                errorMessage = "No se pudo guardar la sesión. Intenta nuevamente."
+                                            }
+                                            return@launch
+                                        }
+
+                                        RetrofitClient.initialize(context)
 
                                         try {
                                             val authHeader = "Bearer ${loginResponse.accessToken}"
@@ -287,28 +323,173 @@ fun LoginScreen(
 
             item {
                 // Botón de registro
-                Row(
-                    modifier = Modifier.padding(top = 24.dp), // Reducir padding (era 32dp)
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp), // Reducir padding (era 32dp)
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "¿No tienes cuenta? ",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Gray700
-                    )
-                    TextButton(
-                        onClick = onNavigateToRegister,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = Turquoise500
-                        )
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Regístrate",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            )
+                            text = "¿No tienes cuenta? ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Gray700
                         )
+                        TextButton(
+                            onClick = onNavigateToRegister,
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Turquoise500
+                            )
+                        ) {
+                            Text(
+                                text = "Regístrate",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                backendDialogError = null
+                                showBackendDialog = true
+                            }
+                            .background(color = Gray200, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "?",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = Gray600
+                        )
+                    }
+                }
+            }
+        }
+
+        if (showBackendDialog) {
+            Dialog(onDismissRequest = { showBackendDialog = false }) {
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Cambiar de backend",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                textAlign = TextAlign.Center,
+                                color = Gray800,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+
+                            IconButton(
+                                onClick = { showBackendDialog = false },
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .align(Alignment.TopEnd)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cerrar",
+                                    tint = Gray700
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "Modo actual: $backendModeLabel",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = if (backendModeLabel == "Kubernetes") Turquoise600 else Gray700
+                        )
+
+                        OutlinedTextField(
+                            value = backendIp,
+                            onValueChange = {
+                                backendIp = it
+                                backendDialogError = null
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            placeholder = {
+                                Text(
+                                    text = "Ingresa IP:PORT",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Gray400
+                                )
+                            },
+                            shape = RoundedCornerShape(14.dp)
+                        )
+
+                        if (backendDialogError != null) {
+                            Text(
+                                text = backendDialogError!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Error
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    RetrofitClient.resetBaseUrl()
+                                    invalidateSessionForBackendChange()
+                                    email = ""
+                                    password = ""
+                                    backendIp = ""
+                                    backendDialogError = null
+                                    showBackendDialog = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Resetear")
+                            }
+
+                            Button(
+                                onClick = {
+                                    val rawValue = backendIp.trim()
+                                    if (!ipPortRegex.matches(rawValue)) {
+                                        backendDialogError = "Formato invalido. Usa IP:PORT"
+                                        return@Button
+                                    }
+
+                                    val updated = RetrofitClient.updateBaseUrlFromHostPort(rawValue)
+                                    if (updated) {
+                                        Log.d("LoginScreen", "Backend actualizado a: $rawValue")
+                                        invalidateSessionForBackendChange()
+                                        email = ""
+                                        password = ""
+                                        backendDialogError = null
+                                        showBackendDialog = false
+                                    } else {
+                                        backendDialogError = "No se pudo actualizar el backend"
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Turquoise500)
+                            ) {
+                                Text("Actualizar", color = Color.White)
+                            }
+                        }
                     }
                 }
             }

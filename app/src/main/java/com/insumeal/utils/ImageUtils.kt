@@ -5,18 +5,21 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.provider.MediaStore
+import android.util.Log
 import android.webkit.MimeTypeMap
 import coil.request.ImageRequest
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 
 /**
  * Clase de utilidad para el manejo de imágenes
  */
 object ImageUtils {
+
+    private const val MAX_UPLOAD_SIZE_BYTES = 1_048_576L // 1 MB
+    private const val MIN_JPEG_QUALITY = 30
+    private const val TAG = "ImageUtils"
     
     /**
      * Convierte una URI en un archivo temporal
@@ -39,8 +42,55 @@ object ImageUtils {
                 inputStream.copyTo(fileOut)
             }
         } ?: throw IOException("No se pudo abrir el stream de la URI")
-        
-        return tempFile
+
+        // Si ya cumple el limite, se envia tal cual sin reprocesar.
+        if (tempFile.length() <= MAX_UPLOAD_SIZE_BYTES) {
+            return tempFile
+        }
+
+        val originalSizeBytes = tempFile.length()
+
+        // Si supera 1MB, recomprimir como JPEG buscando la mayor calidad posible bajo el limite.
+        val bitmap = contentResolver.openInputStream(uri)?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+        } ?: throw IOException("No se pudo decodificar la imagen para compresion")
+
+        val compressedFile = File(context.cacheDir, "img_${System.currentTimeMillis()}_compressed.jpg")
+        var low = MIN_JPEG_QUALITY
+        var high = 100
+        var bestCompressedBytes: ByteArray? = null
+        var bestQuality: Int? = null
+
+        // Buscamos la mayor calidad posible que siga por debajo de 1MB.
+        while (low <= high) {
+            val quality = (low + high) / 2
+            val byteStream = java.io.ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteStream)
+            val candidateBytes = byteStream.toByteArray()
+
+            if (candidateBytes.size <= MAX_UPLOAD_SIZE_BYTES) {
+                bestCompressedBytes = candidateBytes
+                bestQuality = quality
+                low = quality + 1
+            } else {
+                high = quality - 1
+            }
+        }
+
+        val compressedBytes = bestCompressedBytes
+            ?: throw IOException("No se pudo comprimir la imagen a 1MB")
+
+        FileOutputStream(compressedFile).use { output ->
+            output.write(compressedBytes)
+            output.flush()
+        }
+
+        Log.d(
+            TAG,
+            "Compresion aplicada: qualityFinal=${bestQuality ?: -1}, tamanoOriginal=${originalSizeBytes}B, tamanoFinal=${compressedFile.length()}B"
+        )
+
+        return compressedFile
     }
     
     /**

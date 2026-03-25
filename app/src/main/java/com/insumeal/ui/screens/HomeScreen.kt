@@ -216,7 +216,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        tokenManager.clearToken()
+                        tokenManager.clearSession()
                         navController.navigate("login") {
                             popUpTo("home") { inclusive = true }
                             launchSingleTop = true

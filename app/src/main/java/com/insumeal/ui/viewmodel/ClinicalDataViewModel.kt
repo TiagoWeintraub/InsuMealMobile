@@ -2,6 +2,7 @@ package com.insumeal.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.insumeal.api.ClinicalDataService
 import com.insumeal.api.RetrofitClient
 import com.insumeal.api.UpdateClinicalDataRequest
@@ -23,22 +24,25 @@ class ClinicalDataViewModel : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
-    private val clinicalDataService: ClinicalDataService by lazy {
-        RetrofitClient.retrofit.create(ClinicalDataService::class.java)
+    private fun getClinicalDataService(): ClinicalDataService {
+        return RetrofitClient.retrofit.create(ClinicalDataService::class.java)
     }
 
     fun loadClinicalData(authHeader: String, userId: String) {
         viewModelScope.launch {
             try {
-                val response = clinicalDataService.getClinicalData(authHeader, userId.toInt())
+                val response = getClinicalDataService().getClinicalData(authHeader, userId.toInt())
                 _clinicalData.value = response.toModel()
             } catch (e: Exception) {
                 _clinicalData.value = null
             }
         }
-    }    fun updateClinicalData(
+    }
+
+    fun updateClinicalData(
         authHeader: String,
         userId: String,
+        fallbackResourceId: String? = null,
         ratio: Double,
         sensitivity: Double,
         glycemiaTarget: Double,
@@ -56,12 +60,28 @@ class ClinicalDataViewModel : ViewModel() {
                     glycemiaTarget = glycemiaTarget
                 )
                 
-                val response = clinicalDataService.updateClinicalData(authHeader, userId.toInt(), updateRequest)
+                val primaryId = userId.toInt()
+                var response = getClinicalDataService().updateClinicalData(authHeader, primaryId, updateRequest)
+
+                // Compatibilidad entre despliegues: algunos exponen PUT por user_id y otros por clinical_data.id.
+                val fallbackIdInt = fallbackResourceId?.toIntOrNull()
+                if (response.code() == 404 && fallbackIdInt != null && fallbackIdInt != primaryId) {
+                    Log.w(
+                        "ClinicalDataViewModel",
+                        "PUT clinical_data 404 con id=$primaryId. Reintentando con id alternativo=$fallbackIdInt"
+                    )
+                    response = getClinicalDataService().updateClinicalData(authHeader, fallbackIdInt, updateRequest)
+                }
                 
                 if (response.isSuccessful && response.body() != null) {
                     _clinicalData.value = response.body()!!.toModel()
                     onSuccess()
                 } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e(
+                        "ClinicalDataViewModel",
+                        "PUT clinical_data fallo: code=${response.code()}, message=${response.message()}, userId=$userId, fallbackId=$fallbackResourceId, body=$errorBody"
+                    )
                     val errorMessage = when (response.code()) {
                         401 -> "Error de autenticación"
                         403 -> "No autorizado"

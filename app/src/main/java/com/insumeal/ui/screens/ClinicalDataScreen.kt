@@ -201,13 +201,14 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
 
                             val tokenManager = TokenManager(context)
                             val token = tokenManager.getToken()
-                            val savedUserId = tokenManager.getUserId() ?: userId.toString()
+                            val targetUserId = tokenManager.getUserId() ?: userId.toString()
 
                             if (token != null) {
                                 val authHeader = "Bearer $token"
                                 clinicalDataViewModel.updateClinicalData(
                                     authHeader = authHeader,
-                                    userId = savedUserId,
+                                    userId = targetUserId,
+                                    fallbackResourceId = clinicalData?.id?.toString(),
                                     ratio = clinicalData!!.ratio,
                                     sensitivity = newValue.toDouble(),
                                     glycemiaTarget = clinicalData!!.glycemiaTarget,
@@ -249,13 +250,14 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
 
                             val tokenManager = TokenManager(context)
                             val token = tokenManager.getToken()
-                            val savedUserId = tokenManager.getUserId() ?: userId.toString()
+                            val targetUserId = tokenManager.getUserId() ?: userId.toString()
 
                             if (token != null) {
                                 val authHeader = "Bearer $token"
                                 clinicalDataViewModel.updateClinicalData(
                                     authHeader = authHeader,
-                                    userId = savedUserId,
+                                    userId = targetUserId,
+                                    fallbackResourceId = clinicalData?.id?.toString(),
                                     ratio = newValue.toDouble(),
                                     sensitivity = clinicalData!!.sensitivity,
                                     glycemiaTarget = clinicalData!!.glycemiaTarget,
@@ -297,13 +299,14 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
 
                             val tokenManager = TokenManager(context)
                             val token = tokenManager.getToken()
-                            val savedUserId = tokenManager.getUserId() ?: userId.toString()
+                            val targetUserId = tokenManager.getUserId() ?: userId.toString()
 
                             if (token != null) {
                                 val authHeader = "Bearer $token"
                                 clinicalDataViewModel.updateClinicalData(
                                     authHeader = authHeader,
-                                    userId = savedUserId,
+                                    userId = targetUserId,
+                                    fallbackResourceId = clinicalData?.id?.toString(),
                                     ratio = clinicalData?.ratio ?: 15.0,
                                     sensitivity = clinicalData?.sensitivity ?: 50.0,
                                     glycemiaTarget = newValue.toDouble(),
@@ -668,7 +671,7 @@ fun EditParameterDialog(
     val (minValue, maxValue) = when (fieldName) {
         "sensitivity" -> Pair(10f, 100f)
         "ratio" -> Pair(5f, 30f)
-        "glycemiaTarget" -> Pair(70f, 180f)
+        "glycemiaTarget" -> Pair(90f, 120f)
         else -> Pair(0f, 100f)
     }
 

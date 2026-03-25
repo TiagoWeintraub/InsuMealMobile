@@ -386,6 +386,10 @@ class MealPlateViewModel : ViewModel() {
                 }.onFailure { error ->
                     android.util.Log.e("MealPlateViewModel", "Error al agregar alimento: ${error.message}", error)
                     val errorMsg = when {
+                        error.message?.contains("FOOD_NOT_FOUND_OR_NOT_COMPATIBLE") == true ||
+                            error.message?.contains("ingredient_out_of_context") == true ||
+                            error.message?.contains("422") == true ->
+                            "Comida no encontrada o no compatible con este plato"
                         error.message?.contains("FOOD_ALREADY_EXISTS") == true -> 
                             "Este alimento ya está en el plato"
                         error.message?.contains("MealPlate no encontrado") == true -> 

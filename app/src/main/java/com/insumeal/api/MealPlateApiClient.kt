@@ -457,6 +457,13 @@ class MealPlateApiClient {
                             "Solicitud inválida: $errorBody"
                         }
                     }
+                    422 -> {
+                        if (errorBody.contains("ingredient_out_of_context")) {
+                            "FOOD_NOT_FOUND_OR_NOT_COMPATIBLE"
+                        } else {
+                            "No se pudo procesar el alimento"
+                        }
+                    }
                     401 -> "Error de autenticación"
                     403 -> "No autorizado"
                     404 -> "MealPlate no encontrado"
