@@ -133,6 +133,8 @@ class TranslationService {
         "ketchup" to "ketchup",
         "cake" to "torta",
         "thousand island dressing" to "aderezo thousand island",
+        "sausage patty" to "medallón de carne industrial",
+        "sausage" to "salchicha"
     )
     
     companion object {

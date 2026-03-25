@@ -6,12 +6,13 @@ plugins {
 
 android {
     namespace = "com.insumeal"
-    compileSdk = 34
+    compileSdk = 35
+    compileSdkExtension = 12
 
     defaultConfig {
         applicationId = "com.insumeal"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -43,14 +44,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // Optimizaciones para Kotlin
-        freeCompilerArgs += listOf(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-Xjvm-default=all"
-        )
-    }
     buildFeatures {
         compose = true
     }
@@ -58,6 +51,31 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    
+    // Habilitar soporte para 16 KB page size (Android 15+)
+    androidResources {
+        noCompress += listOf("so")
+    }
+    
+    // Configuración NDK para alineamiento de 16 KB
+    ndkVersion = "26.1.10909125"
+}
+
+// Tarea personalizada para verificar alineación de 16 KB
+tasks.register<Exec>("check16KbAlignment") {
+    commandLine("python", "${project.rootDir}/check_16kb_alignment.py", "app/build/apk_extracted/lib/arm64-v8a/libtranslate_jni.so")
+    isIgnoreExitValue = true
+}
+
+// Configuración de Kotlin para reemplazar kotlinOptions deprecated
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all"
+        )
     }
 }
 

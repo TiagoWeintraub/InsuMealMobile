@@ -60,7 +60,7 @@ fun LoginScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var showBackendDialog by remember { mutableStateOf(false) }
-    var backendIp by remember { mutableStateOf("") }
+    var backendIp by remember { mutableStateOf("192.168.0.105:8000") }
     var backendDialogError by remember { mutableStateOf<String?>(null) }
     val userProfileViewModel = remember { UserProfileViewModel() }
     val ipPortRegex = remember { Regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,5}$") }
@@ -70,13 +70,8 @@ fun LoginScreen(
         "Local"
     }
 
-    LaunchedEffect(Unit) {
-        RetrofitClient.initialize(context)
-    }
-
     fun invalidateSessionForBackendChange() {
         TokenManager(context).clearSession()
-        RetrofitClient.initialize(context)
         errorMessage = "Backend cambiado. Inicia sesión nuevamente."
     }
 
@@ -238,25 +233,11 @@ fun LoginScreen(
 
                                 CoroutineScope(Dispatchers.IO).launch {
                                     try {
-                                        RetrofitClient.initialize(context)
                                         val loginResponse = RetrofitClient.retrofit.create(LoginService::class.java).login(loginRequest)
 
                                         val tokenManager = TokenManager(context)
-                                        tokenManager.clearSession()
-                                        val sessionSaved = tokenManager.saveSession(
-                                            loginResponse.accessToken,
-                                            loginResponse.userId
-                                        )
-
-                                        if (!sessionSaved) {
-                                            withContext(Dispatchers.Main) {
-                                                isLoading = false
-                                                errorMessage = "No se pudo guardar la sesión. Intenta nuevamente."
-                                            }
-                                            return@launch
-                                        }
-
-                                        RetrofitClient.initialize(context)
+                                        tokenManager.saveToken(loginResponse.accessToken)
+                                        tokenManager.saveUserId(loginResponse.userId)
 
                                         try {
                                             val authHeader = "Bearer ${loginResponse.accessToken}"

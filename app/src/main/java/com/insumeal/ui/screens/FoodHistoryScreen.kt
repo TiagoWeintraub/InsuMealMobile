@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,6 +51,11 @@ fun FoodHistoryScreen(
     val historyList by historyViewModel.historyList.collectAsState()
     val isLoading by historyViewModel.isLoading.collectAsState()
     val errorMessage by historyViewModel.errorMessage.collectAsState()
+
+    // Estados de paginación
+    val currentPage by historyViewModel.currentPage.collectAsState()
+    val hasNextPage by historyViewModel.hasNextPage.collectAsState()
+    val hasPreviousPage by historyViewModel.hasPreviousPage.collectAsState()
 
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     var isDeletingAll by remember { mutableStateOf(false) }
@@ -445,27 +451,106 @@ fun FoodHistoryScreen(
                         }
 
                         else -> {
-                            // Lista del historial con diseño moderno
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.padding(top = 20.dp),
-                                contentPadding = PaddingValues(bottom = 24.dp) // Agregar padding inferior para evitar que se corten las cards
+                             // Lista del historial con diseño moderno y paginación
+                            Column(
+                                modifier = Modifier.fillMaxSize()
                             ) {
-                                items(filteredHistoryList) { historyItem ->
-                                    ModernMealPlateHistoryCard(
-                                        historyItem = historyItem,
-                                        onViewDetails = { mealPlateId ->
-                                            navController.navigate("foodHistoryMealPlate/$mealPlateId")
-                                        },
-                                        onDelete = { mealPlateId ->
-                                            historyViewModel.deleteMealPlate(
-                                                context = context,
-                                                mealPlateId = mealPlateId,
-                                                onSuccess = {},
-                                                onError = { error -> }
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier
+                                        .weight(1f) // Ocupa el espacio disponible
+                                        .padding(top = 20.dp),
+                                    contentPadding = PaddingValues(bottom = 16.dp) 
+                                ) {
+                                    items(filteredHistoryList) { historyItem ->
+                                        ModernMealPlateHistoryCard(
+                                            historyItem = historyItem,
+                                            onViewDetails = { mealPlateId ->
+                                                navController.navigate("foodHistoryMealPlate/$mealPlateId")
+                                            },
+                                            onDelete = { mealPlateId ->
+                                                historyViewModel.deleteMealPlate(
+                                                    context = context,
+                                                    mealPlateId = mealPlateId,
+                                                    onSuccess = {},
+                                                    onError = { error -> }
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+
+                                // Controles de paginación
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Botón Anterior
+                                    Button(
+                                        onClick = { historyViewModel.loadPreviousPage(context) },
+                                        enabled = hasPreviousPage && !isLoading,
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Turquoise500,
+                                            disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                                        ),
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Anterior",
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Anterior",
+                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                    }
+
+                                    // Indicador de página
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                color = Color(0xFFF7FAFF),
+                                                shape = RoundedCornerShape(8.dp)
                                             )
-                                        }
-                                    )
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = "Pág $currentPage",
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFF4299E1)
+                                            )
+                                        )
+                                    }
+
+                                    // Botón Siguiente
+                                    Button(
+                                        onClick = { historyViewModel.loadNextPage(context) },
+                                        enabled = hasNextPage && !isLoading,
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Turquoise500,
+                                            disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                                        ),
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+                                    ) {
+                                        Text(
+                                            text = "Siguiente",
+                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                            contentDescription = "Siguiente",
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

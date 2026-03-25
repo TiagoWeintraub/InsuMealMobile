@@ -7,6 +7,8 @@ import android.util.Log
 import com.insumeal.models.MealPlate
 import com.insumeal.models.DosisCalculation
 import com.insumeal.models.MealPlateHistory
+import com.insumeal.schemas.MealPlateHistorySchema
+import com.insumeal.schemas.PaginationMetadataSchema
 import com.insumeal.schemas.toModel
 import com.insumeal.schemas.DosisCalculationSchema
 import com.insumeal.utils.AuthCheckUtil
@@ -225,7 +227,11 @@ class MealPlateApiClient {
         }
     }
 
-    suspend fun getMealPlateHistory(context: Context): Result<List<MealPlateHistory>> = withContext(Dispatchers.IO) {
+    suspend fun getMealPlateHistory(
+        context: Context,
+        page: Int = 1,
+        pageSize: Int = 10
+    ): Result<Pair<List<MealPlateHistory>, PaginationMetadataSchema>> = withContext(Dispatchers.IO) {
         try {
             // Verificar si hay un token disponible y es válido
             if (!AuthCheckUtil.checkToken(context)) {
@@ -233,19 +239,19 @@ class MealPlateApiClient {
                 return@withContext Result.failure(Exception("No hay sesión activa. Por favor inicia sesión nuevamente."))
             }
 
-            Log.d("MealPlateApiClient", "Obteniendo historial de meal plates")
+            Log.d("MealPlateApiClient", "Obteniendo historial de meal plates - Página: $page")
             
             val mealPlateService = getMealPlateService(context)
-            val response = mealPlateService.getMealPlateHistory()
+            val response = mealPlateService.getMealPlateHistory(page, pageSize)
             
             Log.d("MealPlateApiClient", "Respuesta del servidor: ${response.code()}")
             
             if (response.isSuccessful && response.body() != null) {
-                val historySchemas = response.body()!!
-                Log.d("MealPlateApiClient", "Historial obtenido exitosamente: ${historySchemas.size} elementos")
+                val paginatedResponse = response.body()!!
+                Log.d("MealPlateApiClient", "Historial obtenido exitosamente: ${paginatedResponse.items.size} elementos")
                 
-                val historyModels = historySchemas.map { it.toModel() }
-                return@withContext Result.success(historyModels)
+                val historyModels = paginatedResponse.items.map { it.toModel() }
+                return@withContext Result.success(Pair(historyModels, paginatedResponse.pagination))
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Error desconocido"
                 Log.e("MealPlateApiClient", "Error al obtener historial: código=${response.code()}, mensaje=${response.message()}, cuerpo=$errorBody")

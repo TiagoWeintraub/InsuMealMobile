@@ -230,7 +230,7 @@ fun DosisScreen(
                                     horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
                                     CircularInfoBubble(
-                                        label = "H.Carbono",
+                                        label = "Carbohidratos",
                                         value = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
                                         backgroundColor = Color(0xFFFF9800), // Naranja elegante
                                         icon = Icons.Default.Restaurant,
@@ -246,7 +246,7 @@ fun DosisScreen(
                                     )
 
                                     CircularInfoBubble(
-                                        label = "Dosis",
+                                        label = "Dosis Total",
                                         value = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
                                         backgroundColor = Color(0xFF2196F3), // Azul elegante
                                         icon = Icons.Default.MedicalServices,

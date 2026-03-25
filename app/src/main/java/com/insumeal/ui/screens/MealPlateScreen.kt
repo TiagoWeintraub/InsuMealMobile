@@ -695,12 +695,12 @@ fun IngredientEditableCard(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botones modernos - Cancelar en negro, Guardar en azul
+                    // Botones modernos - Cancelar en naranja, Guardar en azul
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Botón Cancelar moderno con colores negros
+                        // Botón Cancelar moderno con colores naranjas
                         OutlinedButton(
                             onClick = {
                                 showEditModal = false
@@ -715,7 +715,7 @@ fun IngredientEditableCard(
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(
                                 1.dp,
-                                Color.Black.copy(alpha = 0.8f)
+                                Color(0xFFFF6B35).copy(alpha = 0.8f)
                             ),
                             enabled = !isUpdating
                         ) {
@@ -727,14 +727,14 @@ fun IngredientEditableCard(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = null,
                                     modifier = Modifier.size(13.dp),
-                                    tint = Color.Black
+                                    tint = Color(0xFFFF6B35)
                                 )
                                 Text(
                                     "Cancelar",
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Medium
                                     ),
-                                    color = Color.Black,
+                                    color = Color(0xFFFF6B35),
                                     maxLines = 1
                                 )
                             }

@@ -18,7 +18,21 @@ class MealPlateHistoryViewModel : ViewModel() {
     
     private val _isLoading = MutableStateFlow(false) // Cambiar a false inicialmente
     val isLoading: StateFlow<Boolean> = _isLoading
-    
+
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore
+
+    private val _currentPage = MutableStateFlow(1)
+    val currentPage: StateFlow<Int> = _currentPage
+
+    private val _hasNextPage = MutableStateFlow(false)
+    val hasNextPage: StateFlow<Boolean> = _hasNextPage
+
+    private val _hasPreviousPage = MutableStateFlow(false)
+    val hasPreviousPage: StateFlow<Boolean> = _hasPreviousPage
+
+    private val PAGE_SIZE = 10
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
     
@@ -26,15 +40,19 @@ class MealPlateHistoryViewModel : ViewModel() {
     private val translationService = TranslationService.getInstance()
     
     @SuppressLint("SuspiciousIndentation")
-    fun loadHistory(context: Context) {
+    fun loadHistory(context: Context, page: Int = 1) {
         viewModelScope.launch {
-            _isLoading.value = true // Activar loading al inicio de la función
+            _isLoading.value = true
             _errorMessage.value = null
-            _historyList.value = emptyList() // Limpiar lista anterior
+            _historyList.value = emptyList() 
 
             try {
-                val result = apiClient.getMealPlateHistory(context)
-                result.onSuccess { history ->
+                val result = apiClient.getMealPlateHistory(context, page, PAGE_SIZE)
+                result.onSuccess { (history, pagination) ->
+                    _currentPage.value = pagination.page
+                    _hasNextPage.value = pagination.hasNext
+                    _hasPreviousPage.value = pagination.hasPrevious
+
                     // Traducir el historial automáticamente a español
                     viewModelScope.launch {
                         try {
@@ -42,10 +60,9 @@ class MealPlateHistoryViewModel : ViewModel() {
                             _historyList.value = translatedHistory
                         } catch (e: Exception) {
                             android.util.Log.e("MealPlateHistoryViewModel", "Error en traducción: ${e.message}", e)
-                            // Si falla la traducción, usar el historial original
                             _historyList.value = history
                         } finally {
-                            _isLoading.value = false // Desactivar loading después de la traducción
+                            _isLoading.value = false
                         }
                     }
                 }.onFailure { error ->
@@ -62,14 +79,32 @@ class MealPlateHistoryViewModel : ViewModel() {
                             "No se puede conectar al servidor. Verifica tu conexión a internet."
                         else -> "Error al cargar el historial: ${error.message}"
                     }
-                    _isLoading.value = false // Desactivar loading en caso de error
+                    _isLoading.value = false
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error inesperado: ${e.message}"
-                _isLoading.value = false // Desactivar loading en caso de excepción
+                _isLoading.value = false
             }
         }
-    }      fun clearError() {
+    } 
+    
+    fun loadNextPage(context: Context) {
+        if (_hasNextPage.value) {
+            loadHistory(context, _currentPage.value + 1)
+        }
+    }
+
+    fun loadPreviousPage(context: Context) {
+        if (_hasPreviousPage.value && _currentPage.value > 1) {
+            loadHistory(context, _currentPage.value - 1)
+        }
+    }
+
+    fun refreshCurrentPage(context: Context) {
+        loadHistory(context, _currentPage.value)
+    }
+    
+    fun clearError() {
         _errorMessage.value = null
     }
     

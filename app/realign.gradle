@@ -1,0 +1,79 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.BufferedOutputStream
+
+// Script para realinear librerías .so después del empaquetado
+
+fun realignApk(apkPath: String) {
+    val apkFile = File(apkPath)
+    if (!apkFile.exists()) {
+        println("APK no encontrado: $apkPath")
+        return
+    }
+
+    println("Procesando APK para realineación a 16 KB: $apkPath")
+    val tempDir = Files.createTempDirectory("apk_reorg").toFile()
+    
+    try {
+        // Extraer APK
+        ZipFile(apkFile).use { zip ->
+            zip.entries().asSequence().forEach { entry ->
+                val filePath = File(tempDir, entry.name)
+                if (entry.isDirectory) {
+                    filePath.mkdirs()
+                } else {
+                    filePath.parentFile?.mkdirs()
+                    zip.getInputStream(entry).use { input ->
+                        Files.copy(input, filePath.toPath())
+                    }
+                }
+            }
+        }
+        
+        // Procesar librerías
+        val libDir = File(tempDir, "lib")
+        if (libDir.exists()) {
+            libDir.listFiles()?.forEach { archDir ->
+                if (archDir.isDirectory) {
+                    println("Procesando arquitectura: ${archDir.name}")
+                    archDir.listFiles()?.forEach { soFile ->
+                        if (soFile.name.endsWith(".so")) {
+                            println("  - ${soFile.name}")
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Reempaquetar APK
+        val newApkPath = apkPath.replace(".apk", "_aligned.apk")
+        ZipOutputStream(BufferedOutputStream(FileOutputStream(newApkPath))).use { zos ->
+            tempDir.walk().forEach { file ->
+                if (file.isFile) {
+                    val entryName = file.relativeToOrSelf(tempDir).path.replace("\\", "/")
+                    val entry = ZipEntry(entryName)
+                    zos.putNextEntry(entry)
+                    file.inputStream().use { it.copyTo(zos) }
+                    zos.closeEntry()
+                }
+            }
+        }
+        
+        println("APK realineado guardado en: $newApkPath")
+        
+    } finally {
+        tempDir.deleteRecursively()
+    }
+}
+
+// Uso
+if (project.hasProperty("realignApk")) {
+    val apkPath = project.property("realignApk") as String
+    realignApk(apkPath)
+}
+

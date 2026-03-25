@@ -8,7 +8,7 @@ class TokenManager(context: Context) {
         context.getSharedPreferences("insumeal_prefs", Context.MODE_PRIVATE)
 
     fun saveToken(token: String) {
-        prefs.edit().putString("jwt_token", token).commit()
+        prefs.edit().putString("jwt_token", token).apply()
     }
 
     fun getToken(): String? {
@@ -16,11 +16,11 @@ class TokenManager(context: Context) {
     }
 
     fun clearToken() {
-        prefs.edit().remove("jwt_token").commit()
+        prefs.edit().remove("jwt_token").apply()
     }
 
     fun saveUserId(userId: String) {
-        prefs.edit().putString("user_id", userId).commit()
+        prefs.edit().putString("user_id", userId).apply()
     }
 
     fun getUserId(): String? {
@@ -28,20 +28,13 @@ class TokenManager(context: Context) {
     }
 
     fun clearUserId() {
-        prefs.edit().remove("user_id").commit()
+        prefs.edit().remove("user_id").apply()
     }
 
-    fun saveSession(token: String, userId: String): Boolean {
-        return prefs.edit()
-            .putString("jwt_token", token)
-            .putString("user_id", userId)
-            .commit()
-    }
-
-    fun clearSession(): Boolean {
-        return prefs.edit()
+    fun clearSession() {
+        prefs.edit()
             .remove("jwt_token")
             .remove("user_id")
-            .commit()
+            .apply()
     }
 }

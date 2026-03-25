@@ -3,6 +3,7 @@ package com.insumeal.api
 import com.insumeal.schemas.MealPlateSchema
 import com.insumeal.schemas.DosisCalculationSchema
 import com.insumeal.schemas.MealPlateHistorySchema
+import com.insumeal.schemas.PaginatedResponseSchema
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -20,8 +21,12 @@ interface MealPlateService {
         @Path("meal_plate_id") mealPlateId: Int,
         @Body calculateDosisRequest: CalculateDosisRequest
     ): Response<DosisCalculationSchema>
-      @GET("/meal_plate/")
-    suspend fun getMealPlateHistory(): Response<List<MealPlateHistorySchema>>
+
+    @GET("/food_history/")
+    suspend fun getMealPlateHistory(
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 10
+    ): Response<PaginatedResponseSchema<MealPlateHistorySchema>>
     
     @DELETE("/meal_plate/{id_meal_plate}")
     suspend fun deleteMealPlate(@Path("id_meal_plate") mealPlateId: Int): Response<Unit>
