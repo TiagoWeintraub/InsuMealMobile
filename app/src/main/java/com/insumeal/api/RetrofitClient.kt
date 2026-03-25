@@ -9,6 +9,8 @@ import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
+import java.util.concurrent.TimeUnit
+import okhttp3.logging.HttpLoggingInterceptor
 
 object RetrofitClient {
     const val DEFAULT_BASE_URL = "https://insumeal-backend-ingress.my.kube.um.edu.ar/"
@@ -83,13 +85,20 @@ object RetrofitClient {
                 chain.proceed(originalRequest)
             }
         }
-    }    // Cliente HTTP con el interceptor de autenticación
+    }
+
+    // Cliente HTTP con el interceptor de autenticación y logging
     private val okHttpClient by lazy {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        
         OkHttpClient.Builder()
+            .addInterceptor(logging) // Añadir logging interceptor primero
             .addInterceptor(AuthInterceptor())
-            .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS) // 2 minutos para la respuesta
-            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS) // 30 segundos para la conexión
-            .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS) // 30 segundos para la escritura
+            .readTimeout(120, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 
@@ -104,7 +113,7 @@ object RetrofitClient {
     @Volatile
     private var retrofitInstance: Retrofit = buildRetrofit(currentBaseUrl)
 
-    // Cliente Retrofit actual, reconstruible cuando cambia la base URL
+    // Cliente Retrofit actual
     val retrofit: Retrofit
         get() = retrofitInstance
 }

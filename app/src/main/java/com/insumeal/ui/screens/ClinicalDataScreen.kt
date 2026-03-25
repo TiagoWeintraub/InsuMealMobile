@@ -155,7 +155,7 @@ fun ClinicalDataScreen(userId: Int = 1, navController: NavController) {
                                 text = "Información Clínica",
                                 style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp
+                                    fontSize = 18.sp
                                 ),
                                 color = Color.White
                             )

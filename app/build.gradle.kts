@@ -97,5 +97,5 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Google ML Kit Translation
-    implementation("com.google.mlkit:translate:17.0.1")
+    implementation("com.google.mlkit:translate:17.0.2")
 }

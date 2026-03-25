@@ -1,6 +1,7 @@
 package com.insumeal.api
 
 import com.insumeal.schemas.ClinicalDataSchema
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -20,7 +21,10 @@ interface ClinicalDataService {
 }
 
 data class UpdateClinicalDataRequest(
+    @SerializedName("ratio")
     val ratio: Double,
+    @SerializedName("sensitivity")
     val sensitivity: Double,
+    @SerializedName("glycemiaTarget")
     val glycemiaTarget: Double
 )

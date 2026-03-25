@@ -51,14 +51,18 @@ class MealPlateViewModel : ViewModel() {
     fun setImage(uri: Uri?, bmp: Bitmap?) {
         imageUri = uri
         bitmap = bmp
-    }fun clearData() {
+    }
+
+    fun clearData() {
         _mealPlate.value = null
+        _dosisCalculation.value = null
+        _lastGlycemia.value = ""
         _errorMessage.value = null
         _hasAttemptedLoad.value = false
         _isLoading.value = false
         imageUri = null
         bitmap = null
-    }    
+    }
     fun clearError() {
         _errorMessage.value = null
     }
@@ -93,6 +97,10 @@ class MealPlateViewModel : ViewModel() {
     
     fun analyzeImage(context: Context, onSuccess: () -> Unit, onNoFoodDetected: () -> Unit = {}) {
         viewModelScope.launch {
+            // Nuevo plato: no reutilizar glucemia ni calculo previos.
+            clearGlycemia()
+            _dosisCalculation.value = null
+
             _isLoading.value = true
             _errorMessage.value = null
             _hasAttemptedLoad.value = true

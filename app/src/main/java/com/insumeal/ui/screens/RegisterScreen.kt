@@ -222,7 +222,7 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit, onBackToLogin: () -> Unit) {
                         value = glycemiaTarget,
                         onValueChange = { glycemiaTarget = it },
                         valueRange = 90f..120f,
-                        unit = "mg/dL objetivo",
+                        unit = "mg/dL",
                         description = "Nivel objetivo de glucemia a mantener"
                     )
 
@@ -459,7 +459,7 @@ private fun ModernTextField(
             Text(
                 label,
                 style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
             )
         },
@@ -509,7 +509,7 @@ private fun ModernPasswordField(
             Text(
                 label,
                 style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
             )
         },

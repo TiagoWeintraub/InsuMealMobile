@@ -351,7 +351,7 @@ fun UploadPhotoScreen(
                                 text = "Analizar Comida",
                                 style = MaterialTheme.typography.headlineMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp
+                                    fontSize = 18.sp
                                 ),
                                 color = Color.White,
                                 textAlign = TextAlign.Center

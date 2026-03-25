@@ -38,6 +38,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.insumeal.models.Ingredient
+import com.insumeal.ui.navigation.NavigationStateKeys
 import com.insumeal.ui.theme.Gray400
 import com.insumeal.ui.viewmodel.MealPlateViewModel
 
@@ -694,12 +695,12 @@ fun IngredientEditableCard(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botones modernos - Cancelar en naranja, Guardar en azul
+                    // Botones modernos - Cancelar en negro, Guardar en azul
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Botón Cancelar moderno con colores naranjas
+                        // Botón Cancelar moderno con colores negros
                         OutlinedButton(
                             onClick = {
                                 showEditModal = false
@@ -714,7 +715,7 @@ fun IngredientEditableCard(
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(
                                 1.dp,
-                                Color(0xFFFF6B35).copy(alpha = 0.8f)
+                                Color.Black.copy(alpha = 0.8f)
                             ),
                             enabled = !isUpdating
                         ) {
@@ -726,14 +727,14 @@ fun IngredientEditableCard(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = null,
                                     modifier = Modifier.size(13.dp),
-                                    tint = Color(0xFFFF6B35)
+                                    tint = Color.Black
                                 )
                                 Text(
                                     "Cancelar",
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Medium
                                     ),
-                                    color = Color(0xFFFF6B35),
+                                    color = Color.Black,
                                     maxLines = 1
                                 )
                             }
@@ -845,12 +846,22 @@ fun MealPlateScreen(
     var isCalculatingDosis by remember { mutableStateOf(false) }
     var dosisCalculationError by remember { mutableStateOf<String?>(null) }
 
-    // Efecto para restaurar la glucemia guardada
-    LaunchedEffect(lastGlycemia) {
-        if (lastGlycemia.isNotEmpty() && glycemiaInput.isEmpty()) {
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val restoreFromDosisEditState =
+        savedStateHandle?.getStateFlow(NavigationStateKeys.RESTORE_GLYCEMIA_FROM_DOSIS_EDIT, false)
+    val shouldRestoreFromDosisEdit by (restoreFromDosisEditState?.collectAsState() ?: remember {
+        mutableStateOf(false)
+    })
+
+    // Restaurar solo cuando se vuelve desde Dosis con el boton Editar.
+    LaunchedEffect(lastGlycemia, shouldRestoreFromDosisEdit) {
+        if (shouldRestoreFromDosisEdit && lastGlycemia.isNotEmpty()) {
             glycemiaInput = lastGlycemia
+            savedStateHandle?.set(NavigationStateKeys.RESTORE_GLYCEMIA_FROM_DOSIS_EDIT, false)
         }
-    }// Efecto para sincronizar los estados y hacer logs
+    }
+
+    // Efecto para sincronizar los estados y hacer logs
     LaunchedEffect(mealPlate) {
         android.util.Log.d("MealPlateScreen", "ViewModel mealPlate cambió: ${mealPlate?.name}")
         mealPlate?.let { plate ->

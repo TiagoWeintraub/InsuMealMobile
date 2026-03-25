@@ -33,6 +33,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.insumeal.api.RetrofitClient
+import com.insumeal.ui.navigation.NavigationStateKeys
 import com.insumeal.ui.viewmodel.MealPlateViewModel
 import com.insumeal.utils.ImageUtils
 import com.insumeal.utils.TokenManager
@@ -229,7 +230,7 @@ fun DosisScreen(
                                     horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
                                     CircularInfoBubble(
-                                        label = "Carbohidratos",
+                                        label = "H.Carbono",
                                         value = "${String.format("%.1f", dosisCalculation!!.totalCarbs)} g",
                                         backgroundColor = Color(0xFFFF9800), // Naranja elegante
                                         icon = Icons.Default.Restaurant,
@@ -245,7 +246,7 @@ fun DosisScreen(
                                     )
 
                                     CircularInfoBubble(
-                                        label = "Dosis Total",
+                                        label = "Dosis",
                                         value = "${String.format("%.1f", dosisCalculation!!.totalDose)} U",
                                         backgroundColor = Color(0xFF2196F3), // Azul elegante
                                         icon = Icons.Default.MedicalServices,
@@ -633,6 +634,12 @@ fun DosisScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
+                                                    navController.previousBackStackEntry
+                                                        ?.savedStateHandle
+                                                        ?.set(
+                                                            NavigationStateKeys.RESTORE_GLYCEMIA_FROM_DOSIS_EDIT,
+                                                            true
+                                                        )
                                                     navController.navigateUp()
                                                 }
                                                 .padding(16.dp),
@@ -833,7 +840,7 @@ fun CircularInfoBubble(
                 text = value,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp
+                    fontSize = 18.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
@@ -845,7 +852,7 @@ fun CircularInfoBubble(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 14.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
