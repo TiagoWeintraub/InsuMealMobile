@@ -138,6 +138,9 @@ class MealPlateViewModel : ViewModel() {
                     android.util.Log.e("MealPlateViewModel", "Error: ${error.message}", error)
                       // Mensaje de error más amigable para el usuario
                     _errorMessage.value = when {
+                        error.message?.contains("NO_FOOD_IMAGE") == true ||
+                            error.message?.contains("\"code\":\"no_food\"") == true ->
+                            "Foto Incorrecta\nDebe ser una foto de un plato de comida"
                         error.message?.contains("401") == true -> 
                             "Error de autenticación con el servidor. Tu sesión ha expirado, inicia sesión nuevamente."
                         error.message?.contains("403") == true -> 

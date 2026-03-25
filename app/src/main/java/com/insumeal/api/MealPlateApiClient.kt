@@ -82,6 +82,13 @@ class MealPlateApiClient {
                         401 -> "Error de autenticación. Tu sesión ha expirado, por favor inicia sesión nuevamente."
                         403 -> "No tienes permiso para realizar esta acción."
                         404 -> "El recurso solicitado no existe."
+                        422 -> {
+                            if (errorBody?.contains("\"code\":\"no_food\"") == true) {
+                                "NO_FOOD_IMAGE"
+                            } else {
+                                "Error al analizar la imagen: 422 ${response.message()}"
+                            }
+                        }
                         500 -> "Error interno del servidor. Intenta más tarde."
                         else -> "Error al analizar la imagen: ${response.code()} ${response.message()}"
                     }

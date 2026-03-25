@@ -210,14 +210,14 @@ fun FoodHistoryMealPlateScreen(
                         // Card superpuesta que contiene todo el contenido
                         Card(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .padding(top = 250.dp), // Posicionada para superponerse a la imagen
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                             shape = RoundedCornerShape(
                                 topStart = 24.dp,
                                 topEnd = 24.dp,
-                                bottomStart = if (isDosisExpanded || isIngredientsExpanded) 0.dp else 24.dp,
-                                bottomEnd = if (isDosisExpanded || isIngredientsExpanded) 0.dp else 24.dp
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
                             ),
                             colors = CardDefaults.cardColors(
                                 containerColor = Color(0xFFFFFFFF) // Blanco puro
