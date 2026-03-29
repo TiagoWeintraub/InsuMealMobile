@@ -110,7 +110,6 @@ fun DosisScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
             ) {
                 // Imagen del plato que ocupa todo el ancho y llega hasta arriba
                 Box(
@@ -255,8 +254,8 @@ fun DosisScreen(
                                 }
                             }
 
-                            // Mensaje de advertencia si glucemia > 170
-                            if (dosisCalculation!!.glycemia > 170) {
+                            // Mensaje de advertencia si glucemia > 180
+                            if (dosisCalculation!!.glycemia > 180) {
                                 item {
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
@@ -281,6 +280,42 @@ fun DosisScreen(
                                             Spacer(modifier = Modifier.width(16.dp))
                                             Text(
                                                 text = "No se recomienda comer alimentos con carbohidratos cuando la glucemia está elevada",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = Color(0xFFEF5350)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Mensaje de advertencia si glucemia < 70
+                            if (dosisCalculation!!.glycemia < 70) {
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color(0xFFFFFFFF) // Blanco puro
+                                        ),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(20.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Warning,
+                                                contentDescription = null,
+                                                tint = Color(0xFFEF5350),
+                                                modifier = Modifier.size(28.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Text(
+                                                text = "Glucosa en sangre baja: Se recomienda comer de 15 a 20 gramos de carbohidratos de acción rápida y descansar 15 minutos hasta que se estabilice la glucemia.",
                                                 style = MaterialTheme.typography.titleMedium.copy(
                                                     fontWeight = FontWeight.Bold
                                                 ),

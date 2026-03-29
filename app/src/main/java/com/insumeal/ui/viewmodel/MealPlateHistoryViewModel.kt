@@ -31,6 +31,9 @@ class MealPlateHistoryViewModel : ViewModel() {
     private val _hasPreviousPage = MutableStateFlow(false)
     val hasPreviousPage: StateFlow<Boolean> = _hasPreviousPage
 
+    private val _totalItems = MutableStateFlow(0)
+    val totalItems: StateFlow<Int> = _totalItems
+
     private val PAGE_SIZE = 10
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -52,6 +55,7 @@ class MealPlateHistoryViewModel : ViewModel() {
                     _currentPage.value = pagination.page
                     _hasNextPage.value = pagination.hasNext
                     _hasPreviousPage.value = pagination.hasPrevious
+                    _totalItems.value = pagination.totalItems
 
                     // Traducir el historial automáticamente a español
                     viewModelScope.launch {
@@ -130,6 +134,7 @@ class MealPlateHistoryViewModel : ViewModel() {
                 result.onSuccess {
                     // Remover el elemento de la lista local
                     _historyList.value = _historyList.value.filter { it.id != mealPlateId }
+                    _totalItems.value = (_totalItems.value - 1).coerceAtLeast(0)
                     onSuccess()
                 }.onFailure { error ->
                     val errorMsg = when {
@@ -160,6 +165,7 @@ class MealPlateHistoryViewModel : ViewModel() {
                 result.onSuccess {
                     // Limpiar la lista local
                     _historyList.value = emptyList()
+                    _totalItems.value = 0
                     onSuccess()
                 }.onFailure { error ->
                     val errorMsg = when {

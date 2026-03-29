@@ -56,6 +56,7 @@ fun FoodHistoryScreen(
     val currentPage by historyViewModel.currentPage.collectAsState()
     val hasNextPage by historyViewModel.hasNextPage.collectAsState()
     val hasPreviousPage by historyViewModel.hasPreviousPage.collectAsState()
+    val totalItems by historyViewModel.totalItems.collectAsState()
 
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     var isDeletingAll by remember { mutableStateOf(false) }
@@ -504,11 +505,6 @@ fun FoodHistoryScreen(
                                             contentDescription = "Anterior",
                                             modifier = Modifier.size(18.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "Anterior",
-                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                                        )
                                     }
 
                                     // Indicador de página
@@ -540,11 +536,6 @@ fun FoodHistoryScreen(
                                         shape = RoundedCornerShape(12.dp),
                                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                                     ) {
-                                        Text(
-                                            text = "Siguiente",
-                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                             contentDescription = "Siguiente",
@@ -569,7 +560,7 @@ fun FoodHistoryScreen(
                 ) {
                     StatCardWithCalendar(
                         label = if (selectedDate != null) "Total" else "Total",
-                        value = "${filteredHistoryList.size}",
+                        value = "$totalItems",
                         icon = Icons.Filled.RestaurantMenu,
                         backgroundColor = Color(0xFFF7FAFF),
                         iconColor = Color(0xFF4299E1),

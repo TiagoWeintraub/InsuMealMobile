@@ -59,11 +59,10 @@ fun FoodHistoryMealPlateScreen(
     
     Scaffold(
         // Sin topBar para que la imagen llegue hasta arriba
-    ) { paddingValues ->
+    ) { _ ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
         ) {
             when {
                 isLoading -> {

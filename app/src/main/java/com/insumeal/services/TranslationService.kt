@@ -134,7 +134,10 @@ class TranslationService {
         "cake" to "torta",
         "thousand island dressing" to "aderezo thousand island",
         "sausage patty" to "medallón de carne industrial",
-        "sausage" to "salchicha"
+        "sausage" to "salchicha",
+        "gnocchi" to "ñoquis",
+        "microgreens" to "microvegetales",
+        "potato wedges" to "gajos de papa"
     )
     
     companion object {
